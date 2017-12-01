@@ -9,9 +9,8 @@ class Request{
 		Suplier suplier;
 		int demand;
 
-		tuple < int, int > time_window;
-		
 		// funciones de la clase
-		Request(Customer,Suplier,int);
+		Request(Suplier,Customer,int);
+		Request();
 
 };

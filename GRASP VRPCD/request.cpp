@@ -2,8 +2,11 @@
 
 
 // CONSTRUCTOR
-Request::Request (Customer customer, Suplier suplier, int demand){
+Request::Request (Suplier suplier, Customer customer, int demand){
 	this->customer = customer;
 	this->suplier = suplier;
 	this->demand = demand;
+}
+
+Request::Request (){
 }

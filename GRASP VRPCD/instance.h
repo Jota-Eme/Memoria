@@ -1,5 +1,6 @@
 #include "imports.h"
 #include "request.h"
+#include "utils.h"
 
 
 class Instance{
@@ -14,6 +15,7 @@ class Instance{
 		// funciones de la clase
 		
 		Instance(string);
+		void add_request();
 		void read_instance();
 
 };

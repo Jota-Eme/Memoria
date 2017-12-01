@@ -25,6 +25,16 @@ int main(int argc, char *argv[]) {
 	Instance instance(input_file);
 	instance.read_instance();
 
+	cout<< instance.requests[500].suplier.x_coord << endl;
+	cout<< instance.requests[500].suplier.y_coord << endl;
+	cout<< instance.requests[500].suplier.ready_time << endl;
+	cout<< instance.requests[500].suplier.due_date << endl;
+	cout<< instance.requests[500].customer.x_coord << endl;
+	cout<< instance.requests[500].customer.y_coord << endl;
+	cout<< instance.requests[500].customer.ready_time << endl;
+	cout<< instance.requests[500].customer.due_date << endl;
+	cout<< instance.requests[500].demand << endl;
+
     return 0;
 
 }

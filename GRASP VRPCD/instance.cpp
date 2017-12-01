@@ -5,6 +5,12 @@ Instance::Instance (string input){
 	this->input_file = input;
 }
 
+
+// funcion que agrega un request
+/*void Instance::add_request(Request request){
+	this->requests.push_back(request);
+}*/
+
 //funcion que lee las instancias (actualmente las de Morais)
 void Instance::read_instance(){
 
@@ -19,52 +25,50 @@ void Instance::read_instance(){
 		return;
 	}
 
-	/*string line;
-	vector<string> prev_data;
-	// LINEA 1: obtencion del numero de buses y capacidad desde la primera linea del archivo
+	string line;
+	vector<int> prev_data;
+	// LINEA 1: obtencion del numero de Request
 	getline(file, line);
-  	prev_data = split(line, ':');
-  	this->bus_number = stoi(prev_data[0]);
-  	this->bus_capacity = stoi(prev_data[1]);
-
-	// LINEA 2 :obtencion de la cantidad de estaciones de buses y la cantidad de buses en cada una
 	getline(file, line);
-  	prev_data = split(line, ':');
-	this->bus_stations_number = stoi(prev_data[0]);
-	this->bus_in_station = get_int_vector(prev_data[1]);
+  	this->request_number = stoi(line);
 
-	// LINEA 3: obtencion de los puntos de encuentro con su gente respectiva
+	// LINEA 2 : obtencion de la capacidad de los vehiculos
 	getline(file, line);
-  	prev_data = split(line, ':');
-	this->points_number = stoi(prev_data[0]);
-	this->total_persons = stoi(prev_data[1]);
-	this->persons_in_points = get_int_vector(prev_data[2]);
-
-	// LINEA 4: obtencion de los refugios con sus capacidades respectivas
 	getline(file, line);
-  	prev_data = split(line, ':');
-	this->shelters_number = stoi(prev_data[0]);
-	this->total_shelters_capacity = stoi(prev_data[1]);
-	this->shelters_capacity = get_int_vector(prev_data[2]);
+	getline(file, line);
+  	this->vehicle_capacity = stoi(line);
 
-	// LINEA 5 en adelante: obtencion de las distancias iniciales de cada estacion a los puntos de encuentro
+	// LINEA 3: obtencion de los tiempos de carga y descarga
+  	getline(file, line);
+	getline(file, line);
+	getline(file, line);
+  	prev_data = get_int_vector(line);
+
+  	prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
+
+  	/*for(int j = 0; (unsigned)j < prev_data.size(); ++j){
+		cout <<  prev_data[j] << endl;
+	}*/
+
+	this->unit_time_pallet = prev_data[0];
+	this->fixed_time_preparation = prev_data[1];
+
+	// LINEA 5 en adelante: obtencion de la informacion de los pedidos
+	getline(file, line);
 	getline(file, line);
 
-	for(int i=0; i < this->bus_stations_number; i++){
+	for(int i=0; i<this->request_number+1; i++){
 		getline(file, line);
-	  	prev_data = split(line, ':');
-		this->initial_distances.push_back(get_int_vector(prev_data[1]));
-	}
-	
-	// MATRIZ: obtencion de las distancias de cada punto de encuentro a cada refugio
-	getline(file, line);
-	for(int i=0; i < this->points_number; i++){
-		getline(file, line);
-	  	prev_data = split(line, ':');
-		this->point_distances.push_back(get_int_vector(prev_data[1]));
-	}
+	  	prev_data = get_int_vector(line);
+	  	prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
+	  	//se crean las respectivas clases
+	  	Suplier suplier(prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
+	  	Customer customer(prev_data[5],prev_data[6],prev_data[7],prev_data[8]);
+	  	Request request(suplier,customer,prev_data[9]);
+
+	  	this->requests.push_back(request);
+  	}
 
 	file.close();
-	*/
-
+	
 }
