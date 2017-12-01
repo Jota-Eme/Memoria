@@ -15,7 +15,6 @@ class Instance{
 		// funciones de la clase
 		
 		Instance(string);
-		void add_request();
 		void read_instance();
 
 };
