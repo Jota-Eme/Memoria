@@ -5,6 +5,8 @@ Instance::Instance (string input){
 	this->input_file = input;
 }
 
+Instance::Instance(){
+}
 
 // funcion que agrega un request
 /*void Instance::add_request(Request request){
@@ -61,15 +63,16 @@ void Instance::read_instance(){
 	// se lee la primera linea correspondiente al cross-dock
 	prev_data = get_int_vector(line);
 	prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
-	Crossdock crossdock(prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
+	Crossdock crossdock(prev_data[0],prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
+	this->crossdock = crossdock;
 
 	for(int i=0; i<this->request_number; i++){
 		getline(file, line);
 	  	prev_data = get_int_vector(line);
 	  	prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
 	  	//se crean las respectivas clases
-	  	Suplier suplier(prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
-	  	Customer customer(prev_data[5],prev_data[6],prev_data[7],prev_data[8]);
+	  	Suplier suplier(prev_data[0],prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
+	  	Customer customer((prev_data[0]*(-1)),prev_data[5],prev_data[6],prev_data[7],prev_data[8]);
 	  	Request request(suplier,customer,prev_data[9]);
 
 	  	this->requests.push_back(request);

@@ -25,7 +25,9 @@ int main(int argc, char *argv[]) {
 	Instance instance(input_file);
 	instance.read_instance();
 
-	cout<< instance.requests[499].suplier.x_coord << endl;
+	float test = instance.crossdock.get_distance(instance.requests[0].suplier);
+
+	/*cout<< instance.requests[499].suplier.x_coord << endl;
 	cout<< instance.requests[499].suplier.y_coord << endl;
 	cout<< instance.requests[499].suplier.ready_time << endl;
 	cout<< instance.requests[499].suplier.due_date << endl;
@@ -33,7 +35,7 @@ int main(int argc, char *argv[]) {
 	cout<< instance.requests[499].customer.y_coord << endl;
 	cout<< instance.requests[499].customer.ready_time << endl;
 	cout<< instance.requests[499].customer.due_date << endl;
-	cout<< instance.requests[499].demand << endl;
+	cout<< instance.requests[499].demand << endl;*/
 
     return 0;
 

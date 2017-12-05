@@ -12,10 +12,12 @@ class Instance{
 		int request_number, vehicle_capacity, unit_time_pallet, fixed_time_preparation;
 
 		vector<Request> requests;
+		Crossdock crossdock;
 
 		// funciones de la clase
 		
 		Instance(string);
+		Instance();
 		void read_instance();
 
 };
