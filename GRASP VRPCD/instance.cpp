@@ -56,8 +56,14 @@ void Instance::read_instance(){
 	// LINEA 5 en adelante: obtencion de la informacion de los pedidos
 	getline(file, line);
 	getline(file, line);
+	getline(file, line);
 
-	for(int i=0; i<this->request_number+1; i++){
+	// se lee la primera linea correspondiente al cross-dock
+	prev_data = get_int_vector(line);
+	prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
+	Crossdock crossdock(prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
+
+	for(int i=0; i<this->request_number; i++){
 		getline(file, line);
 	  	prev_data = get_int_vector(line);
 	  	prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());

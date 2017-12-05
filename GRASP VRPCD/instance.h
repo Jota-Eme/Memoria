@@ -1,6 +1,7 @@
 #include "imports.h"
 #include "request.h"
 #include "utils.h"
+#include "crossdock.h"
 
 
 class Instance{
