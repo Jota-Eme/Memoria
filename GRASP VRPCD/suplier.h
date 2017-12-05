@@ -1,3 +1,6 @@
+#ifndef __SUPLIER_H__
+#define __SUPLIER_H__
+
 #include "imports.h"
 #include "node.h"
 
@@ -10,4 +13,4 @@ class Suplier : public Node {
 		//~Suplier();
 
 };
-
+#endif

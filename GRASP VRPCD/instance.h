@@ -1,3 +1,6 @@
+#ifndef __INSTANCE_H__
+#define __INSTANCE_H__
+
 #include "imports.h"
 #include "request.h"
 #include "utils.h"
@@ -21,6 +24,6 @@ class Instance{
 		void read_instance();
 
 };
-
+#endif
 
 

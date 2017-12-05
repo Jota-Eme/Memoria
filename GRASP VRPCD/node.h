@@ -1,3 +1,6 @@
+#ifndef __NODE_H__
+#define __NODE_H__
+
 #include "imports.h"
 
 class Node{
@@ -15,3 +18,4 @@ class Node{
 
 
 };
+#endif

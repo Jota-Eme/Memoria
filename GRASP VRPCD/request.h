@@ -1,3 +1,6 @@
+#ifndef __REQUEST_H__
+#define __REQUEST_H__
+
 #include "imports.h"
 #include "customer.h"
 #include "suplier.h"
@@ -14,3 +17,4 @@ class Request{
 		Request();
 
 };
+#endif

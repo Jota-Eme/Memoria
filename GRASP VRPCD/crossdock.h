@@ -1,3 +1,7 @@
+
+#ifndef __CROSSDOCK_H__
+#define __CROSSDOCK_H__
+
 #include "imports.h"
 #include "node.h"
 
@@ -10,3 +14,4 @@ class Crossdock : public Node{
 		//~Crossdock();
 
 };
+#endif

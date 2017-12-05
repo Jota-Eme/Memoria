@@ -1,3 +1,6 @@
+#ifndef __CUSTOMER_H__
+#define __CUSTOMER_H__
+
 #include "imports.h"
 #include "node.h"
 
@@ -9,6 +12,6 @@ class Customer : public Node {
 		Customer();
 		//~Customer();
 };
-
+#endif
 
 

@@ -1,3 +1,6 @@
+#ifndef __GRASP_H__
+#define __GRASP_H__
+
 #include "imports.h"
 #include "instance.h"
 #include "utils.h"
@@ -14,3 +17,4 @@ class Grasp{
 		//make_solution();
 
 };
+#endif
