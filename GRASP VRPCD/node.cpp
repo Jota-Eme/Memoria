@@ -19,7 +19,7 @@ Node::Node (){
 
 //Funcion que retorna la distancia euclideana del cross-dock a otro nodo.
 float Node::get_distance(Node node){
-	cout<<"el node que me pasaste tiene coordenadas: "<< node.x_coord << " y " << node.y_coord <<endl;
-
-	return 1.0;
+	return float(sqrt(pow((node.x_coord - this->x_coord),2) + pow((node.y_coord - this->y_coord),2)));
 }
+
+

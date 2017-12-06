@@ -48,10 +48,6 @@ void Instance::read_instance(){
 
   	prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
 
-  	/*for(int j = 0; (unsigned)j < prev_data.size(); ++j){
-		cout <<  prev_data[j] << endl;
-	}*/
-
 	this->unit_time_pallet = prev_data[0];
 	this->fixed_time_preparation = prev_data[1];
 
@@ -73,7 +69,7 @@ void Instance::read_instance(){
 	  	//se crean las respectivas clases
 	  	Suplier suplier(prev_data[0],prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
 	  	Customer customer((prev_data[0]*(-1)),prev_data[5],prev_data[6],prev_data[7],prev_data[8]);
-	  	Request request(suplier,customer,prev_data[9]);
+	  	Request request(suplier,customer,prev_data[9],prev_data[0]);
 
 	  	this->requests.push_back(request);
   	}

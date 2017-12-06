@@ -4,6 +4,9 @@
 #include "imports.h"
 #include "instance.h"
 #include "utils.h"
+#include "request.h"
+#include "node.h"
+#include "crossdock.h"
 
 
 class Grasp{
@@ -14,7 +17,8 @@ class Grasp{
 		// funciones de la clase
 		Grasp(Instance);
 		Grasp();
-		//make_solution();
+		tuple<Request,float> get_cheaper_request(vector<Request>);
+		tuple<Request,float> get_cheaper_request(Suplier, Customer ,vector<Request>);
 
 };
 #endif

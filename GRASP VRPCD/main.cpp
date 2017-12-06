@@ -1,5 +1,7 @@
 #include "imports.h"
 #include "instance.h"
+#include "request.h"
+#include "grasp.h"
 
 
 // FUNCION QUE LEERA LA VENTANA DE COMANDOS 
@@ -25,8 +27,15 @@ int main(int argc, char *argv[]) {
 	Instance instance(input_file);
 	instance.read_instance();
 
-	float test = instance.crossdock.get_distance(instance.requests[0].suplier);
+	Grasp grasp(instance);
+	vector<Request> requests = instance.requests;
+	Request cheaper_request = Request();
+	float min_cost;
+	tie(cheaper_request,min_cost) = grasp.get_cheaper_request(requests);
 
+	cout<< "El request mas barato desde el CD es el numero "<< cheaper_request.id << " con un coste de " << std::setprecision(16) << min_cost <<endl;
+
+	//cout << "la distancia es " << std::setprecision(16) << test <<endl;
 	/*cout<< instance.requests[499].suplier.x_coord << endl;
 	cout<< instance.requests[499].suplier.y_coord << endl;
 	cout<< instance.requests[499].suplier.ready_time << endl;

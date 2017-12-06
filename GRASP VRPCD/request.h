@@ -10,10 +10,10 @@ class Request{
 		//atributos de clase
 		Customer customer;
 		Suplier suplier;
-		int demand;
+		int demand,id;
 
 		// funciones de la clase
-		Request(Suplier,Customer,int);
+		Request(Suplier,Customer,int,int);
 		Request();
 
 };
