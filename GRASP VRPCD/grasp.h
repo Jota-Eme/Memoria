@@ -7,6 +7,8 @@
 #include "request.h"
 #include "node.h"
 #include "crossdock.h"
+#include "solution.h"
+
 
 
 class Grasp{
@@ -19,6 +21,7 @@ class Grasp{
 		Grasp();
 		tuple<Request,float> get_cheaper_request(vector<Request>);
 		tuple<Request,float> get_cheaper_request(Suplier, Customer ,vector<Request>);
+		vector<tuple<vector<int>,vector<int>>> initial_solution();
 
 };
 #endif

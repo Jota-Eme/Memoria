@@ -52,3 +52,13 @@ tuple<Request,float> Grasp::get_cheaper_request(Suplier suplier, Customer custom
 	return make_tuple(cheaper_request,min_cost);
 
 }
+
+
+// FUncion que genera una solucion inicial mediante greedy
+
+Solution Grasp::initial_solution(){
+
+	Solution solution();
+	vector<Request> request = this->instance.requests;
+
+}
