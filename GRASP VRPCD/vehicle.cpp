@@ -13,3 +13,6 @@ Vehicle::Vehicle(){
 }
 
 
+Vehicle::Vehicle(int capacity){
+	this->capacity = capacity;
+}

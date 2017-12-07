@@ -7,6 +7,7 @@
 #include "request.h"
 #include "node.h"
 #include "crossdock.h"
+#include "vehicle.h"
 #include "solution.h"
 
 
@@ -19,9 +20,9 @@ class Grasp{
 		// funciones de la clase
 		Grasp(Instance);
 		Grasp();
-		tuple<Request,float> get_cheaper_request(vector<Request>);
-		tuple<Request,float> get_cheaper_request(Suplier, Customer ,vector<Request>);
-		vector<tuple<vector<int>,vector<int>>> initial_solution();
+		tuple<Request,float,bool> get_cheaper_request(vector<Request>, int);
+		tuple<Request,float,bool> get_cheaper_request(Suplier, Customer ,vector<Request>, int);
+		Solution initial_solution();
 
 };
 #endif

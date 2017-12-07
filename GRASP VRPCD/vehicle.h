@@ -13,6 +13,7 @@ class Vehicle{
 		// funciones de la clase
 		Vehicle(int,int,int);
 		Vehicle();
+		Vehicle(int);
 
 };
 #endif

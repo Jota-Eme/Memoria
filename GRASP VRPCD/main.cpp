@@ -2,6 +2,7 @@
 #include "instance.h"
 #include "request.h"
 #include "grasp.h"
+#include "solution.h"
 
 
 // FUNCION QUE LEERA LA VENTANA DE COMANDOS 
@@ -30,10 +31,12 @@ int main(int argc, char *argv[]) {
 	Grasp grasp(instance);
 	vector<Request> requests = instance.requests;
 	Request cheaper_request = Request();
-	float min_cost;
+	/*float min_cost;
 	tie(cheaper_request,min_cost) = grasp.get_cheaper_request(requests);
+	cout<< "El request mas barato desde el CD es el numero "<< cheaper_request.id << " con un coste de " << std::setprecision(16) << min_cost <<endl;*/
 
-	cout<< "El request mas barato desde el CD es el numero "<< cheaper_request.id << " con un coste de " << std::setprecision(16) << min_cost <<endl;
+	Solution solution = Solution();
+	solution = grasp.initial_solution();
 
 	//cout << "la distancia es " << std::setprecision(16) << test <<endl;
 	/*cout<< instance.requests[499].suplier.x_coord << endl;
