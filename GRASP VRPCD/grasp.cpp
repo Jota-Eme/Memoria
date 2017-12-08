@@ -87,7 +87,6 @@ Solution Grasp::initial_solution(){
 	while(requests.size() != 0){
 		
 		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet);
-				cout<<"Vehiculo nuevo"<<endl;
 
 		initial_request = true;
 		found = true;
@@ -106,7 +105,6 @@ Solution Grasp::initial_solution(){
 			
 			//si encontro un request que cumpliera con las restricciones se le asigna el request al vehiculo
 			if(found){
-				cout<<"encontree"<<endl;
 
 				vehicle.pickup_route.push_back(selected_request.suplier);
 				vehicle.delivery_route.push_back(selected_request.customer);
@@ -120,15 +118,10 @@ Solution Grasp::initial_solution(){
 				    if (request_iterator->id == selected_request.id) {
 				        request_iterator = requests.erase(request_iterator); // luego de borrar el iterador pasa a la siguiente posicion.
 				        --request_iterator; // devuelve el iterador si quedo fuera de rango.
-
-				        cout<<"elimine"<<endl;
 				    }
 				}
 			}
-			cout<<"el valor de found es "<< found <<endl;
 		
-			cout<<"no me queda capacidad tengo solo: "<< vehicle.capacity <<endl;
-
 		}
 
 		solution.vehicles.push_back(vehicle);
