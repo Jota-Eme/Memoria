@@ -11,8 +11,3 @@ Vehicle::Vehicle(int capacity, int fixed_time, int unit_time){
 
 Vehicle::Vehicle(){
 }
-
-
-Vehicle::Vehicle(int capacity){
-	this->capacity = capacity;
-}

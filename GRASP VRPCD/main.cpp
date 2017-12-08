@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
 	Grasp grasp(instance);
 	vector<Request> requests = instance.requests;
-	Request cheaper_request = Request();
+	//Request cheaper_request = Request();
 	/*float min_cost;
 	tie(cheaper_request,min_cost) = grasp.get_cheaper_request(requests);
 	cout<< "El request mas barato desde el CD es el numero "<< cheaper_request.id << " con un coste de " << std::setprecision(16) << min_cost <<endl;*/

@@ -3,4 +3,4 @@
 # Para ejecutar ./grasp archivo_instancia
 
 #ejemplo
-./grasp instances_MI/R1_10_1_500m.txt
+./grasp instances_MI/R1_4_1_200m.txt
