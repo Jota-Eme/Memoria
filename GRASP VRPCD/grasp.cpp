@@ -42,7 +42,7 @@ tuple<Request,float,float,bool> Grasp::get_cheaper_request(vector<Request> reque
 				cheaper_request = requests[i];
 				min_cost = total_cost;
 				min_suplier_cost = suplier_cost;
-				min_customer_cost = customer_cost
+				min_customer_cost = customer_cost;
 			}
 			// informa si se encontro un request que cumpla con las restricciones
 			flag = true;
@@ -128,10 +128,10 @@ Solution Grasp::initial_solution(){
 	vector <Request>::iterator request_iterator;
 	//Vector de costos, actualmente solo se usa para debugear, pero podria servir para algo mas adelante
 	vector<int> costs;
-	bool initial_request = true;
+	//bool initial_request = true;
 
-	Customer actual_customer = Customer();
-	Suplier actual_suplier = Suplier();
+	//Customer actual_customer = Customer();
+	//Suplier actual_suplier = Suplier();
 
 	while(requests.size() != 0){
 		

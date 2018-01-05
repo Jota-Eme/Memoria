@@ -1,0 +1,14 @@
+ NUMBER OF REQUESTS
+  3
+
+ VEHICLE CAPACITY
+   10
+
+ UNIT_TIME_FOR_PALLET      FIXED_TIME_PREPARATION
+    1                          5
+ REQUEST      SUPPLIER                                            CUSTOMER
+ CUST NO.     XCOORD.     YCOORD.     READY TIME     DUE DATE     XCOORD.     YCOORD.     READY TIME     DUE DATE     DEMAND
+    0           10           7            0            55           10           7            0           55           0
+    1           5            9            6            13           17           10           20          40           6
+    2           3            8            5            15           12           8            25          35           8
+    3           1            5            10           20           15           4            20          50           4
