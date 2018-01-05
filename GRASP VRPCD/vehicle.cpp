@@ -35,7 +35,7 @@ tuple<vector<tuple<float,float>> , vector<tuple<float,float>> , vector<tuple<flo
 			departure_time = max(arrival_time, (float)new_suplier.ready_time);
 
 			current_node = new_suplier;
-			this->pickup_times.push_back(make_tuple(arrival_time,departure_time));
+			pickup_times.push_back(make_tuple(arrival_time,departure_time));
 		}
 
 		//SE LLEGA AL CROSSDOCK PARA COMENZAR LA CONSOLIDACION (POR AHORA SE ASUME QUE SE ENTREGA LO MISMO QUE SE RETIRA POR LO QUE NO HAY CONSOLIDACION)
@@ -57,7 +57,7 @@ tuple<vector<tuple<float,float>> , vector<tuple<float,float>> , vector<tuple<flo
 			departure_time = max(arrival_time, (float)new_customer.ready_time);
 
 			current_node = new_customer;
-			this->delivery_times.push_back(make_tuple(arrival_time,departure_time));
+			delivery_times.push_back(make_tuple(arrival_time,departure_time));
 		}
 
 	}

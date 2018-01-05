@@ -13,3 +13,4 @@ string trim(const string& str);
 vector<int> get_int_vector(string line);
 
 void print_solution(Solution solution);
+void print_times(Solution solution);

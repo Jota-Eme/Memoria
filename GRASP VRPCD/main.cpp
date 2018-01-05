@@ -34,9 +34,23 @@ int main(int argc, char *argv[]) {
 	Solution solution = Solution();
 	solution = grasp.initial_solution();
 
+
+
 	cout<<"La solucion inicial es"<<endl;
 	print_solution(solution);
 
+	//Se hace esto para probar los tiempos
+	vector<tuple<float,float>> pickup_times, crossdock_times,delivery_times;
+	for (int i=0; (unsigned)i<solution.vehicles.size();i++) {
+
+		tie(pickup_times,crossdock_times,delivery_times) = solution.vehicles[i].set_times();
+		solution.vehicles[i].pickup_times = pickup_times;
+		solution.vehicles[i].crossdock_times = crossdock_times;
+		solution.vehicles[i].delivery_times = delivery_times;
+
+	}
+
+	print_times(solution);
     return 0;
 
 }
