@@ -74,7 +74,6 @@ void print_times(Solution solution){
 	vector <Vehicle>::iterator vehicle_iterator;
 	vector<Vehicle> vehicles = solution.vehicles;
 	
-	cout<<"Los tiempos de pickup para cada vehiculo son: "<<endl;
 	for (vehicle_iterator = vehicles.begin(); vehicle_iterator != vehicles.end(); ++vehicle_iterator) {
 		cout<<"[ ";
 	    for (int i=0; (unsigned)i<vehicle_iterator->pickup_times.size(); i++) {
@@ -90,6 +89,14 @@ void print_times(Solution solution){
 	    	cout<<"{"<<get<0>(vehicle_iterator->delivery_times[i])<<","<<get<1>(vehicle_iterator->delivery_times[i])<<"} ";
 		}
 		cout<<" ]"<<endl;
+
+		Vehicle &new_vehicle = *vehicle_iterator;
+		if(new_vehicle.feasible_route()){
+			cout<<"RUTAS FACTIBLES"<<endl;
+		}
+		else{
+			cout<<"RUTAS INFACTIBLES"<<endl;
+		}
 	}
 
 }

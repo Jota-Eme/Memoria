@@ -8,7 +8,7 @@
 
 class Vehicle{
 	public:
-		int capacity,fixed_time,unit_time;
+		int total_capacity,fixed_time,unit_time,remaining_capacity;
 		vector<Suplier> pickup_route;
 		vector<Customer> delivery_route;
 		// rutas de crossdocks luego del delivery route (para IAA siempre habra solo 1 CD)
@@ -21,7 +21,10 @@ class Vehicle{
 		// funciones de la clase
 		Vehicle(int,int,int);
 		Vehicle();
-		tuple<vector<tuple<float,float>> , vector<tuple<float,float>> , vector<tuple<float,float>> > set_times();
+		//funcion que setea los tiempos de llegada y salida de cada nodo de todas las rutas
+		void set_times();
+		//funcion que determina si la rita cumple con los TW
+		bool feasible_route();
 
 };
 #endif
