@@ -2,8 +2,9 @@
 
 
 // CONSTRUCTOR
-Grasp::Grasp (Instance instance){
+Grasp::Grasp (Instance instance, int list_size){
 	this->instance = instance;
+	this->list_size = list_size;
 }
 
 Grasp::Grasp(){
@@ -47,11 +48,11 @@ tuple<vector<tuple<Request,float>>,bool> Grasp::get_cheaper_requests(vector<Requ
 
 				if(vehicle_temp.feasible_route()){
 
-					if(selected_requests.size() < 10){
+					if(selected_requests.size() < (unsigned)this->list_size){
 						selected_requests.push_back(make_tuple(requests[i],total_cost));
 					}
 
-					else if(selected_requests.size() == 10){
+					else if(selected_requests.size() == (unsigned)this->list_size){
 						selected_requests.push_back(make_tuple(requests[i],total_cost));
 						std::sort(begin(selected_requests), end(selected_requests), [](tuple<Request, float> const &t1, tuple<Request, float> const &t2) {
 					        return get<1>(t1) < get<1>(t2); // or use a custom compare function

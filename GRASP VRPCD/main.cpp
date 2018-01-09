@@ -6,32 +6,39 @@
 
 
 // FUNCION QUE LEERA LA VENTANA DE COMANDOS 
-string read_input(int argc, char **argv){
+tuple<string,int,int> read_input(int argc, char **argv){
 
 	string input_file = (char *)(argv[1]);
+	int list_size = stoi((char *)(argv[2]));
+	int seed = stoi((char *)(argv[3]));
 
-	return input_file;
+	return make_tuple(input_file,list_size,seed);
 
 }
 
 
 int main(int argc, char *argv[]) {
 
-	if(argc != 3){
-		cout << "El formato para la ejecucion es: " << argv[0] << " archivo_entrada semilla"<<endl;
+	if(argc != 4){
+		cout << "El formato para la ejecucion es: " << argv[0] << " archivo_entrada tamaño_lista semilla"<<endl;
 		return 0;
 	}
 
-	int seed=atoi(argv[2]);
-	srand(seed);
-
 	string input_file;
-	input_file = read_input(argc,argv);
+	int list_size,seed;
 
+	tie(input_file,list_size,seed) = read_input(argc,argv);
+
+	if(list_size<=0){
+		cout<<"El tamaño de la lista debe ser mayor o igual a 1"<<endl;
+		return 0;
+	}
+
+	srand(seed);
 	Instance instance(input_file);
 	instance.read_instance();
 
-	Grasp grasp(instance);
+	Grasp grasp(instance,list_size);
 	vector<Request> requests = instance.requests;
 
 	Solution solution = Solution();

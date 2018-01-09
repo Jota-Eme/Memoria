@@ -16,9 +16,10 @@ class Grasp{
 	public:
 		//atributos de clase
 		Instance instance;
+		int list_size;
 
 		// funciones de la clase
-		Grasp(Instance);
+		Grasp(Instance,int);
 		Grasp();
 		tuple<vector<tuple<Request,float>>,bool> get_cheaper_requests(vector<Request>, Vehicle);
 		Solution initial_solution();
