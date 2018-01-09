@@ -12,5 +12,7 @@
 #include <sstream>
 #include <climits>
 #include <time.h>
+#include <iomanip>
+#include <cfloat>
 
 using namespace std;

@@ -47,3 +47,56 @@ string trim(const string& str)
 {
   return trim_left(trim_right(str));
 }
+
+
+void print_solution(Solution solution){
+	vector <Vehicle>::iterator vehicle_iterator;
+	vector <Suplier>::iterator suplier_iterator;
+	vector <Customer>::iterator customer_iterator;
+	vector<Vehicle> vehicles = solution.vehicles;
+
+	for (vehicle_iterator = vehicles.begin(); vehicle_iterator != vehicles.end(); ++vehicle_iterator) {
+		cout<<"[ ";
+	    for (suplier_iterator = vehicle_iterator->pickup_route.begin(); suplier_iterator != vehicle_iterator->pickup_route.end(); ++suplier_iterator) {
+	    	cout<<suplier_iterator->id<<" ";
+		}
+		cout<<"]   ";
+		cout<<"[ ";
+		for (customer_iterator = vehicle_iterator->delivery_route.begin(); customer_iterator != vehicle_iterator->delivery_route.end(); ++customer_iterator) {
+	    	cout<<customer_iterator->id<<" ";
+		}
+		cout<<"]"<<endl;
+	}
+
+}
+
+void print_times(Solution solution){
+	vector <Vehicle>::iterator vehicle_iterator;
+	vector<Vehicle> vehicles = solution.vehicles;
+	
+	for (vehicle_iterator = vehicles.begin(); vehicle_iterator != vehicles.end(); ++vehicle_iterator) {
+		cout<<"[ ";
+	    for (int i=0; (unsigned)i<vehicle_iterator->pickup_times.size(); i++) {
+	    	cout<<"{"<<get<0>(vehicle_iterator->pickup_times[i])<<","<<get<1>(vehicle_iterator->pickup_times[i])<<"} ";
+		}
+		cout<<"]   [ ";
+
+		for (int i=0; (unsigned)i<vehicle_iterator->crossdock_times.size(); i++) {
+	    	cout<<"{"<<get<0>(vehicle_iterator->crossdock_times[i])<<","<<get<1>(vehicle_iterator->crossdock_times[i])<<"} ";
+		}
+		cout<<"]   [ ";
+		for (int i=0; (unsigned)i<vehicle_iterator->delivery_times.size(); i++) {
+	    	cout<<"{"<<get<0>(vehicle_iterator->delivery_times[i])<<","<<get<1>(vehicle_iterator->delivery_times[i])<<"} ";
+		}
+		cout<<" ]"<<endl;
+
+		Vehicle &new_vehicle = *vehicle_iterator;
+		if(new_vehicle.feasible_route()){
+			cout<<"RUTAS FACTIBLES"<<endl;
+		}
+		else{
+			cout<<"RUTAS INFACTIBLES"<<endl;
+		}
+	}
+
+}

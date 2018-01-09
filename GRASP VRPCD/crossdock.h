@@ -1,12 +1,17 @@
-#include "imports.h"
 
-class Crossdock{
+#ifndef __CROSSDOCK_H__
+#define __CROSSDOCK_H__
+
+#include "imports.h"
+#include "node.h"
+
+
+class Crossdock : public Node{
 	public:
-		//atributos de clase
-		int x_coord, y_coord, ready_time, due_date;
-		
 		// funciones de la clase
-		Crossdock(int,int,int,int);
+		Crossdock(int,int,int,int,int);
 		Crossdock();
-		~Crossdock();
+		//~Crossdock();
+
 };
+#endif
