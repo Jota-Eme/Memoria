@@ -17,10 +17,13 @@ string read_input(int argc, char **argv){
 
 int main(int argc, char *argv[]) {
 
-	if(argc != 2){
-		cout << "El formato para la ejecucion es: " << argv[0] << " archivo_entrada "<<endl;
+	if(argc != 3){
+		cout << "El formato para la ejecucion es: " << argv[0] << " archivo_entrada semilla"<<endl;
 		return 0;
 	}
+
+	int seed=atoi(argv[2]);
+	srand(seed);
 
 	string input_file;
 	input_file = read_input(argc,argv);
@@ -41,6 +44,30 @@ int main(int argc, char *argv[]) {
 
 	print_times(solution);
 
+	cout<<"CANTIDAD DE AUTOS USADOS: "<<solution.vehicles.size()<<endl;
+
+	/*vector<tuple<string,int>> asd;
+	asd.push_back(make_tuple("quinto",5));
+	asd.push_back(make_tuple("tercero",3));
+	asd.push_back(make_tuple("primero",1));
+	asd.push_back(make_tuple("cuarto",4));
+	asd.push_back(make_tuple("segundo",2));*/
+
+	/*for(int i=0; (unsigned)i<asd.size();i++){
+		cout<<get<1>(asd[i])<<" ";
+	}*/
+
+	/*cout<<endl;
+	std::sort(begin(asd), end(asd), [](tuple<string, int> const &t1, tuple<string, int> const &t2) {
+        return get<1>(t1) < get<1>(t2); // or use a custom compare function
+    	}
+    );*/
+
+	/*for(int i=0; (unsigned)i<asd.size();i++){
+		cout<<get<1>(asd[i])<<" ";
+	}*/
+
+	
 
     return 0;
 

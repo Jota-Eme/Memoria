@@ -20,8 +20,7 @@ class Grasp{
 		// funciones de la clase
 		Grasp(Instance);
 		Grasp();
-		tuple<Request,float,float,bool> get_cheaper_request(vector<Request>, Vehicle);
-		//tuple<Request,float,bool> get_cheaper_request(Suplier, Customer ,vector<Request>, int);
+		tuple<vector<tuple<Request,float>>,bool> get_cheaper_requests(vector<Request>, Vehicle);
 		Solution initial_solution();
 
 };

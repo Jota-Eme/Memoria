@@ -10,17 +10,16 @@ Grasp::Grasp(){
 }
 
 
-
-tuple<Request,float,float,bool> Grasp::get_cheaper_request(vector<Request> requests, Vehicle vehicle){
+// funcion que retorna una lista de loss request mas bajos en costo, que cumplan con las condiciones de TW (request factibles)
+tuple<vector<tuple<Request,float>>,bool> Grasp::get_cheaper_requests(vector<Request> requests, Vehicle vehicle){
 
 	float suplier_cost, customer_cost, total_cost;
 	float min_cost = FLT_MAX;
-	float min_suplier_cost, min_customer_cost;
-	Request cheaper_request;
 	bool flag = false;
 	Suplier suplier;
 	Customer customer;
 	Vehicle vehicle_temp;
+	vector<tuple<Request,float>> selected_requests;
 
 	for(int i = 0; (unsigned)i < requests.size(); i++){
 		// PARA MEMORIA se deben considerar los otros CD tambien 
@@ -40,7 +39,6 @@ tuple<Request,float,float,bool> Grasp::get_cheaper_request(vector<Request> reque
 			total_cost = suplier_cost + customer_cost;
 
 			if(total_cost < min_cost){
-
 				// se analiza si es factible agregar dicho par de nodos en relacion a los TW  (para MEMORIA deberia considerar los distintos CD tambien)
 				vehicle_temp = vehicle;
 				vehicle_temp.pickup_route.push_back(requests[i].suplier);
@@ -48,10 +46,25 @@ tuple<Request,float,float,bool> Grasp::get_cheaper_request(vector<Request> reque
 				vehicle_temp.set_times();
 
 				if(vehicle_temp.feasible_route()){
-					cheaper_request = requests[i];
-					min_cost = total_cost;
-					min_suplier_cost = suplier_cost;
-					min_customer_cost = customer_cost;
+
+					if(selected_requests.size() < 10){
+						selected_requests.push_back(make_tuple(requests[i],total_cost));
+					}
+
+					else if(selected_requests.size() == 10){
+						selected_requests.push_back(make_tuple(requests[i],total_cost));
+						std::sort(begin(selected_requests), end(selected_requests), [](tuple<Request, float> const &t1, tuple<Request, float> const &t2) {
+					        return get<1>(t1) < get<1>(t2); // or use a custom compare function
+					    	}
+					    );
+						selected_requests.pop_back();
+						min_cost = get<1>(selected_requests.back());
+
+					}
+
+					else{
+						cout << "ERROR, SE SOBREPASO EL TAMAÑO DE LA LISTA"<<endl;
+					}
 					// informa si se encontro un request que cumpla con las restricciones
 					flag = true;
 				}
@@ -60,7 +73,7 @@ tuple<Request,float,float,bool> Grasp::get_cheaper_request(vector<Request> reque
 		}		
 	}
 
-	return make_tuple(cheaper_request,min_suplier_cost,min_customer_cost,flag);
+	return make_tuple(selected_requests,flag);
 
 }
 
@@ -71,13 +84,13 @@ Solution Grasp::initial_solution(){
 
 	Solution solution = Solution();
 	vector<Request> requests = this->instance.requests;
-	Request selected_request;
-	int min_suplier_cost,min_customer_cost;
 	bool found = true;
 	vector <Request>::iterator request_iterator;
 	//Vector de costos, actualmente solo se usa para debugear, pero podria servir para algo mas adelante
 	vector<int> costs;
-
+	vector<tuple<Request,float>> requests_list;
+	Request selected_request;
+	int random;
 
 	while(requests.size() != 0){
 		
@@ -88,10 +101,14 @@ Solution Grasp::initial_solution(){
 
 		while (found){
 
-			tie(selected_request,min_suplier_cost,min_customer_cost,found) = this->get_cheaper_request(requests, vehicle);
-			
+			tie(requests_list,found) = this->get_cheaper_requests(requests, vehicle);
+
 			//si encontro un request que cumpliera con las restricciones se le asigna el request al vehiculo
 			if(found){
+				//Se agrega la componente aleatoria
+
+				random = rand() % requests_list.size();
+				selected_request = get<0>(requests_list[random]);
 
 				vehicle.pickup_route.push_back(selected_request.suplier);
 				vehicle.delivery_route.push_back(selected_request.customer);
