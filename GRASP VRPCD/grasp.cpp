@@ -134,3 +134,63 @@ Solution Grasp::initial_solution(){
 
 	return solution;
 }
+
+
+float Grasp::evaluation_function(Solution solution){
+
+	vector <Suplier>::iterator suplier_iterator;
+	vector <Customer>::iterator customer_iterator;
+	vector <Crossdock>::iterator crossdock_iterator;
+	vector <Vehicle>::iterator vehicle_iterator;
+	Node current_node;
+	float total_cost =0;
+
+	if(solution.vehicles.empty() == false){
+
+		for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator){
+			//POR EL MOMENTO SOLO HAY 1 CD COMO PUNTO DE PARTIDA, EN LA MEMORIA SE DEBE AGREGAR COMO ATRIBUTO PARA CADA VEHICULO
+			current_node = vehicle_iterator->crossdock_route[0];
+
+			if(vehicle_iterator->pickup_route.empty() == false){
+
+				for (suplier_iterator = vehicle_iterator->pickup_route.begin(); suplier_iterator != vehicle_iterator->pickup_route.end(); ++suplier_iterator) {
+
+					Suplier &new_suplier = *suplier_iterator;
+					total_cost += current_node.get_distance(new_suplier);
+					current_node = new_suplier;
+				}
+
+			}
+
+			if(vehicle_iterator->crossdock_route.empty() == false){
+
+				for (crossdock_iterator = vehicle_iterator->crossdock_route.begin(); crossdock_iterator != vehicle_iterator->crossdock_route.end(); ++crossdock_iterator) {
+
+					Crossdock &new_crossdock = *crossdock_iterator;
+					total_cost += current_node.get_distance(new_crossdock);
+					current_node = new_crossdock;
+				}
+
+			}
+
+			if(vehicle_iterator->delivery_route.empty() == false){
+
+				for (customer_iterator = vehicle_iterator->delivery_route.begin(); customer_iterator != vehicle_iterator->delivery_route.end(); ++customer_iterator) {
+
+					Customer &new_customer = *customer_iterator;
+					total_cost += current_node.get_distance(new_customer);
+					current_node = new_customer;
+				}
+
+			}
+
+			//EN este caso siempre vuelve al CD inicial, PARA LA MEMORIA SE DEBEN CONSIDERAR LOS LUGARES TERMINALES
+			total_cost += current_node.get_distance(vehicle_iterator->crossdock_route[0]);
+
+		}
+
+	}
+
+	return total_cost;
+
+}

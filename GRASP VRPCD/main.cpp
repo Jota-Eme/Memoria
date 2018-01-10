@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
 	print_times(solution);
 
 	cout<<"CANTIDAD DE AUTOS USADOS: "<<solution.vehicles.size()<<endl;
+	cout<<"COSTO TOTAL DE: "<< grasp.evaluation_function(solution)<<endl;
 
 	/*vector<tuple<string,int>> asd;
 	asd.push_back(make_tuple("quinto",5));
