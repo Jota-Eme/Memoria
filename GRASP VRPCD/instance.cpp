@@ -34,13 +34,19 @@ void Instance::read_instance(){
 	getline(file, line);
   	this->request_number = stoi(line);
 
-	// LINEA 2 : obtencion de la capacidad de los vehiculos
+	// LINEA 2 : obtencion de la cantidad de crossdocks
+	getline(file, line);
+	getline(file, line);
+	getline(file, line);
+  	this->crossdocks_number = stoi(line);
+
+  	// LINEA 3 : obtencion de la capacidad de los vehiculos
 	getline(file, line);
 	getline(file, line);
 	getline(file, line);
   	this->vehicle_capacity = stoi(line);
 
-	// LINEA 3: obtencion de los tiempos de carga y descarga
+	// LINEA 4: obtencion de los tiempos de carga y descarga
   	getline(file, line);
 	getline(file, line);
 	getline(file, line);
@@ -54,14 +60,17 @@ void Instance::read_instance(){
 	// LINEA 5 en adelante: obtencion de la informacion de los pedidos
 	getline(file, line);
 	getline(file, line);
-	getline(file, line);
 
-	// se lee la primera linea correspondiente al cross-dock
-	prev_data = get_int_vector(line);
-	prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
-	Crossdock crossdock(prev_data[0],prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
-	this->crossdock = crossdock;
+	// se comienzan a leer los crossdocks
+	for(int i=0; i<this->crossdocks_number; i++){
+		prev_data = get_int_vector(line);
+		prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
+		Crossdock crossdock(prev_data[0],prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
+		this->crossdocks.push_back(crossdock);
+	}
 
+
+	// se comienzan a leer los requests
 	for(int i=0; i<this->request_number; i++){
 		getline(file, line);
 	  	prev_data = get_int_vector(line);
@@ -73,6 +82,11 @@ void Instance::read_instance(){
 
 	  	this->requests.push_back(request);
   	}
+
+
+  	// SE ASUME POR EL MOMENTO QUE EL ESTACIONAMIENTO ES EL CROSSDOCK NUMERO 0
+  	this->vehicle_depot = Node(this->crossdocks[0].x_coord,this->crossdocks[0].y_coord, this->crossdocks[0].ready_time, this->crossdocks[0].due_date);
+
 
 	file.close();
 	

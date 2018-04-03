@@ -11,15 +11,29 @@ Grasp::Grasp(){
 }
 
 
+int Grasp::get_closest_crossdock(Node nodo){
+	int best_cd;
+	int min_cost = FLT_MAX;
+	vector<Crossdock> crossdocks = this->instance.crossdocks;
+	for(int i=0; i<crossdocks.size();i++){
+		int cost = nodo.get_distance(crossdocks[i]);
+		if (cost < min_cost){
+			min_cost = cost;
+			best_cd = i;
+		}
+	}
+	return	best_cd;
+}
+
+
 // funcion que retorna una lista de loss request mas bajos en costo, que cumplan con las condiciones de TW (request factibles)
 tuple<vector<tuple<Request,float>>,bool> Grasp::get_cheaper_requests(vector<Request> requests, Vehicle vehicle){
 
-	float suplier_cost, customer_cost, total_cost;
+	float suplier_cost, customer_cost, crossdock_cost, total_cost;
 	float min_cost = FLT_MAX;
 	bool flag = false;
 	Suplier suplier;
 	Customer customer;
-	Vehicle vehicle_temp;
 	vector<tuple<Request,float>> selected_requests;
 
 	for(int i = 0; (unsigned)i < requests.size(); i++){
@@ -27,22 +41,32 @@ tuple<vector<tuple<Request,float>>,bool> Grasp::get_cheaper_requests(vector<Requ
 		if(requests[i].demand <= vehicle.remaining_capacity){
 
 			if(vehicle.pickup_route.empty()){
-				suplier_cost = this->instance.crossdock.get_distance(requests[i].suplier);
-				customer_cost = this->instance.crossdock.get_distance(requests[i].customer);
+				suplier_cost = this->instance.vehicle_depot.get_distance(requests[i].suplier);
+				int best_cd = this->get_closest_crossdock(requests[i].suplier);
+				crossdock_cost = requests[i].suplier.get_distance(this->instance.crossdocks[best_cd]);
+				customer_cost = this->instance.crossdocks[best_cd].get_distance(requests[i].customer);
+				depot_cost = requests[i].customer.get_distance(this->instance.vehicle_depot);
+
 			}
 			else{
 				suplier = vehicle.pickup_route.back();
 				customer = vehicle.delivery_route.back();
 				suplier_cost = suplier.get_distance(requests[i].suplier);
+				int best_cd = this->get_closest_crossdock(requests[i].suplier);
+				crossdock_cost = requests[i].suplier.get_distance(this->instance.crossdocks[best_cd]);
 				customer_cost = customer.get_distance(requests[i].customer);
+				depot_cost = requests[i].customer.get_distance(this->instance.vehicle_depot);
+
 			}
 
-			total_cost = suplier_cost + customer_cost;
+			total_cost = suplier_cost + crossdock_cost + customer_cost + depot_cost;
+			
 
 			if(total_cost < min_cost){
 				// se analiza si es factible agregar dicho par de nodos en relacion a los TW  (para MEMORIA deberia considerar los distintos CD tambien)
-				vehicle_temp = vehicle;
+				Vehicle vehicle_temp = vehicle;
 				vehicle_temp.pickup_route.push_back(requests[i].suplier);
+				vehicle_temp.crossdock_route.push_back(this->instance.crossdocks[best_cd]);
 				vehicle_temp.delivery_route.push_back(requests[i].customer);
 				vehicle_temp.set_times();
 
@@ -96,8 +120,8 @@ Solution Grasp::initial_solution(){
 	while(requests.size() != 0){
 		
 		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet);
-		// PARA IAA SE AGREGA SIEMPRE EL MISMO CD PARA TODOS LOS VEHICULOS
-		vehicle.crossdock_route.push_back(this->instance.crossdock);
+		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
+		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
 
 		while (found){

@@ -12,10 +12,11 @@ class Instance{
 		//atributos de clase
 		string input_file;
 
-		int request_number, vehicle_capacity, unit_time_pallet, fixed_time_preparation;
+		int request_number, vehicle_capacity, unit_time_pallet, fixed_time_preparation, crossdocks_number;
 
+		Node vehicle_depot;
 		vector<Request> requests;
-		Crossdock crossdock;
+		vector<Crossdock> crossdocks;
 
 		// funciones de la clase
 		

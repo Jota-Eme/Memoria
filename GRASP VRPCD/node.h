@@ -13,6 +13,7 @@ class Node{
 		// funciones de la clase
 		//Nodo(int,int,int,int,int);
 		Node();
+		Node(int,int,int,int);
 		//~Nodo();
 		float get_distance(Node);
 
