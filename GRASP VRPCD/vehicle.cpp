@@ -2,11 +2,12 @@
 #include "vehicle.h"
 
 // CONSTRUCTOR
-Vehicle::Vehicle(int capacity, int fixed_time, int unit_time){
+Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot){
 	this->total_capacity = capacity;
 	this->remaining_capacity = capacity;
 	this->fixed_time = fixed_time;
 	this->unit_time = unit_time;
+	this->vehicle_depot = vehicle_depot;
 
 }
 
@@ -25,7 +26,7 @@ void Vehicle::set_times(){
 	vector<tuple<float,float>> pickup_times,delivery_times,crossdock_times;
 
 	// PARA EL CASO DE IAA SOLO HABRA 1 CD SIEMPRE.
-	Node current_node = this->crossdock_route[0];
+	Node current_node = this->vehicle_depot;
 
 	if(this->pickup_route.empty() == false && this->delivery_route.empty() == false){
 		//ITERA SOBRE LOS NODOS DE LA RUTA DE PICKUP Y CALCULA LOS RESPECTIVOS TIEMPOS EN CADA NODO

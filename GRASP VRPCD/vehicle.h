@@ -5,6 +5,7 @@
 #include "suplier.h"
 #include "customer.h"
 #include "crossdock.h"
+#include "node.h"
 
 class Vehicle{
 	public:
@@ -18,8 +19,10 @@ class Vehicle{
 		// Lista de tiempos de llegada y salida en cada nodo de la forma [{t_llegada1,t_salida1},{t_llegada2,t_salida2}...]
 		vector<tuple<float,float>> pickup_times,crossdock_times,delivery_times;
 
+		Node vehicle_depot;
+
 		// funciones de la clase
-		Vehicle(int,int,int);
+		Vehicle(int,int,int, Node);
 		Vehicle();
 		//funcion que setea los tiempos de llegada y salida de cada nodo de todas las rutas
 		void set_times();

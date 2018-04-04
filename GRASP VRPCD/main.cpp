@@ -39,12 +39,9 @@ int main(int argc, char *argv[]) {
 	instance.read_instance();
 
 	Grasp grasp(instance,list_size);
-	vector<Request> requests = instance.requests;
-
+	
 	Solution solution = Solution();
-	solution = grasp.initial_solution();
-
-
+	solution = grasp.initial_solution();	
 
 	cout<<"La solucion inicial es"<<endl;
 	print_solution(solution);
@@ -54,28 +51,6 @@ int main(int argc, char *argv[]) {
 	cout<<"CANTIDAD DE AUTOS USADOS: "<<solution.vehicles.size()<<endl;
 	cout<<"COSTO TOTAL DE: "<< grasp.evaluation_function(solution)<<endl;
 
-	/*vector<tuple<string,int>> asd;
-	asd.push_back(make_tuple("quinto",5));
-	asd.push_back(make_tuple("tercero",3));
-	asd.push_back(make_tuple("primero",1));
-	asd.push_back(make_tuple("cuarto",4));
-	asd.push_back(make_tuple("segundo",2));*/
-
-	/*for(int i=0; (unsigned)i<asd.size();i++){
-		cout<<get<1>(asd[i])<<" ";
-	}*/
-
-	/*cout<<endl;
-	std::sort(begin(asd), end(asd), [](tuple<string, int> const &t1, tuple<string, int> const &t2) {
-        return get<1>(t1) < get<1>(t2); // or use a custom compare function
-    	}
-    );*/
-
-	/*for(int i=0; (unsigned)i<asd.size();i++){
-		cout<<get<1>(asd[i])<<" ";
-	}*/
-
-	
 
     return 0;
 

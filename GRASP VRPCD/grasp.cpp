@@ -13,9 +13,9 @@ Grasp::Grasp(){
 
 int Grasp::get_closest_crossdock(Node nodo){
 	int best_cd;
-	int min_cost = FLT_MAX;
+	float min_cost = FLT_MAX;
 	vector<Crossdock> crossdocks = this->instance.crossdocks;
-	for(int i=0; i<crossdocks.size();i++){
+	for(int i=0; (unsigned)i<crossdocks.size();i++){
 		int cost = nodo.get_distance(crossdocks[i]);
 		if (cost < min_cost){
 			min_cost = cost;
@@ -27,14 +27,15 @@ int Grasp::get_closest_crossdock(Node nodo){
 
 
 // funcion que retorna una lista de loss request mas bajos en costo, que cumplan con las condiciones de TW (request factibles)
-tuple<vector<tuple<Request,float>>,bool> Grasp::get_cheaper_requests(vector<Request> requests, Vehicle vehicle){
+tuple<vector<tuple<Request,float, int>>,bool> Grasp::get_cheaper_requests(vector<Request> requests, Vehicle vehicle){
 
-	float suplier_cost, customer_cost, crossdock_cost, total_cost;
+	float suplier_cost, customer_cost, crossdock_cost, total_cost, depot_cost;
 	float min_cost = FLT_MAX;
 	bool flag = false;
 	Suplier suplier;
 	Customer customer;
-	vector<tuple<Request,float>> selected_requests;
+	vector<tuple<Request,float, int>> selected_requests;
+	int best_cd;  // indice del crossdock mas cercano para el ultimo nodo de una ruta
 
 	for(int i = 0; (unsigned)i < requests.size(); i++){
 		// PARA MEMORIA se deben considerar los otros CD tambien 
@@ -42,7 +43,7 @@ tuple<vector<tuple<Request,float>>,bool> Grasp::get_cheaper_requests(vector<Requ
 
 			if(vehicle.pickup_route.empty()){
 				suplier_cost = this->instance.vehicle_depot.get_distance(requests[i].suplier);
-				int best_cd = this->get_closest_crossdock(requests[i].suplier);
+				best_cd = this->get_closest_crossdock(requests[i].suplier);
 				crossdock_cost = requests[i].suplier.get_distance(this->instance.crossdocks[best_cd]);
 				customer_cost = this->instance.crossdocks[best_cd].get_distance(requests[i].customer);
 				depot_cost = requests[i].customer.get_distance(this->instance.vehicle_depot);
@@ -52,7 +53,7 @@ tuple<vector<tuple<Request,float>>,bool> Grasp::get_cheaper_requests(vector<Requ
 				suplier = vehicle.pickup_route.back();
 				customer = vehicle.delivery_route.back();
 				suplier_cost = suplier.get_distance(requests[i].suplier);
-				int best_cd = this->get_closest_crossdock(requests[i].suplier);
+				best_cd = this->get_closest_crossdock(requests[i].suplier);
 				crossdock_cost = requests[i].suplier.get_distance(this->instance.crossdocks[best_cd]);
 				customer_cost = customer.get_distance(requests[i].customer);
 				depot_cost = requests[i].customer.get_distance(this->instance.vehicle_depot);
@@ -66,6 +67,7 @@ tuple<vector<tuple<Request,float>>,bool> Grasp::get_cheaper_requests(vector<Requ
 				// se analiza si es factible agregar dicho par de nodos en relacion a los TW  (para MEMORIA deberia considerar los distintos CD tambien)
 				Vehicle vehicle_temp = vehicle;
 				vehicle_temp.pickup_route.push_back(requests[i].suplier);
+				vehicle_temp.crossdock_route.clear();
 				vehicle_temp.crossdock_route.push_back(this->instance.crossdocks[best_cd]);
 				vehicle_temp.delivery_route.push_back(requests[i].customer);
 				vehicle_temp.set_times();
@@ -73,12 +75,12 @@ tuple<vector<tuple<Request,float>>,bool> Grasp::get_cheaper_requests(vector<Requ
 				if(vehicle_temp.feasible_route()){
 
 					if(selected_requests.size() < (unsigned)this->list_size){
-						selected_requests.push_back(make_tuple(requests[i],total_cost));
+						selected_requests.push_back(make_tuple(requests[i],total_cost, best_cd));
 					}
 
 					else if(selected_requests.size() == (unsigned)this->list_size){
-						selected_requests.push_back(make_tuple(requests[i],total_cost));
-						std::sort(begin(selected_requests), end(selected_requests), [](tuple<Request, float> const &t1, tuple<Request, float> const &t2) {
+						selected_requests.push_back(make_tuple(requests[i],total_cost, best_cd));
+						std::sort(begin(selected_requests), end(selected_requests), [](tuple<Request, float, int> const &t1, tuple<Request, float, int> const &t2) {
 					        return get<1>(t1) < get<1>(t2); // or use a custom compare function
 					    	}
 					    );
@@ -113,13 +115,13 @@ Solution Grasp::initial_solution(){
 	vector <Request>::iterator request_iterator;
 	//Vector de costos, actualmente solo se usa para debugear, pero podria servir para algo mas adelante
 	vector<int> costs;
-	vector<tuple<Request,float>> requests_list;
+	vector<tuple<Request,float,int>> requests_list;
 	Request selected_request;
 	int random;
 
 	while(requests.size() != 0){
 		
-		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet);
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot);
 		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
 		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
@@ -131,13 +133,19 @@ Solution Grasp::initial_solution(){
 			//si encontro un request que cumpliera con las restricciones se le asigna el request al vehiculo
 			if(found){
 				//Se agrega la componente aleatoria
-
 				random = rand() % requests_list.size();
 				selected_request = get<0>(requests_list[random]);
+				int best_cd = get<2>(requests_list[random]);
 
 				vehicle.pickup_route.push_back(selected_request.suplier);
 				vehicle.delivery_route.push_back(selected_request.customer);
+
+				vehicle.crossdock_route.clear();
+				vehicle.crossdock_route.push_back(this->instance.crossdocks[best_cd]);
+
 				vehicle.remaining_capacity -= selected_request.demand;
+
+				
 
 				// se elimina el request asignado de la lista de requests
 				for (request_iterator = requests.begin(); request_iterator != requests.end(); ++request_iterator) {
@@ -154,7 +162,6 @@ Solution Grasp::initial_solution(){
 		solution.vehicles.push_back(vehicle);
 
 	}
-
 
 	return solution;
 }
@@ -173,7 +180,7 @@ float Grasp::evaluation_function(Solution solution){
 
 		for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator){
 			//POR EL MOMENTO SOLO HAY 1 CD COMO PUNTO DE PARTIDA, EN LA MEMORIA SE DEBE AGREGAR COMO ATRIBUTO PARA CADA VEHICULO
-			current_node = vehicle_iterator->crossdock_route[0];
+			current_node = vehicle_iterator->vehicle_depot;
 
 			if(vehicle_iterator->pickup_route.empty() == false){
 
@@ -209,7 +216,7 @@ float Grasp::evaluation_function(Solution solution){
 			}
 
 			//EN este caso siempre vuelve al CD inicial, PARA LA MEMORIA SE DEBEN CONSIDERAR LOS LUGARES TERMINALES
-			total_cost += current_node.get_distance(vehicle_iterator->crossdock_route[0]);
+			total_cost += current_node.get_distance(vehicle_iterator->vehicle_depot);
 
 		}
 

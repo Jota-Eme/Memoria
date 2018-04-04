@@ -22,9 +22,9 @@ class Grasp{
 		Grasp(Instance,int);
 		Grasp();
 		//funcion que retorna una lista con los request de menos costo que cumplan las restricciones
-		tuple<vector<tuple<Request,float>>,bool> get_cheaper_requests(vector<Request>, Vehicle);
+		tuple<vector<tuple<Request,float, int>>,bool> get_cheaper_requests(vector<Request>, Vehicle);
 		//funcion que retorna el cd mas cercano desde un nodo
-		int get_closest_crossdock(Node)
+		int get_closest_crossdock(Node);
 		//funcion que retorna una solucion inicial utilizando GRASP
 		Solution initial_solution();
 		//funcion que retorna el valor de la funcion de evaluacion de una solucion (costo de la solucion)
