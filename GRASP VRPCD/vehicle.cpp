@@ -115,6 +115,7 @@ bool Vehicle::feasible_route(){
 			cout<<departure_time<<endl;
 			cout<<delivery_route[i].due_date<<endl;
 			cout<<"murio en el nodo "<< i << " de la ruta de delivery"<<endl;*/
+
 		}
 	}
 

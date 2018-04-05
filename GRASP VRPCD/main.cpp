@@ -45,7 +45,8 @@ int main(int argc, char *argv[]) {
 
 	cout<<"La solucion inicial es"<<endl;
 	print_solution(solution);
-
+	cout<<"----------------------------------------------------"<<endl;
+	cout<<"................Los tiempos son ...................."<<endl;
 	print_times(solution);
 
 	cout<<"CANTIDAD DE AUTOS USADOS: "<<solution.vehicles.size()<<endl;

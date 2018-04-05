@@ -57,14 +57,18 @@ void Instance::read_instance(){
 	this->unit_time_pallet = prev_data[0];
 	this->fixed_time_preparation = prev_data[1];
 
+
 	// LINEA 5 en adelante: obtencion de la informacion de los pedidos
 	getline(file, line);
 	getline(file, line);
 
 	// se comienzan a leer los crossdocks
 	for(int i=0; i<this->crossdocks_number; i++){
+		getline(file, line);
 		prev_data = get_int_vector(line);
 		prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
+		
+
 		Crossdock crossdock(prev_data[0],prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
 		this->crossdocks.push_back(crossdock);
 	}
