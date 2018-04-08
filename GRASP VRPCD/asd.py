@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 
-with open('instances_MI/R1_4_1_200m.txt') as f:
+instance = input("Ingrese el nombre de la instancia\n")
+
+with open('instances_MI/'+instance) as f:
 	read_data = f.readline()
 	read_data = f.readline() 
 
