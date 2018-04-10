@@ -38,7 +38,6 @@ tuple<vector<tuple<Request,float, int>>,bool> Grasp::get_cheaper_requests(vector
 	int best_cd;  // indice del crossdock mas cercano para el ultimo nodo de una ruta
 
 	for(int i = 0; (unsigned)i < requests.size(); i++){
-		// PARA MEMORIA se deben considerar los otros CD tambien 
 		if(requests[i].demand <= vehicle.remaining_capacity){
 
 			if(vehicle.pickup_route.empty()){
@@ -223,5 +222,52 @@ float Grasp::evaluation_function(Solution solution){
 	}
 
 	return total_cost;
+
+}
+
+Solution Grasp::Two_opt(Solution solution){
+	//se selecciona el vehiculo al azar
+	int random_vehicle = rand() % solution.vehicles.size();
+	Vehicle selected_vehicle = solution.vehicles[random_vehicle];
+	// se selecciona la ruta a modificar del vehiculo al azar
+	int random_type_route = rand() % 2;
+
+	if(random_type_route == 0){
+		vector<Suplier> selected_route = selected_vehicle.pickup_route;
+		vector<Suplier> new_route;
+	}
+	else(){
+		vector<Customer> selected_route = selected_vehicle.delivery_route;
+		vector<Customer> new_route;
+	}
+
+	//SE comienza a realizar el 2-opt, primero se seleccionan los 2 putnos de corte
+	// y se verifica que no sean el mismo, luego se ordenan para que el i sea el menor y el k el mayor por conveniencia
+	int i = rand() % solution.selected_route.size();
+	int k = rand() % solution.selected_route.size();
+	while(i == k){
+		i = rand() % solution.selected_route.size();
+		k = rand() % solution.selected_route.size();
+	}
+	if(i>j){
+		int temp = i;
+		i=k;
+		k=temp;
+	}
+
+	// ahora se comienza a crear la nueva ruta, intercambiando los nodos correspondientes
+	//PRIMERA PARTE 2-OPT, ANTES DEL PRIMER PUNTO SE AGREGA TODO NORMAL
+	for(int j=0; j<i;j++){
+		new_route.push_back(selected_route[j]);
+	}
+	//SEGUNDA PARTE 2-OPT, DESPUES DEL PRIMER PUNTO SE AGREGA EN ORDEN INVERSO LOS NODOS HASTA EL 2 PUNTO
+	for(int j=k; j>=i;j--){
+		new_route.push_back(selected_route[j]);
+	}
+	//TERCERA PARTE 2-OPT, LUEGO DEL 2 PUNTO SE AGREGA NORMAL
+	for(int j=(k+1); j<(unsigned)selected_route.size();j++){
+		new_route.push_back(selected_route[j]);
+	}
+
 
 }

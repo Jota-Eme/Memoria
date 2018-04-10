@@ -29,6 +29,8 @@ class Grasp{
 		Solution initial_solution();
 		//funcion que retorna el valor de la funcion de evaluacion de una solucion (costo de la solucion)
 		float evaluation_function(Solution);
+		// Realiza el movimiento 2-opt a una solucion
+		Solution Two_opt(Solution);
 
 
 };

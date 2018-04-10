@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	srand(seed);
-	Instance instance(input_file);
+	/*Instance instance(input_file);
 	instance.read_instance();
 
 	Grasp grasp(instance,list_size);
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 
 	cout<<"CANTIDAD DE AUTOS USADOS: "<<solution.vehicles.size()<<endl;
 	cout<<"COSTO TOTAL DE: "<< grasp.evaluation_function(solution)<<endl;
-
+*/
 
     return 0;
 
