@@ -35,23 +35,24 @@ int main(int argc, char *argv[]) {
 	}
 
 	srand(seed);
-	/*Instance instance(input_file);
+	Instance instance(input_file);
 	instance.read_instance();
 
 	Grasp grasp(instance,list_size);
 	
 	Solution solution = Solution();
-	solution = grasp.initial_solution();	
+	solution = grasp.initial_solution();
+	Solution solution_opt = grasp.two_opt(solution);	
 
-	cout<<"La solucion inicial es"<<endl;
+	/*cout<<"La solucion inicial es"<<endl;
 	print_solution(solution);
 	cout<<"----------------------------------------------------"<<endl;
 	cout<<"................Los tiempos son ...................."<<endl;
 	print_times(solution);
 
 	cout<<"CANTIDAD DE AUTOS USADOS: "<<solution.vehicles.size()<<endl;
-	cout<<"COSTO TOTAL DE: "<< grasp.evaluation_function(solution)<<endl;
-*/
+	cout<<"COSTO TOTAL DE: "<< grasp.evaluation_function(solution)<<endl;*/
+
 
     return 0;
 
