@@ -40,9 +40,7 @@ int main(int argc, char *argv[]) {
 
 	Grasp grasp(instance,list_size);
 	
-	Solution solution = Solution();
-	solution = grasp.initial_solution();
-	Solution solution_opt = grasp.two_opt(solution);	
+	Solution final_solution = grasp.run();	
 
 	/*cout<<"La solucion inicial es"<<endl;
 	print_solution(solution);

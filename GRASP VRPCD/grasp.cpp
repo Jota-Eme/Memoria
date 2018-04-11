@@ -331,11 +331,26 @@ Solution Grasp::two_opt(Solution solution){
 }
 
 
-/*
-Solution Grasp::run(){
 
-	Solution = this->initial_solution();
-	Solution solution_opt = grasp.two_opt(solution);
+Solution Grasp::run(int iterations){
 
+	Solution new_solution = this->initial_solution();
+	Solution best_solution = new_solution;
+	int best_time = this->evaluation_function(best_solution);
+	int new_time;
 
-}*/
+	for(int i = 1; i <= iterations; i++){
+
+		new_solution = this->two_opt(new_solution);
+		new_time = this->evaluation_function(new_solution);
+
+		if(new_time <= best_time){
+			best_solution = new_solution;
+			best_time = new_time;
+		}
+		
+	}
+
+	return best_solution;
+
+}

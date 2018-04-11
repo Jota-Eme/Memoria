@@ -31,7 +31,8 @@ class Grasp{
 		float evaluation_function(Solution);
 		// Realiza el movimiento 2-opt a una solucion
 		Solution two_opt(Solution);
-
+		// FUNCION QUE EJECUTA EL ALGORITMO GRASP, HACIENDO TODOS LOS PASOS DE ESTE
+		Solution run(int);
 
 };
 #endif
