@@ -14,3 +14,4 @@ vector<int> get_int_vector(string line);
 
 void print_solution(Solution solution);
 void print_times(Solution solution);
+bool feasible_solution(Solution solution);

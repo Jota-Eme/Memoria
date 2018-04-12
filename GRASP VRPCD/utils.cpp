@@ -96,13 +96,17 @@ void print_times(Solution solution){
 		}
 		cout<<" ]"<<endl;
 
-		Vehicle &new_vehicle = *vehicle_iterator;
-		if(new_vehicle.feasible_route()){
-			cout<<"RUTAS FACTIBLES"<<endl;
-		}
-		else{
-			cout<<"RUTAS INFACTIBLES"<<endl;
-		}
 	}
 
+}
+
+bool feasible_solution(Solution solution){
+	
+	vector <Vehicle>::iterator vehicle_iterator;
+	vector<Vehicle> vehicles = solution.vehicles;
+	bool feasible = true;
+	for (vehicle_iterator = vehicles.begin(); vehicle_iterator != vehicles.end(); ++vehicle_iterator) {
+		if(vehicle_iterator->feasible_route() == false) feasible = false;
+	}
+	return feasible;
 }

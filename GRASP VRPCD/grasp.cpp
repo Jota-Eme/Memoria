@@ -237,26 +237,36 @@ Solution Grasp::two_opt(Solution solution){
 	int random_type_route = rand() % 2;
 
 	if(random_type_route == 0){
+		//SE retorna la misma solucion si se elije una ruta con 1 solo nodo
+		if(selected_vehicle.pickup_route.size() == 1){
+			return solution;
+		}
+
 		for(int l=0; (unsigned)l < selected_vehicle.pickup_route.size(); l++){
 			selected_route.push_back(selected_vehicle.pickup_route[l]);
 		}
 
-		cout<< "LA RUTA SELECCIONADA ES DE PICKUP" <<endl;
+		//cout<< "LA RUTA SELECCIONADA ES DE PICKUP" <<endl;
 	}
 
 	else{
-		for(int l=0; (unsigned)l < selected_vehicle.pickup_route.size(); l++){
-			selected_route.push_back(selected_vehicle.pickup_route[l]);
+		//SE retorna la misma solucion si se elije una ruta con 1 solo nodo
+		if(selected_vehicle.delivery_route.size() == 1){
+			return solution;
 		}
 
-		cout<< "LA RUTA SELECCIONADA ES DE DELIVERY" <<endl;
+		for(int l=0; (unsigned)l < selected_vehicle.delivery_route.size(); l++){
+			selected_route.push_back(selected_vehicle.delivery_route[l]);
+		}
+
+		//cout<< "LA RUTA SELECCIONADA ES DE DELIVERY" <<endl;
 	}
 
-	cout<< "[";
+	/*cout<< "[";
 	for(int l=0; (unsigned)l < selected_route.size();l++){
 		cout<<" "<<selected_route[l].id;
 	}
-	cout<< " ]" <<endl;
+	cout<< " ]" <<endl;*/
 
 	//SE comienza a realizar el 2-opt, primero se seleccionan los 2 putnos de corte
 	// y se verifica que no sean el mismo, luego se ordenan para que el i sea el menor y el k el mayor por conveniencia
@@ -272,7 +282,7 @@ Solution Grasp::two_opt(Solution solution){
 		k=temp;
 	}
 
-	cout<<"Los puntos escogidos son: "<<i<<" y "<<k<<endl;
+	//cout<<"Los puntos escogidos son: "<<i<<" y "<<k<<endl;
 
 	// ahora se comienza a crear la nueva ruta, intercambiando los nodos correspondientes
 	//PRIMERA PARTE 2-OPT, ANTES DEL PRIMER PUNTO SE AGREGA TODO NORMAL
@@ -297,15 +307,12 @@ Solution Grasp::two_opt(Solution solution){
 			selected_vehicle.pickup_route.push_back(*suplier);
 		}
 
-		// FINALMENTE SE REEMPLAZA EL VEHICULO CAMBIADO CON LA NUEVA RUTA
-		solution.vehicles[random_vehicle] = selected_vehicle;
-
-		cout<<"La nueva ruta de pickup es: "<<endl;
+		/*cout<<"La nueva ruta de pickup es: "<<endl;
 		cout<< "[";
-		for(int l=0; (unsigned)l < solution.vehicles[random_vehicle].pickup_route.size(); l++){
-			cout<<" "<<solution.vehicles[random_vehicle].pickup_route[l].id;
+		for(int l=0; (unsigned)l < selected_vehicle.pickup_route.size(); l++){
+			cout<<" "<<selected_vehicle.pickup_route[l].id;
 		}
-		cout<< " ]" <<endl;
+		cout<< " ]" <<endl;*/
 	}
 	else{
 
@@ -316,16 +323,37 @@ Solution Grasp::two_opt(Solution solution){
 			selected_vehicle.delivery_route.push_back(*customer);
 		}
 
-		// FINALMENTE SE REEMPLAZA EL VEHICULO CAMBIADO CON LA NUEVA RUTA
-		solution.vehicles[random_vehicle] = selected_vehicle;
-
-		cout<<"La nueva ruta de delivery es: "<<endl;
+		/*cout<<"La nueva ruta de delivery es: "<<endl;
 		cout<< "[";
-		for(int l=0; (unsigned)l < solution.vehicles[random_vehicle].delivery_route.size();l++){
-			cout<<" "<<solution.vehicles[random_vehicle].delivery_route[l].id;
+		for(int l=0; (unsigned)l < selected_vehicle.delivery_route.size();l++){
+			cout<<" "<<selected_vehicle.delivery_route[l].id;
+		}
+		cout<< " ]" <<endl;*/
+	}
+
+	if(selected_vehicle.feasible_route()){
+		// FINALMENTE SE REEMPLAZA EL VEHICULO CAMBIADO CON LA NUEVA RUTA SI ESTA ES FACTIBLE
+		solution.vehicles[random_vehicle] = selected_vehicle;
+		//cout<<"SII SOY FACTIBLE"<<endl;
+	}
+	else{
+		//cout<<"NOOOO SOY FACTIBLE"<<endl;
+	}
+
+	/*cout<<"estoy devolviendo esta ruta "<<endl;
+	cout<< "[";
+	if(random_type_route == 0){
+		for(int l=0; (unsigned)l < selected_vehicle.pickup_route.size();l++){
+			cout<<" "<<solution.vehicles[random_vehicle].pickup_route[l].id;
 		}
 		cout<< " ]" <<endl;
 	}
+	else{
+		for(int l=0; (unsigned)l < selected_vehicle.delivery_route.size();l++){
+				cout<<" "<<solution.vehicles[random_vehicle].delivery_route[l].id;
+			}
+		cout<< " ]" <<endl;	
+	}*/
 
 	return solution;
 }
@@ -338,15 +366,22 @@ Solution Grasp::run(int iterations){
 	Solution best_solution = new_solution;
 	int best_time = this->evaluation_function(best_solution);
 	int new_time;
-
+	// Se comienzan las iteraciones haciendo el 2-opt, solo se acepta el cambio en la solucion si esta mejora
 	for(int i = 1; i <= iterations; i++){
 
 		new_solution = this->two_opt(new_solution);
 		new_time = this->evaluation_function(new_solution);
 
+		cout<<"Mejor= "<<best_time<<endl;
+		cout<<"Actual= "<<new_time<<endl;
+
 		if(new_time <= best_time){
 			best_solution = new_solution;
 			best_time = new_time;
+			cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
+		}
+		else{
+			new_solution = best_solution;
 		}
 		
 	}
