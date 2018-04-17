@@ -31,6 +31,8 @@ class Grasp{
 		float evaluation_function(Solution);
 		// Realiza el movimiento 2-opt a una solucion
 		Solution two_opt(Solution);
+		// Realiza el proceso de consolidacion, retornando los tiempos de salida del CD de los vehiculos
+		tuple<int,int> consolidation(tuple<Vehicle,int>, tuple<Vehicle, int>);
 		// FUNCION QUE EJECUTA EL ALGORITMO GRASP, HACIENDO TODOS LOS PASOS DE ESTE
 		Solution run(int);
 

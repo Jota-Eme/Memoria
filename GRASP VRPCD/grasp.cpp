@@ -358,6 +358,71 @@ Solution Grasp::two_opt(Solution solution){
 	return solution;
 }
 
+// FUNCION QUE REALIZA LA CONSOLIDACION ENTRE 2 VEHICULOS Y CALCULA EL TIEMPO DE SALIDA DEL CD. (POR AHORA SOLO CONSIDERA EL DELIVERY ROUTE)
+// VERIFICA EN PRIMER LUGAR QUE LA CONSOLIDACION SEA FACTIBLE EN CUANTO A CAPACIDAD
+// SETEA EL CAMPO DEPARTURE_CD_TIME DE CADA VEHICULO, SETEA EL REMAINING_CAPACITY Y MODIFICA LOS DELIVERY_ITEMS SEGUN LA CONSOLIDACION
+tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tuple<Vehicle, int> tuple2){
+
+	Vehicle v1 = get<0>(tuple1);
+	int n1 = get<1>(tuple1);
+	Vehicle v2 = get<0>(tuple2);
+	int n2 = get<1>(tuple2);
+	// CANTIDAD DE ITEMS A DESCARGAR DE CADA VEHICULO
+	int unload_items_v1 = get<0>(v1.delivery_items[n1]);
+	int unload_items_v2 = get<0>(v2.delivery_items[n2]);
+
+
+	//verificacion de factibilidad en la capacidad
+	if(v1.remaining_capacity + unload_items_v1 < unload_items_v2){
+		return make_tuple(v1, v2, false);
+	}
+
+	if(v2.remaining_capacity + unload_items_v2 < unload_items_v1){
+		return make_tuple(v1, v2, false);
+	}
+
+
+	// TIEMPOS DE DESCARGA Y CARGA DE CADA VEHICULO
+	int unload_time_v1 = unload_items_v1 * v1.unit_time + v1.fixed_time;
+	int unload_time_v2 = unload_items_v2 * v2.unit_time + v2.fixed_time;
+	int reload_time_v1 = unload_items_v2 * v1.unit_time + v1.fixed_time;
+	int reload_time_v2 = unload_items_v1 * v2.unit_time + v2.fixed_time;
+
+	// SE considera que los vehiculos solo pasan por un crossdock
+	int arrival_time_v1 = get<0>(v1.crossdocks_times[0]);
+	int arrival_time_v2 = get<0>(v2.crossdocks_times[0]);
+
+	int total_unload_time_v1 = arrival_time_v1 + unload_time_v1;
+	int total_unload_time_v2 = arrival_time_v2 + unload_time_v2;
+
+	int ready_load_time_v1 = max(total_unload_time_v1, total_unload_time_v2);
+	int ready_load_time_v2 = max(total_unload_time_v1, total_unload_time_v2);
+
+	int final_departure_time_v1 = ready_load_time_v1 + reload_time_v1;
+	int final_departure_time_v2 = ready_load_time_v2 + reload_time_v2;
+	// SETEO DEL ATRIBUTO DEPARTURE_CD_TIME
+	v1.departure_cd_time = final_departure_time_v1;
+	v2.departure_cd_time = final_departure_time_v2;
+	// SETEO DE REMAINING CAPACITY
+	v1.remaining_capacity = v1.remaining_capacity + unload_items_v1 - unload_items_v2;
+	v2.remaining_capacity = v2.remaining_capacity + unload_items_v2 - unload_items_v1;
+	// CAMBIO DE DELIVERY_ITEMS
+	tuple<int,int> tuple_temp = v1.delivery_items[n1];
+	v1.delivery_items[n1] = v2.delivery_items[n2];
+	v2.delivery_items[n2] = tuple_temp;
+
+
+	return make_tuple(v1, v2, true);
+}
+
+
+
+
+
+
+
+
+
 
 
 Solution Grasp::run(int iterations){

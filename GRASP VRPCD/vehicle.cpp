@@ -40,11 +40,12 @@ void Vehicle::set_times(){
 			this->pickup_times.push_back(make_tuple(arrival_time,departure_time));
 		}
 
-		//SE LLEGA AL CROSSDOCK PARA COMENZAR LA CONSOLIDACION (POR AHORA SE ASUME QUE SE ENTREGA LO MISMO QUE SE RETIRA POR LO QUE NO HAY CONSOLIDACION)
+		//SE LLEGA AL CROSSDOCK PARA COMENZAR LA CONSOLIDACION 
 		for (crossdock_iterator = this->crossdock_route.begin(); crossdock_iterator != this->crossdock_route.end(); ++crossdock_iterator) {
 
 			Crossdock &new_crossdock = *crossdock_iterator;
 			arrival_time = departure_time + current_node.get_distance(new_crossdock);
+			
 			departure_time = max(arrival_time, (float)new_crossdock.ready_time);
 
 			current_node = new_crossdock;
