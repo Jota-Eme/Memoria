@@ -32,7 +32,9 @@ class Grasp{
 		// Realiza el movimiento 2-opt a una solucion
 		Solution two_opt(Solution);
 		// Realiza el proceso de consolidacion, retornando los tiempos de salida del CD de los vehiculos
-		tuple<int,int> consolidation(tuple<Vehicle,int>, tuple<Vehicle, int>);
+		tuple<Vehicle,Vehicle,bool> consolidation(tuple<Vehicle,int>, tuple<Vehicle, int>);
+		// REALIZA EL MOVIMIENTO SWAP NODE, QUE SELECCIONA 2 VEHICULOS E INTERCAMBIA ENTRE ELLOS UN NODO AL AZAR DELIVERY.
+		Solution swap_node(Solution);
 		// FUNCION QUE EJECUTA EL ALGORITMO GRASP, HACIENDO TODOS LOS PASOS DE ESTE
 		Solution run(int);
 

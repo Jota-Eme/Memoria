@@ -331,6 +331,8 @@ Solution Grasp::two_opt(Solution solution){
 		cout<< " ]" <<endl;*/
 	}
 
+	//selected_vehicle.set_times();
+
 	if(selected_vehicle.feasible_route()){
 		// FINALMENTE SE REEMPLAZA EL VEHICULO CAMBIADO CON LA NUEVA RUTA SI ESTA ES FACTIBLE
 		solution.vehicles[random_vehicle] = selected_vehicle;
@@ -389,8 +391,10 @@ tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tupl
 	int reload_time_v2 = unload_items_v1 * v2.unit_time + v2.fixed_time;
 
 	// SE considera que los vehiculos solo pasan por un crossdock
-	int arrival_time_v1 = get<0>(v1.crossdocks_times[0]);
-	int arrival_time_v2 = get<0>(v2.crossdocks_times[0]);
+	int cdtime1 = get<0>(v1.crossdock_times[0]);
+	int cdtime2 = get<0>(v2.crossdock_times[0]);
+	int arrival_time_v1 = max(cdtime1, v1.crossdock_route[0].ready_time);
+	int arrival_time_v2 = max(cdtime2, v2.crossdock_route[0].ready_time);
 
 	int total_unload_time_v1 = arrival_time_v1 + unload_time_v1;
 	int total_unload_time_v2 = arrival_time_v2 + unload_time_v2;
@@ -418,7 +422,40 @@ tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tupl
 
 
 
+Solution Grasp::swap_node(Solution solution){
 
+	int random_vehicle_1 = rand() % solution.vehicles.size();
+	int random_vehicle_2 = rand() % solution.vehicles.size();
+	while(random_vehicle_1 == random_vehicle_1){
+		random_vehicle_2 = rand() % solution.vehicles.size();
+	}
+
+	Vehicle vehicle_1 = solution.vehicles[random_vehicle_1];
+	Vehicle vehicle_2 = solution.vehicles[random_vehicle_2];
+	int random_node_1 = rand() % vehicle_1.delivery_route.size();
+	int random_node_2 = rand() % vehicle_2.delivery_route.size();
+	bool feasible;
+
+	tie(vehicle_1, vehicle_2, feasible) = this->consolidation(make_tuple(vehicle_1,random_node_1), make_tuple(vehicle_2,random_node_2));
+
+	if(!feasible){
+		return solution;
+	}
+	else{
+
+		vehicle_1.set_times();
+		vehicle_2.set_times();
+
+		if(vehicle_1.feasible_route() && vehicle_2.feasible_route()){
+			solution.vehicles[random_vehicle_1] = vehicle_1;
+			solution.vehicles[random_vehicle_2] = vehicle_2;
+		}
+
+	}
+
+	return solution;
+
+}
 
 
 
@@ -437,10 +474,10 @@ Solution Grasp::run(int iterations){
 		new_solution = this->two_opt(new_solution);
 		new_time = this->evaluation_function(new_solution);
 
-		cout<<"Mejor= "<<best_time<<endl;
-		cout<<"Actual= "<<new_time<<endl;
+		if(new_time < best_time){
+			cout<<"Mejor= "<<best_time<<endl;
+			cout<<"Actual= "<<new_time<<endl;
 
-		if(new_time <= best_time){
 			best_solution = new_solution;
 			best_time = new_time;
 			cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
