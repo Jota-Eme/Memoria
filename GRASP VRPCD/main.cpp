@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 	Grasp grasp(instance,list_size);
 	
-	Solution final_solution = grasp.run(1000);	
+	Solution final_solution = grasp.run(10000);	
 	if(feasible_solution(final_solution)){
 		cout<<"LA SOLUCION FINAL SIIII ES FACTIBLE"<< endl;
 	}

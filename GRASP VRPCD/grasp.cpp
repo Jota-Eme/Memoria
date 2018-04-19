@@ -144,7 +144,8 @@ Solution Grasp::initial_solution(){
 
 				vehicle.remaining_capacity -= selected_request.demand;
 
-				
+				vehicle.pickup_items.push_back(make_tuple(selected_request.demand, selected_request.suplier.id));
+				vehicle.delivery_items.push_back(make_tuple(selected_request.demand, selected_request.customer.id));
 
 				// se elimina el request asignado de la lista de requests
 				for (request_iterator = requests.begin(); request_iterator != requests.end(); ++request_iterator) {
@@ -229,6 +230,7 @@ float Grasp::evaluation_function(Solution solution){
 
 Solution Grasp::two_opt(Solution solution){
 	vector<Node> selected_route, new_route;
+	vector<tuple<int,int>> selected_items;
 
 	//se selecciona el vehiculo al azar
 	int random_vehicle = rand() % solution.vehicles.size();
@@ -244,6 +246,7 @@ Solution Grasp::two_opt(Solution solution){
 
 		for(int l=0; (unsigned)l < selected_vehicle.pickup_route.size(); l++){
 			selected_route.push_back(selected_vehicle.pickup_route[l]);
+			selected_items.push_back(selected_vehicle.pickup_items[l]);
 		}
 
 		//cout<< "LA RUTA SELECCIONADA ES DE PICKUP" <<endl;
@@ -257,6 +260,7 @@ Solution Grasp::two_opt(Solution solution){
 
 		for(int l=0; (unsigned)l < selected_vehicle.delivery_route.size(); l++){
 			selected_route.push_back(selected_vehicle.delivery_route[l]);
+			selected_items.push_back(selected_vehicle.delivery_items[l]);
 		}
 
 		//cout<< "LA RUTA SELECCIONADA ES DE DELIVERY" <<endl;
@@ -286,16 +290,21 @@ Solution Grasp::two_opt(Solution solution){
 
 	// ahora se comienza a crear la nueva ruta, intercambiando los nodos correspondientes
 	//PRIMERA PARTE 2-OPT, ANTES DEL PRIMER PUNTO SE AGREGA TODO NORMAL
+	vector<tuple<int,int>> new_items;
+
 	for(int j=0; j<i;j++){
 		new_route.push_back(selected_route[j]);
+		new_items.push_back(selected_items[j]);
 	}
 	//SEGUNDA PARTE 2-OPT, DESPUES DEL PRIMER PUNTO SE AGREGA EN ORDEN INVERSO LOS NODOS HASTA EL 2 PUNTO
 	for(int j=k; j>=i;j--){
 		new_route.push_back(selected_route[j]);
+		new_items.push_back(selected_items[j]);
 	}
 	//TERCERA PARTE 2-OPT, LUEGO DEL 2 PUNTO SE AGREGA NORMAL
 	for(int j=(k+1); (unsigned)j < selected_route.size();j++){
 		new_route.push_back(selected_route[j]);
+		new_items.push_back(selected_items[j]);
 	}
 	// Se reemplaza la ruta antigua por la nueva segun corresponda
 	if(random_type_route == 0){
@@ -306,6 +315,8 @@ Solution Grasp::two_opt(Solution solution){
 			Suplier *suplier =  (Suplier *) &new_route[l];
 			selected_vehicle.pickup_route.push_back(*suplier);
 		}
+
+		selected_vehicle.pickup_items = selected_items;
 
 		/*cout<<"La nueva ruta de pickup es: "<<endl;
 		cout<< "[";
@@ -322,6 +333,8 @@ Solution Grasp::two_opt(Solution solution){
 			Customer *customer =  (Customer *) &new_route[l];
 			selected_vehicle.delivery_route.push_back(*customer);
 		}
+
+		selected_vehicle.delivery_items = selected_items;
 
 		/*cout<<"La nueva ruta de delivery es: "<<endl;
 		cout<< "[";
@@ -369,6 +382,7 @@ tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tupl
 	int n1 = get<1>(tuple1);
 	Vehicle v2 = get<0>(tuple2);
 	int n2 = get<1>(tuple2);
+
 	// CANTIDAD DE ITEMS A DESCARGAR DE CADA VEHICULO
 	int unload_items_v1 = get<0>(v1.delivery_items[n1]);
 	int unload_items_v2 = get<0>(v2.delivery_items[n2]);
@@ -404,17 +418,23 @@ tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tupl
 
 	int final_departure_time_v1 = ready_load_time_v1 + reload_time_v1;
 	int final_departure_time_v2 = ready_load_time_v2 + reload_time_v2;
+
 	// SETEO DEL ATRIBUTO DEPARTURE_CD_TIME
 	v1.departure_cd_time = final_departure_time_v1;
 	v2.departure_cd_time = final_departure_time_v2;
 	// SETEO DE REMAINING CAPACITY
 	v1.remaining_capacity = v1.remaining_capacity + unload_items_v1 - unload_items_v2;
 	v2.remaining_capacity = v2.remaining_capacity + unload_items_v2 - unload_items_v1;
+
 	// CAMBIO DE DELIVERY_ITEMS
 	tuple<int,int> tuple_temp = v1.delivery_items[n1];
 	v1.delivery_items[n1] = v2.delivery_items[n2];
 	v2.delivery_items[n2] = tuple_temp;
 
+	// CAMBIO DE NODOS 
+	Customer customer_temp = v1.delivery_route[n1];
+	v1.delivery_route[n1] = v2.delivery_route[n2];
+	v2.delivery_route[n2] = customer_temp;
 
 	return make_tuple(v1, v2, true);
 }
@@ -426,12 +446,31 @@ Solution Grasp::swap_node(Solution solution){
 
 	int random_vehicle_1 = rand() % solution.vehicles.size();
 	int random_vehicle_2 = rand() % solution.vehicles.size();
-	while(random_vehicle_1 == random_vehicle_1){
+	while(random_vehicle_1 == random_vehicle_2){
 		random_vehicle_2 = rand() % solution.vehicles.size();
 	}
 
 	Vehicle vehicle_1 = solution.vehicles[random_vehicle_1];
 	Vehicle vehicle_2 = solution.vehicles[random_vehicle_2];
+
+	/*cout<<"ruta vehiculo 1 antes"<<endl;
+
+	cout<< " [";
+
+	for(int l=0; (unsigned)l < solution.vehicles[random_vehicle_1].delivery_route.size();l++){
+		cout<<" "<<solution.vehicles[random_vehicle_1].delivery_route[l].id;
+	}
+	cout<< " ]" <<endl;
+
+	cout<<"ruta vehiculo 2 antes"<<endl;
+
+	cout<< " [";
+	for(int l=0; (unsigned)l < solution.vehicles[random_vehicle_2].delivery_route.size();l++){
+		cout<<" "<<solution.vehicles[random_vehicle_2].delivery_route[l].id;
+	}
+	cout<< " ]" <<endl;*/
+
+
 	int random_node_1 = rand() % vehicle_1.delivery_route.size();
 	int random_node_2 = rand() % vehicle_2.delivery_route.size();
 	bool feasible;
@@ -439,6 +478,7 @@ Solution Grasp::swap_node(Solution solution){
 	tie(vehicle_1, vehicle_2, feasible) = this->consolidation(make_tuple(vehicle_1,random_node_1), make_tuple(vehicle_2,random_node_2));
 
 	if(!feasible){
+		//cout<<"INFACTIBLE CAPACIDAD"<<endl;
 		return solution;
 	}
 	else{
@@ -447,8 +487,33 @@ Solution Grasp::swap_node(Solution solution){
 		vehicle_2.set_times();
 
 		if(vehicle_1.feasible_route() && vehicle_2.feasible_route()){
+			//cout<<"movimiento SIIIIII FACTIBLE"<<endl;
+
 			solution.vehicles[random_vehicle_1] = vehicle_1;
 			solution.vehicles[random_vehicle_2] = vehicle_2;
+			/*cout<<"ruta vehiculo 1 despues"<<endl;
+
+			cout<< " [";
+
+			for(int l=0; (unsigned)l < solution.vehicles[random_vehicle_1].delivery_route.size();l++){
+				cout<<" "<<solution.vehicles[random_vehicle_1].delivery_route[l].id;
+			}
+			cout<< " ]" <<endl;
+
+			cout<<"ruta vehiculo 2 despues"<<endl;
+
+			cout<< " [";
+
+			for(int l=0; (unsigned)l < solution.vehicles[random_vehicle_2].delivery_route.size();l++){
+				cout<<" "<<solution.vehicles[random_vehicle_2].delivery_route[l].id;
+			}
+			cout<< " ]" <<endl;*/
+
+
+		}
+		else{
+			//cout<<"movimiento NOOO factible"<<endl;
+
 		}
 
 	}
@@ -471,12 +536,12 @@ Solution Grasp::run(int iterations){
 	// Se comienzan las iteraciones haciendo el 2-opt, solo se acepta el cambio en la solucion si esta mejora
 	for(int i = 1; i <= iterations; i++){
 
-		new_solution = this->two_opt(new_solution);
+		//new_solution = this->two_opt(new_solution);
+		new_solution = this->swap_node(new_solution);
 		new_time = this->evaluation_function(new_solution);
-
-		if(new_time < best_time){
 			cout<<"Mejor= "<<best_time<<endl;
 			cout<<"Actual= "<<new_time<<endl;
+		if(new_time < best_time){
 
 			best_solution = new_solution;
 			best_time = new_time;
