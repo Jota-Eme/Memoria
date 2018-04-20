@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 	Grasp grasp(instance,list_size);
 	
-	Solution final_solution = grasp.run(10000);	
+	Solution final_solution = grasp.run(100);	
 	if(feasible_solution(final_solution)){
 		cout<<"LA SOLUCION FINAL SIIII ES FACTIBLE"<< endl;
 	}
@@ -48,14 +48,14 @@ int main(int argc, char *argv[]) {
 		cout<<"LA SOLUCION FINAL NOOOO ES FACTIBLE"<< endl;
 	}
 
-	/*cout<<"La solucion inicial es"<<endl;
-	print_solution(solution);
+	cout<<"La solucion inicial es"<<endl;
+	print_solution(final_solution);
 	cout<<"----------------------------------------------------"<<endl;
 	cout<<"................Los tiempos son ...................."<<endl;
-	print_times(solution);
+	print_times(final_solution);
 
-	cout<<"CANTIDAD DE AUTOS USADOS: "<<solution.vehicles.size()<<endl;
-	cout<<"COSTO TOTAL DE: "<< grasp.evaluation_function(solution)<<endl;*/
+	cout<<"CANTIDAD DE AUTOS USADOS: "<<final_solution.vehicles.size()<<endl;
+	cout<<"COSTO TOTAL DE: "<< grasp.evaluation_function(final_solution)<<endl;
 
 
     return 0;
