@@ -543,10 +543,19 @@ Solution Grasp::run(int iterations){
 	// Se comienzan las iteraciones haciendo el 2-opt, solo se acepta el cambio en la solucion si esta mejora
 	for(int i = 1; i <= iterations; i++){
 
-		//new_solution = this->two_opt(new_solution);
-		new_solution = this->swap_node(new_solution);
+		int random_move_1 = rand() % 101;
+		int random_move_2 = rand() % 101;
+
+		if(random_move_1<30){
+			new_solution = this->two_opt(new_solution);
+		}
+
+		if(random_move_2<50){
+			new_solution = this->swap_node(new_solution);
+		}
+
 		new_time = this->evaluation_function(new_solution);
-			
+				
 		if(new_time < best_time){
 			cout<<"Mejor= "<<best_time<<endl;
 			cout<<"Actual= "<<new_time<<endl;
