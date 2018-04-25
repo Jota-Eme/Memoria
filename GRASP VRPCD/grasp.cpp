@@ -376,16 +376,24 @@ Solution Grasp::two_opt(Solution solution){
 // FUNCION QUE REALIZA LA CONSOLIDACION ENTRE 2 VEHICULOS Y CALCULA EL TIEMPO DE SALIDA DEL CD. (POR AHORA SOLO CONSIDERA EL DELIVERY ROUTE)
 // VERIFICA EN PRIMER LUGAR QUE LA CONSOLIDACION SEA FACTIBLE EN CUANTO A CAPACIDAD
 // SETEA EL CAMPO DEPARTURE_CD_TIME DE CADA VEHICULO, SETEA EL REMAINING_CAPACITY Y MODIFICA LOS DELIVERY_ITEMS SEGUN LA CONSOLIDACION
-tuple<Vehicle,Vehicle,bool> Grasp::consolidation_delivery(tuple<Vehicle,int> tuple1, tuple<Vehicle, int> tuple2){
+tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tuple<Vehicle, int> tuple2, int type){
 
 	Vehicle v1 = get<0>(tuple1);
 	int n1 = get<1>(tuple1);
 	Vehicle v2 = get<0>(tuple2);
 	int n2 = get<1>(tuple2);
+	int unload_items_v1,unload_items_v2;
 
-	// CANTIDAD DE ITEMS A DESCARGAR DE CADA VEHICULO
-	int unload_items_v1 = get<0>(v1.delivery_items[n1]);
-	int unload_items_v2 = get<0>(v2.delivery_items[n2]);
+	if(type == 0){
+		// CANTIDAD DE ITEMS A DESCARGAR DE CADA VEHICULO
+		unload_items_v1 = get<0>(v1.pickup_items[n1]);
+		unload_items_v2 = get<0>(v2.pickup_items[n2]);
+	}
+	else{
+		// CANTIDAD DE ITEMS A DESCARGAR DE CADA VEHICULO
+		unload_items_v1 = get<0>(v1.delivery_items[n1]);
+		unload_items_v2 = get<0>(v2.delivery_items[n2]);
+	}
 
 
 	//verificacion de factibilidad en la capacidad
@@ -404,79 +412,19 @@ tuple<Vehicle,Vehicle,bool> Grasp::consolidation_delivery(tuple<Vehicle,int> tup
 	int reload_time_v1 = unload_items_v2 * v1.unit_time + v1.fixed_time;
 	int reload_time_v2 = unload_items_v1 * v2.unit_time + v2.fixed_time;
 
-	// SE considera que los vehiculos solo pasan por un crossdock
-	int cdtime1 = get<0>(v1.crossdock_times[0]);
-	int cdtime2 = get<0>(v2.crossdock_times[0]);
-	int arrival_time_v1 = max(cdtime1, v1.crossdock_route[0].ready_time);
-	int arrival_time_v2 = max(cdtime2, v2.crossdock_route[0].ready_time);
 
-	int total_unload_time_v1 = arrival_time_v1 + unload_time_v1;
-	int total_unload_time_v2 = arrival_time_v2 + unload_time_v2;
-
-	int ready_load_time_v1 = max(total_unload_time_v1, total_unload_time_v2);
-	int ready_load_time_v2 = max(total_unload_time_v1, total_unload_time_v2);
-
-	int final_departure_time_v1 = ready_load_time_v1 + reload_time_v1;
-	int final_departure_time_v2 = ready_load_time_v2 + reload_time_v2;
-
-	// SETEO DEL ATRIBUTO DEPARTURE_CD_TIME
-	v1.departure_cd_time = final_departure_time_v1;
-	v2.departure_cd_time = final_departure_time_v2;
-	// SETEO DE REMAINING CAPACITY
-	v1.remaining_capacity = v1.remaining_capacity + unload_items_v1 - unload_items_v2;
-	v2.remaining_capacity = v2.remaining_capacity + unload_items_v2 - unload_items_v1;
-
-	// CAMBIO DE DELIVERY_ITEMS
-	tuple<int,int> tuple_temp = v1.delivery_items[n1];
-	v1.delivery_items[n1] = v2.delivery_items[n2];
-	v2.delivery_items[n2] = tuple_temp;
-
-	// CAMBIO DE NODOS 
-	Customer customer_temp = v1.delivery_route[n1];
-	v1.delivery_route[n1] = v2.delivery_route[n2];
-	v2.delivery_route[n2] = customer_temp;
-
-	v1.set_times();
-	v2.set_times();
-
-	return make_tuple(v1, v2, true);
-}
-
-
-tuple<Vehicle,Vehicle,bool> Grasp::consolidation_pickup(tuple<Vehicle,int> tuple1, tuple<Vehicle, int> tuple2){
-
-	Vehicle v1 = get<0>(tuple1);
-	int n1 = get<1>(tuple1);
-	Vehicle v2 = get<0>(tuple2);
-	int n2 = get<1>(tuple2);
-
-	// CANTIDAD DE ITEMS A DESCARGAR DE CADA VEHICULO
-	int unload_items_v1 = get<0>(v1.pickup_items[n1]);
-	int unload_items_v2 = get<0>(v2.pickup_items[n2]);
-
-
-	//verificacion de factibilidad en la capacidad
-	if(v1.remaining_capacity + unload_items_v1 < unload_items_v2){
-		return make_tuple(v1, v2, false);
+	if(type == 0){
+		// CAMBIO DE NODOS 
+		Suplier suplier_temp = v1.pickup_route[n1];
+		v1.pickup_route[n1] = v2.pickup_route[n2];
+		v2.pickup_route[n2] = suplier_temp;
 	}
-
-	if(v2.remaining_capacity + unload_items_v2 < unload_items_v1){
-		return make_tuple(v1, v2, false);
+	else{
+		// CAMBIO DE NODOS 
+		Customer customer_temp = v1.delivery_route[n1];
+		v1.delivery_route[n1] = v2.delivery_route[n2];
+		v2.delivery_route[n2] = customer_temp;
 	}
-
-
-	// TIEMPOS DE DESCARGA Y CARGA DE CADA VEHICULO
-	int unload_time_v1 = unload_items_v1 * v1.unit_time + v1.fixed_time;
-	int unload_time_v2 = unload_items_v2 * v2.unit_time + v2.fixed_time;
-	int reload_time_v1 = unload_items_v2 * v1.unit_time + v1.fixed_time;
-	int reload_time_v2 = unload_items_v1 * v2.unit_time + v2.fixed_time;
-
-	// CAMBIO DE NODOS 
-	Suplier suplier_temp = v1.pickup_route[n1];
-	v1.pickup_route[n1] = v2.pickup_route[n2];
-	v2.pickup_route[n2] = suplier_temp;
-
-	// SE hace el set_time para calcular el tiempo que llega al CD con el nuevo nodo.
 
 	v1.set_times();
 	v2.set_times();
@@ -503,18 +451,24 @@ tuple<Vehicle,Vehicle,bool> Grasp::consolidation_pickup(tuple<Vehicle,int> tuple
 	v1.remaining_capacity = v1.remaining_capacity + unload_items_v1 - unload_items_v2;
 	v2.remaining_capacity = v2.remaining_capacity + unload_items_v2 - unload_items_v1;
 
-	// CAMBIO DE PICKUP_ITEMS
-	tuple<int,int> tuple_temp = v1.pickup_items[n1];
-	v1.pickup_items[n1] = v2.pickup_items[n2];
-	v2.pickup_items[n2] = tuple_temp;
+	if(type == 0){
+		// CAMBIO DE DELIVERY_ITEMS
+		tuple<int,int> tuple_temp = v1.pickup_items[n1];
+		v1.pickup_items[n1] = v2.pickup_items[n2];
+		v2.pickup_items[n2] = tuple_temp;
+	}
+	else{
+		// CAMBIO DE DELIVERY_ITEMS
+		tuple<int,int> tuple_temp = v1.delivery_items[n1];
+		v1.delivery_items[n1] = v2.delivery_items[n2];
+		v2.delivery_items[n2] = tuple_temp;
+	}
 
 	v1.set_times();
 	v2.set_times();
 
 	return make_tuple(v1, v2, true);
 }
-
-
 
 
 
@@ -560,12 +514,12 @@ Solution Grasp::swap_node(Solution solution, int type){
 	if(type == 0){
 		random_node_1 = rand() % vehicle_1.pickup_route.size();
 		random_node_2 = rand() % vehicle_2.pickup_route.size();
-		tie(vehicle_1, vehicle_2, feasible) = this->consolidation_pickup(make_tuple(vehicle_1,random_node_1), make_tuple(vehicle_2,random_node_2));
+		tie(vehicle_1, vehicle_2, feasible) = this->consolidation(make_tuple(vehicle_1,random_node_1), make_tuple(vehicle_2,random_node_2), 0);
 	}
 	else{
 		random_node_1 = rand() % vehicle_1.delivery_route.size();
 		random_node_2 = rand() % vehicle_2.delivery_route.size();
-		tie(vehicle_1, vehicle_2, feasible) = this->consolidation_delivery(make_tuple(vehicle_1,random_node_1), make_tuple(vehicle_2,random_node_2));
+		tie(vehicle_1, vehicle_2, feasible) = this->consolidation(make_tuple(vehicle_1,random_node_1), make_tuple(vehicle_2,random_node_2), 1);
 	}
 
 	//cout<<"Los nodos fueron: "<<random_node_1<<"y"<<random_node_2<<endl;
