@@ -572,7 +572,7 @@ Solution Grasp::swap_node(Solution solution, int type){
 
 
 
-Solution Grasp::run(int iterations){
+Solution Grasp::run(int iterations, int porc_mov_1, int porc_mov_2, int porc_mov_3){
 
 	Solution new_solution = this->initial_solution();
 	Solution best_solution = new_solution;
@@ -585,15 +585,15 @@ Solution Grasp::run(int iterations){
 		int random_move_2 = rand() % 101;
 		int random_move_3 = rand() % 101;
 
-		if(random_move_1<30){
+		if(random_move_1<porc_mov_1){
 			new_solution = this->two_opt(new_solution);
 		}
 
-		if(random_move_2<40){
+		if(random_move_2<porc_mov_2){
 			new_solution = this->swap_node(new_solution,0);
 		}
 
-		if(random_move_3<50){
+		if(random_move_3<porc_mov_3){
 			new_solution = this->swap_node(new_solution,1);
 		}
 
