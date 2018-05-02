@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 	double total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 	cout<<" Se demoro: "<< total_time << " segundos" << endl;
 
-	//export_solution(final_solution);
+	export_solution(final_solution);
 
 
     return 0;
