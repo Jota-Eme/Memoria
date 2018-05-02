@@ -43,8 +43,11 @@ int main(int argc, char *argv[]) {
 	instance.read_instance();
 
 	Grasp grasp(instance,list_size);
-	
+
+	clock_t start_time = clock();
 	Solution final_solution = grasp.run(iterations,porc_movimiento1,porc_movimiento2,porc_movimiento3);	
+	clock_t end_time = clock();
+
 	if(feasible_solution(final_solution)){
 		cout<<"LA SOLUCION FINAL SIIII ES FACTIBLE"<< endl;
 	}
@@ -61,7 +64,10 @@ int main(int argc, char *argv[]) {
 	cout<<"CANTIDAD DE AUTOS USADOS: "<<final_solution.vehicles.size()<<endl;
 	cout<<"COSTO TOTAL DE: "<< grasp.evaluation_function(final_solution)<<endl;
 
-	export_solution(final_solution);
+	double total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+	cout<<" Se demoro: "<< total_time << " segundos" << endl;
+
+	//export_solution(final_solution);
 
 
     return 0;

@@ -12,7 +12,7 @@ Grasp::Grasp(){
 
 
 int Grasp::get_closest_crossdock(Node nodo){
-	int best_cd;
+	int best_cd = 0;
 	float min_cost = FLT_MAX;
 	vector<Crossdock> crossdocks = this->instance.crossdocks;
 	for(int i=0; (unsigned)i<crossdocks.size();i++){
