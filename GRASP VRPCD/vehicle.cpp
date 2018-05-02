@@ -8,6 +8,7 @@ Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot
 	this->fixed_time = fixed_time;
 	this->unit_time = unit_time;
 	this->vehicle_depot = vehicle_depot;
+	this->departure_cd_time = 0;
 
 }
 
@@ -23,7 +24,10 @@ void Vehicle::set_times(){
 	vector <Customer>::iterator customer_iterator;
 	vector <Crossdock>::iterator crossdock_iterator;
 	float arrival_time, departure_time = 0;
-	vector<tuple<float,float>> pickup_times,delivery_times,crossdock_times;
+
+	this->pickup_times.clear();
+	this->crossdock_times.clear();
+	this->delivery_times.clear();
 
 	// PARA EL CASO DE IAA SOLO HABRA 1 CD SIEMPRE.
 	Node current_node = this->vehicle_depot;
@@ -40,12 +44,13 @@ void Vehicle::set_times(){
 			this->pickup_times.push_back(make_tuple(arrival_time,departure_time));
 		}
 
-		//SE LLEGA AL CROSSDOCK PARA COMENZAR LA CONSOLIDACION (POR AHORA SE ASUME QUE SE ENTREGA LO MISMO QUE SE RETIRA POR LO QUE NO HAY CONSOLIDACION)
+		//SE LLEGA AL CROSSDOCK PARA COMENZAR LA CONSOLIDACION 
 		for (crossdock_iterator = this->crossdock_route.begin(); crossdock_iterator != this->crossdock_route.end(); ++crossdock_iterator) {
 
 			Crossdock &new_crossdock = *crossdock_iterator;
 			arrival_time = departure_time + current_node.get_distance(new_crossdock);
-			departure_time = max(arrival_time, (float)new_crossdock.ready_time);
+			int real_arrival = max(arrival_time, (float)new_crossdock.ready_time);
+			departure_time = max(real_arrival, this->departure_cd_time);
 
 			current_node = new_crossdock;
 			this->crossdock_times.push_back(make_tuple(arrival_time,departure_time));
@@ -69,6 +74,8 @@ void Vehicle::set_times(){
 
 //funcion que retorna si la ruta del vehiculo es factible o no (en cuanto a TW)
 bool Vehicle::feasible_route(){
+
+	this->set_times();
 
 	bool feasible = true;
 	float arrival_time, departure_time;
