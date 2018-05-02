@@ -12,7 +12,7 @@ Grasp::Grasp(){
 
 
 int Grasp::get_closest_crossdock(Node nodo){
-	int best_cd;
+	int best_cd=0;
 	float min_cost = FLT_MAX;
 	vector<Crossdock> crossdocks = this->instance.crossdocks;
 	for(int i=0; (unsigned)i<crossdocks.size();i++){
@@ -568,35 +568,65 @@ Solution Grasp::swap_node(Solution solution, int type){
 }
 
 
+Solution Grasp::swap_cd(Solution solution){
+
+	if(this->instance.crossdocks_number == 1){
+		return solution;
+	}
+
+	int random_vehicle = rand() % solution.vehicles.size();
+	int random_cd = rand() % this->instance.crossdocks_number;
+
+	Vehicle vehicle = solution.vehicles[random_vehicle];
+
+	while(random_cd == vehicle.crossdock_route[0].id){
+		random_cd = rand() % this->instance.crossdocks_number;
+	}
+
+	//cout<<"Cd vehiculo antes: "<< vehicle.crossdock_route[0].id <<endl;
+
+
+	Crossdock cd = this->instance.crossdocks[random_cd];
+
+	vehicle.crossdock_route[0] = cd;
+
+	if(vehicle.feasible_route()){
+		solution.vehicles[random_vehicle] = vehicle;
+		//cout<< "movimiento factible"<< endl;
+		//cout<<"Cd vehiculo despues: "<< solution.vehicles[random_vehicle].crossdock_route[0].id <<endl;
+	}
+	else{
+		//cout<< "movimiento NOOO factible"<< endl;
+		//cout<<"Cd vehiculo despues: " << solution.vehicles[random_vehicle].crossdock_route[0].id <<endl;
+	}
+
+	return solution;
+
+
+}
 
 
 
+Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_phase3, int porc_two_opt, int porc_swap_cd, int porc_swap_node_pick, int porc_swap_node_del){
 
-Solution Grasp::run(int iterations, int porc_mov_1, int porc_mov_2, int porc_mov_3){
+
+	cout<<"iteraciones phase 1: "<< iterations_phase1<<endl;
+	cout<<"iteraciones phase 2: "<< iterations_phase2<<endl;
+	cout<<"iteraciones phase 1: "<< iterations_phase1<<endl;
+	cout<<"porcentaje 2opt: "<< porc_two_opt<<endl;
+	cout<<"porcentaje swap_cd: "<< porc_swap_cd<<endl;
+	cout<<"porcentaje swap pickup: "<< porc_swap_node_pick<<endl;
+	cout<<"porcentaje swap delivery: "<< porc_swap_node_del<<endl;
 
 	Solution new_solution = this->initial_solution();
 	Solution best_solution = new_solution;
 	int best_time = this->evaluation_function(best_solution);
 	int new_time;
-	// Se comienzan las iteraciones haciendo el 2-opt, solo se acepta el cambio en la solucion si esta mejora
-	for(int i = 1; i <= iterations; i++){
+	// COMIENZA la FASE 1 en donde se aplican los movimientos 2-opt
 
-		int random_move_1 = rand() % 101;
-		int random_move_2 = rand() % 101;
-		int random_move_3 = rand() % 101;
+	for(int i = 1; i <= iterations_phase1; i++){
 
-		if(random_move_1<porc_mov_1){
-			new_solution = this->two_opt(new_solution);
-		}
-
-		if(random_move_2<porc_mov_2){
-			new_solution = this->swap_node(new_solution,0);
-		}
-
-		if(random_move_3<porc_mov_3){
-			new_solution = this->swap_node(new_solution,1);
-		}
-
+		new_solution = this->two_opt(new_solution);
 
 		new_time = this->evaluation_function(new_solution);
 				
@@ -605,12 +635,61 @@ Solution Grasp::run(int iterations, int porc_mov_1, int porc_mov_2, int porc_mov
 			cout<<"Actual= "<<new_time<<endl;
 			best_solution = new_solution;
 			best_time = new_time;
-			cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
+			cout<<"-------------- MEJORE LA SOLUCION EN 2-OPT------------------"<<endl;
 		}
 		else{
 			new_solution = best_solution;
 		}
 		
+	}
+
+	// COMIENZA la FASE 2 en donde se aplican los movimientos swap CD
+
+	for(int j = 1; j <= iterations_phase2; j++){
+	
+		new_solution = this->swap_cd(new_solution);
+
+		new_time = this->evaluation_function(new_solution);
+				
+		if(new_time < best_time){
+			cout<<"Mejor= "<<best_time<<endl;
+			cout<<"Actual= "<<new_time<<endl;
+			best_solution = new_solution;
+			best_time = new_time;
+			cout<<"-------------- MEJORE LA SOLUCION EN SWAP CD------------------"<<endl;
+		}
+		else{
+			new_solution = best_solution;
+		}
+		
+	}
+
+	for(int k=1; k<=iterations_phase3;k++){
+		
+		int random_move_swap_node_del = rand() % 101;
+		int random_move_swap_node_pick = rand() % 101;
+
+		if(random_move_swap_node_pick<porc_swap_node_pick){
+			new_solution = this->swap_node(new_solution,0);
+		}
+
+		if(random_move_swap_node_del<porc_swap_node_del){
+			new_solution = this->swap_node(new_solution,1);
+		}
+
+		new_time = this->evaluation_function(new_solution);
+
+		if(new_time < best_time){
+			cout<<"Mejor= "<<best_time<<endl;
+			cout<<"Actual= "<<new_time<<endl;
+			best_solution = new_solution;
+			best_time = new_time;
+			cout<<"-------------- MEJORE LA SOLUCION EN SWAP NODE------------------"<<endl;
+		}
+		else{
+			new_solution = best_solution;
+		}
+
 	}
 
 	return best_solution;

@@ -35,8 +35,10 @@ class Grasp{
 		tuple<Vehicle,Vehicle,bool> consolidation(tuple<Vehicle,int>, tuple<Vehicle, int>, int);
 		// REALIZA EL MOVIMIENTO SWAP NODE, QUE SELECCIONA 2 VEHICULOS E INTERCAMBIA ENTRE ELLOS UN NODO AL AZAR DELIVERY.
 		Solution swap_node(Solution,int);
+		// FUNCION QUE EJECUTA EL MOVIMIENTO CAMBIO DE CROSSDOCKS
+		Solution swap_cd(Solution);
 		// FUNCION QUE EJECUTA EL ALGORITMO GRASP, HACIENDO TODOS LOS PASOS DE ESTE
-		Solution run(int,int,int,int);
+		Solution run(int,int,int,int,int,int,int);
 
 };
 #endif
