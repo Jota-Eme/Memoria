@@ -618,12 +618,18 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	cout<<"porcentaje swap pickup: "<< porc_swap_node_pick<<endl;
 	cout<<"porcentaje swap delivery: "<< porc_swap_node_del<<endl;
 
+	ofstream myfile;
+	myfile.open ("result.txt");
+
+
 	Solution new_solution = this->initial_solution();
 	Solution best_solution = new_solution;
 	int best_time = this->evaluation_function(best_solution);
 	int new_time;
 	// COMIENZA la FASE 1 en donde se aplican los movimientos 2-opt
-
+	clock_t start_time, end_time;
+	double total_time;
+	start_time = clock();
 	for(int i = 1; i <= iterations_phase1; i++){
 
 		new_solution = this->two_opt(new_solution);
@@ -636,6 +642,11 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			best_solution = new_solution;
 			best_time = new_time;
 			cout<<"-------------- MEJORE LA SOLUCION EN 2-OPT------------------"<<endl;
+
+			end_time = clock();
+			total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+			myfile << total_time <<"-"<< best_time << "\n";
+
 		}
 		else{
 			new_solution = best_solution;
@@ -657,6 +668,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			best_solution = new_solution;
 			best_time = new_time;
 			cout<<"-------------- MEJORE LA SOLUCION EN SWAP CD------------------"<<endl;
+
+			end_time = clock();
+			total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+			myfile << total_time <<"-"<< best_time<< "\n";
 		}
 		else{
 			new_solution = best_solution;
@@ -685,12 +700,18 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			best_solution = new_solution;
 			best_time = new_time;
 			cout<<"-------------- MEJORE LA SOLUCION EN SWAP NODE------------------"<<endl;
+			
+			end_time = clock();
+			total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+			myfile << total_time <<"-"<< best_time<< "\n";
 		}
 		else{
 			new_solution = best_solution;
 		}
 
 	}
+
+	myfile.close();
 
 	return best_solution;
 
