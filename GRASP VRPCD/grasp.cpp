@@ -621,7 +621,60 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	ofstream myfile;
 	myfile.open ("result.txt");
 
+	//------------------------------------------------------------------------------
 
+	Solution new_solution = this->initial_solution();
+	Solution best_solution = new_solution;
+	int best_time = this->evaluation_function(best_solution);
+	int new_time;
+
+	clock_t start_time, end_time;
+	double total_time;
+	start_time = clock();
+
+	// Se comienzan las iteraciones haciendo el 2-opt, solo se acepta el cambio en la solucion si esta mejora
+	for(int i = 1; i <= iterations_phase1; i++){
+
+		int random_move_1 = rand() % 101;
+		int random_move_2 = rand() % 101;
+		int random_move_3 = rand() % 101;
+
+		if(random_move_1<porc_two_opt){
+			new_solution = this->two_opt(new_solution);
+		}
+
+		if(random_move_2<porc_swap_node_pick){
+			new_solution = this->swap_node(new_solution,0);
+		}
+
+		if(random_move_3<porc_swap_node_del){
+			new_solution = this->swap_node(new_solution,1);
+		}
+
+
+		new_time = this->evaluation_function(new_solution);
+				
+		if(new_time < best_time){
+			cout<<"Mejor= "<<best_time<<endl;
+			cout<<"Actual= "<<new_time<<endl;
+			best_solution = new_solution;
+			best_time = new_time;
+			cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
+
+			end_time = clock();
+			total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+			myfile << total_time <<"-"<< best_time << "\n";
+		}
+		else{
+			new_solution = best_solution;
+		}
+		
+	}
+
+
+	//--------------------------------------------------------------------------------------
+
+/*-------------------------------------------------------------------------------------------------------
 	Solution new_solution = this->initial_solution();
 	Solution best_solution = new_solution;
 	int best_time = this->evaluation_function(best_solution);
@@ -710,6 +763,8 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		}
 
 	}
+
+	--------------------------------------------------------------------------------------------------------*/
 
 	myfile.close();
 
