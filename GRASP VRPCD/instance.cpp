@@ -3,9 +3,11 @@
 // CONSTRUCTOR
 Instance::Instance (string input){
 	this->input_file = input;
+	this->total_demand = 0;
 }
 
 Instance::Instance(){
+	this->total_demand = 0;
 }
 
 // funcion que agrega un request
@@ -27,6 +29,8 @@ void Instance::read_instance(){
 		return;
 	}
 
+	this->total_demand = 0;
+	
 	string line;
 	vector<int> prev_data;
 	// LINEA 1: obtencion del numero de Request
@@ -68,7 +72,6 @@ void Instance::read_instance(){
 		prev_data = get_int_vector(line);
 		prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
 		
-
 		Crossdock crossdock(prev_data[0],prev_data[1],prev_data[2],prev_data[3],prev_data[4]);
 		this->crossdocks.push_back(crossdock);
 	}
@@ -84,6 +87,7 @@ void Instance::read_instance(){
 	  	Customer customer((prev_data[0]*(-1)),prev_data[5],prev_data[6],prev_data[7],prev_data[8]);
 	  	Request request(suplier,customer,prev_data[9],prev_data[0]);
 
+	  	this->total_demand += prev_data[9];
 	  	this->requests.push_back(request);
   	}
 

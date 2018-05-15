@@ -11,7 +11,7 @@
     1                          5
  REQUEST      SUPPLIER                                            CUSTOMER
  CUST NO.     XCOORD.     YCOORD.     READY TIME     DUE DATE     XCOORD.     YCOORD.     READY TIME     DUE DATE     DEMAND
-    0          100          100            0           1000         100          100            0          1000         11
+    0          100          100            0           1000         100          100            0          1000          0
     3           20           59          172           338          178           61          372          650          19
     4           39          186          172           307          182          110          382          657           7
     5           58           19          174           343          186           65          418          681           2

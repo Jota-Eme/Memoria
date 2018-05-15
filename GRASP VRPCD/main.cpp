@@ -76,13 +76,17 @@ int main(int argc, char *argv[]) {
 	cout<<"La solucion final es"<<endl;
 	print_solution(best_solution);
 	cout<<"----------------------------------------------------"<<endl;
-	cout<<"................Los tiempos son ...................."<<endl;
-	print_times(best_solution);
+	//cout<<"................Los tiempos son ...................."<<endl;
+	//print_times(best_solution);
+
+	cout<<"La demanda total es de: "<<instance.total_demand<<endl;
+	cout<<"Los vehiculos optimos son: "<<ceil((float)instance.total_demand / instance.vehicle_capacity)<<endl;
 
 	cout<<"CANTIDAD DE AUTOS USADOS: "<<best_solution.vehicles.size()<<endl;
 	cout<<"COSTO TOTAL DE: "<< best_time <<endl;
 	double total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 	cout<<" Se demoro: "<< total_time << " segundos" << endl;
+
 
 	export_solution(best_solution);
 

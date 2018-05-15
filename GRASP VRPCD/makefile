@@ -13,4 +13,4 @@ clean:
 	rm -rf *.o $(OUT)
 
 exe:
-	./grasp instances_MI/R1_4_1_200m.txt 5 2 100000 0 100000 0 0 50 50 123
+	./grasp instances_MI/R1_4_1_200m.txt 5 2 1000 0 1000 0 0 50 50 123
