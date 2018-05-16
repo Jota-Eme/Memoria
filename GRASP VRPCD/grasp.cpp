@@ -170,88 +170,51 @@ Solution Grasp::initial_solution(){
 
 
 // funcion que retorna una lista de loss request mas bajos en costo, que cumplan con las condiciones de TW (request factibles)
-tuple<vector<Request>,bool> Grasp::get_best_demand_requests(vector<Request> requests, Vehicle vehicle){
+tuple<vector<tuple<Request, int>>,bool> Grasp::get_best_demand_requests(vector<Request> requests, Vehicle vehicle){
 
 	vector<Request> temp_requests = requests;
-	// Se ordenan los request de mayor demanda a menor demanda
+	// Se ordenan los request de mayor a menor demanda
 	std::sort(begin(temp_requests), end(temp_requests), [](Request const &r1, Request const &r2) {
-        return r1.demand < r2.demand; 
+        return r1.demand > r2.demand; 
     	}
     );
 
-	
-
-
-
-
-
-	float suplier_cost, customer_cost, crossdock_cost, total_cost, depot_cost;
-	float min_cost = FLT_MAX;
-	bool flag = false;
-	Suplier suplier;
-	Customer customer;
-	vector<tuple<Request,float, int>> selected_requests;
+    bool flag = false;
+	vector<tuple<Request, int>> selected_requests;
 	int best_cd;  // indice del crossdock mas cercano para el ultimo nodo de una ruta
 
-	for(int i = 0; (unsigned)i < requests.size(); i++){
-		if(requests[i].demand <= vehicle.remaining_capacity){
+	for(int i = 0; (unsigned)i < temp_requests.size(); i++){
+		if(temp_requests[i].demand <= vehicle.remaining_capacity){
 
-			if(vehicle.pickup_route.empty()){
-				suplier_cost = this->instance.vehicle_depot.get_distance(requests[i].suplier);
-				best_cd = this->get_closest_crossdock(requests[i].suplier);
-				crossdock_cost = requests[i].suplier.get_distance(this->instance.crossdocks[best_cd]);
-				customer_cost = this->instance.crossdocks[best_cd].get_distance(requests[i].customer);
-				depot_cost = requests[i].customer.get_distance(this->instance.vehicle_depot);
+			best_cd = this->get_closest_crossdock(temp_requests[i].suplier);
 
-			}
-			else{
-				suplier = vehicle.pickup_route.back();
-				customer = vehicle.delivery_route.back();
-				suplier_cost = suplier.get_distance(requests[i].suplier);
-				best_cd = this->get_closest_crossdock(requests[i].suplier);
-				crossdock_cost = requests[i].suplier.get_distance(this->instance.crossdocks[best_cd]);
-				customer_cost = customer.get_distance(requests[i].customer);
-				depot_cost = requests[i].customer.get_distance(this->instance.vehicle_depot);
 
-			}
+			// se analiza si es factible agregar dicho par de nodos en relacion a los TW  (para MEMORIA deberia considerar los distintos CD tambien)
+			Vehicle vehicle_temp = vehicle;
+			vehicle_temp.pickup_route.push_back(temp_requests[i].suplier);
+			vehicle_temp.crossdock_route.clear();
+			vehicle_temp.crossdock_route.push_back(this->instance.crossdocks[best_cd]);
+			vehicle_temp.delivery_route.push_back(temp_requests[i].customer);
 
-			total_cost = suplier_cost + crossdock_cost + customer_cost + depot_cost;
-			
+			if(vehicle_temp.feasible_route()){
 
-			if(total_cost < min_cost){
-				// se analiza si es factible agregar dicho par de nodos en relacion a los TW  (para MEMORIA deberia considerar los distintos CD tambien)
-				Vehicle vehicle_temp = vehicle;
-				vehicle_temp.pickup_route.push_back(requests[i].suplier);
-				vehicle_temp.crossdock_route.clear();
-				vehicle_temp.crossdock_route.push_back(this->instance.crossdocks[best_cd]);
-				vehicle_temp.delivery_route.push_back(requests[i].customer);
-				vehicle_temp.set_times();
+				flag = true;
 
-				if(vehicle_temp.feasible_route()){
-
-					if(selected_requests.size() < (unsigned)this->list_size){
-						selected_requests.push_back(make_tuple(requests[i],total_cost, best_cd));
-					}
-
-					else if(selected_requests.size() == (unsigned)this->list_size){
-						selected_requests.push_back(make_tuple(requests[i],total_cost, best_cd));
-						std::sort(begin(selected_requests), end(selected_requests), [](tuple<Request, float, int> const &t1, tuple<Request, float, int> const &t2) {
-					        return get<1>(t1) < get<1>(t2); 
-					    	}
-					    );
-						selected_requests.pop_back();
-						min_cost = get<1>(selected_requests.back());
-
-					}
-
-					else{
-						cout << "ERROR, SE SOBREPASO EL TAMAÑO DE LA LISTA"<<endl;
-					}
-					// informa si se encontro un request que cumpla con las restricciones
-					flag = true;
+				if(selected_requests.size() < (unsigned)this->list_size){
+					selected_requests.push_back(make_tuple(temp_requests[i],best_cd));
 				}
 
+				else if(selected_requests.size() == (unsigned)this->list_size){
+					return make_tuple(selected_requests,flag);
+				}
+
+				else{
+					cout << "ERROR, SE SOBREPASO EL TAMAÑO DE LA LISTA"<<endl;
+				}
+				
 			}
+			
+	
 		}		
 	}
 
@@ -267,7 +230,7 @@ Solution Grasp::initial_solution_2(){
 	vector<Request> requests = this->instance.requests;
 	bool found = true;
 	vector <Request>::iterator request_iterator;
-	vector<tuple<Request,float,int>> requests_list;
+	vector<tuple<Request, int>> requests_list;
 	Request selected_request;
 	int random;
 
@@ -280,14 +243,14 @@ Solution Grasp::initial_solution_2(){
 
 		while (found){
 
-			tie(requests_list,found) = this->get_cheaper_requests(requests, vehicle);
+			tie(requests_list,found) = this->get_best_demand_requests(requests, vehicle);
 
 			//si encontro un request que cumpliera con las restricciones se le asigna el request al vehiculo
 			if(found){
 				//Se agrega la componente aleatoria
 				random = rand() % requests_list.size();
 				selected_request = get<0>(requests_list[random]);
-				int best_cd = get<2>(requests_list[random]);
+				int best_cd = get<1>(requests_list[random]);
 
 				vehicle.pickup_route.push_back(selected_request.suplier);
 				vehicle.delivery_route.push_back(selected_request.customer);
@@ -777,7 +740,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 	//------------------------------------------------------------------------------
 
-	Solution new_solution = this->initial_solution();
+	Solution new_solution = this->initial_solution_2();
 	Solution best_solution = new_solution;
 	int best_time = this->evaluation_function(best_solution);
 	int new_time;

@@ -24,7 +24,7 @@ class Grasp{
 		//funcion que retorna una lista con los request de menos costo que cumplan las restricciones
 		tuple<vector<tuple<Request,float, int>>,bool> get_cheaper_requests(vector<Request>, Vehicle);
 		//funcion que retorna una lista con los request que optimicen el espacio a utilizar para el vehiculo
-		tuple<vector<tuple<Request,float, int>>,bool> get_best_demand_requests(vector<Request>, Vehicle);
+		tuple<vector<tuple<Request, int>>,bool> get_best_demand_requests(vector<Request>, Vehicle);
 		//funcion que retorna el cd mas cercano desde un nodo
 		int get_closest_crossdock(Node);
 		//funcion que retorna una solucion inicial con el criterio de la ruta mas economica

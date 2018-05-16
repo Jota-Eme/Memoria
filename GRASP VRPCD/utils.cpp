@@ -71,7 +71,8 @@ void print_solution(Solution solution){
 		for (customer_iterator = vehicle_iterator->delivery_route.begin(); customer_iterator != vehicle_iterator->delivery_route.end(); ++customer_iterator) {
 	    	cout<<customer_iterator->id<<" ";
 		}
-		cout<<"]"<<endl;
+		cout<<"]"<<"  espacio disponible: "<<vehicle_iterator->remaining_capacity<<endl;
+
 	}
 
 }
