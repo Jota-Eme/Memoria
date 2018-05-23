@@ -27,14 +27,14 @@ int Grasp::get_closest_crossdock(Node nodo){
 
 
 // funcion que retorna una lista de loss request mas bajos en costo, que cumplan con las condiciones de TW (request factibles)
-tuple<vector<tuple<Request,float, int>>,bool> Grasp::get_cheaper_requests(vector<Request> requests, Vehicle vehicle){
+tuple<vector<tuple<Request,int, float>>,bool> Grasp::get_cheaper_requests(vector<Request> requests, Vehicle vehicle){
 
 	float suplier_cost, customer_cost, crossdock_cost, total_cost, depot_cost;
 	float min_cost = FLT_MAX;
 	bool flag = false;
 	Suplier suplier;
 	Customer customer;
-	vector<tuple<Request,float, int>> selected_requests;
+	vector<tuple<Request,int, float>> selected_requests;
 	int best_cd;  // indice del crossdock mas cercano para el ultimo nodo de una ruta
 
 	for(int i = 0; (unsigned)i < requests.size(); i++){
@@ -74,17 +74,17 @@ tuple<vector<tuple<Request,float, int>>,bool> Grasp::get_cheaper_requests(vector
 				if(vehicle_temp.feasible_route()){
 
 					if(selected_requests.size() < (unsigned)this->list_size){
-						selected_requests.push_back(make_tuple(requests[i],total_cost, best_cd));
+						selected_requests.push_back(make_tuple(requests[i], best_cd,total_cost));
 					}
 
 					else if(selected_requests.size() == (unsigned)this->list_size){
-						selected_requests.push_back(make_tuple(requests[i],total_cost, best_cd));
-						std::sort(begin(selected_requests), end(selected_requests), [](tuple<Request, float, int> const &t1, tuple<Request, float, int> const &t2) {
-					        return get<1>(t1) < get<1>(t2); 
+						selected_requests.push_back(make_tuple(requests[i],best_cd,total_cost));
+						std::sort(begin(selected_requests), end(selected_requests), [](tuple<Request, int, float> const &t1, tuple<Request, int, float> const &t2) {
+					        return get<2>(t1) < get<2>(t2); 
 					    	}
 					    );
 						selected_requests.pop_back();
-						min_cost = get<1>(selected_requests.back());
+						min_cost = get<2>(selected_requests.back());
 
 					}
 
@@ -114,7 +114,7 @@ Solution Grasp::initial_solution(){
 	vector <Request>::iterator request_iterator;
 	//Vector de costos, actualmente solo se usa para debugear, pero podria servir para algo mas adelante
 	vector<int> costs;
-	vector<tuple<Request,float,int>> requests_list;
+	vector<tuple<Request,int,float>> requests_list;
 	Request selected_request;
 	int random;
 
@@ -134,7 +134,7 @@ Solution Grasp::initial_solution(){
 				//Se agrega la componente aleatoria
 				random = rand() % requests_list.size();
 				selected_request = get<0>(requests_list[random]);
-				int best_cd = get<2>(requests_list[random]);
+				int best_cd = get<1>(requests_list[random]);
 
 				vehicle.pickup_route.push_back(selected_request.suplier);
 				vehicle.delivery_route.push_back(selected_request.customer);
@@ -281,6 +281,88 @@ Solution Grasp::initial_solution_2(){
 
 	return solution;
 }
+
+
+Solution Grasp::hybrid_initial_solution(){
+
+	Solution solution = Solution();
+	vector<Request> requests = this->instance.requests;
+	bool found = true;
+	vector <Request>::iterator request_iterator;
+	vector<tuple<Request, int>> requests_list_1;
+	vector<tuple<Request,int,float>> requests_list_2;
+	Request selected_request;
+	int random;
+	bool changed = false;
+
+	while(requests.size() != 0){
+		
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot);
+		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
+		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
+		found = true;
+		int best_cd = -1;
+
+		while (found){
+
+			if(!changed){
+				tie(requests_list_1,found) = this->get_best_demand_requests(requests, vehicle);
+			}
+			else{
+				tie(requests_list_2,found) = this->get_cheaper_requests(requests, vehicle);
+			}
+
+
+			//si encontro un request que cumpliera con las restricciones se le asigna el request al vehiculo
+			if(found){
+				//Se agrega la componente aleatoria
+				if(!changed){
+					random = rand() % requests_list_1.size();
+					selected_request = get<0>(requests_list_1[random]);
+					best_cd = get<1>(requests_list_1[random]);
+				}
+				else{
+					random = rand() % requests_list_2.size();
+					selected_request = get<0>(requests_list_2[random]);
+					best_cd = get<1>(requests_list_2[random]);
+				}
+			
+
+				vehicle.pickup_route.push_back(selected_request.suplier);
+				vehicle.delivery_route.push_back(selected_request.customer);
+
+				vehicle.crossdock_route.clear();
+				vehicle.crossdock_route.push_back(this->instance.crossdocks[best_cd]);
+
+				vehicle.remaining_capacity -= selected_request.demand;
+
+				vehicle.pickup_items.push_back(make_tuple(selected_request.demand, selected_request.suplier.id));
+				vehicle.delivery_items.push_back(make_tuple(selected_request.demand, selected_request.customer.id));
+
+				// se elimina el request asignado de la lista de requests
+				for (request_iterator = requests.begin(); request_iterator != requests.end(); ++request_iterator) {
+				    if (request_iterator->id == selected_request.id) {
+				        request_iterator = requests.erase(request_iterator); // luego de borrar el iterador pasa a la siguiente posicion.
+				        --request_iterator; // devuelve el iterador si quedo fuera de rango.
+				    }
+				}
+			}
+		
+		}
+
+		
+		vehicle.set_times();
+		solution.vehicles.push_back(vehicle);
+
+		if(vehicle.remaining_capacity >= 5){
+			changed = true;
+		}
+
+	}
+
+	return solution;
+}
+
 
 
 
@@ -729,7 +811,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 	cout<<"iteraciones phase 1: "<< iterations_phase1<<endl;
 	cout<<"iteraciones phase 2: "<< iterations_phase2<<endl;
-	cout<<"iteraciones phase 1: "<< iterations_phase1<<endl;
+	cout<<"iteraciones phase 3: "<< iterations_phase3<<endl;
 	cout<<"porcentaje 2opt: "<< porc_two_opt<<endl;
 	cout<<"porcentaje swap_cd: "<< porc_swap_cd<<endl;
 	cout<<"porcentaje swap pickup: "<< porc_swap_node_pick<<endl;
@@ -740,7 +822,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 	//------------------------------------------------------------------------------
 
-	Solution new_solution = this->initial_solution_2();
+	//Solution new_solution = this->initial_solution();
+	//Solution new_solution = this->initial_solution_2();
+	Solution new_solution = this->hybrid_initial_solution();
+
 	Solution best_solution = new_solution;
 	int best_time = this->evaluation_function(best_solution);
 	int new_time;
