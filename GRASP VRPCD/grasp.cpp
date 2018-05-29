@@ -106,7 +106,7 @@ tuple<vector<tuple<Request,int, float>>,bool> Grasp::get_cheaper_requests(vector
 
 // FUncion que genera una solucion inicial mediante greedy
 
-Solution Grasp::initial_solution(){
+Solution Grasp::distance_initial_solution(){
 
 	Solution solution = Solution();
 	vector<Request> requests = this->instance.requests;
@@ -224,7 +224,7 @@ tuple<vector<tuple<Request, int>>,bool> Grasp::get_best_demand_requests(vector<R
 
 
 
-Solution Grasp::initial_solution_2(){
+Solution Grasp::demand_initial_solution(){
 
 	Solution solution = Solution();
 	vector<Request> requests = this->instance.requests;
@@ -357,6 +357,120 @@ Solution Grasp::hybrid_initial_solution(){
 		if(vehicle.remaining_capacity >= 5){
 			changed = true;
 		}
+
+	}
+
+	return solution;
+}
+
+
+
+tuple<vector<tuple<Request, int>>,bool> Grasp::get_best_timewindow_requests(vector<Request> requests, Vehicle vehicle){
+
+	vector<Request> temp_requests = requests;
+	// Se ordenan los request de menor a mayor ready_time del proveedor
+	std::sort(begin(temp_requests), end(temp_requests), [](Request const &r1, Request const &r2) {
+        return r1.suplier.ready_time < r2.suplier.ready_time; 
+    	}
+    );
+
+    bool flag = false;
+	vector<tuple<Request, int>> selected_requests;
+	int best_cd;  // indice del crossdock mas cercano para el ultimo nodo de una ruta
+
+	for(int i = 0; (unsigned)i < temp_requests.size(); i++){
+		if(temp_requests[i].demand <= vehicle.remaining_capacity){
+
+			best_cd = this->get_closest_crossdock(temp_requests[i].suplier);
+
+
+			// se analiza si es factible agregar dicho par de nodos en relacion a los TW 
+			Vehicle vehicle_temp = vehicle;
+			vehicle_temp.pickup_route.push_back(temp_requests[i].suplier);
+			vehicle_temp.crossdock_route.clear();
+			vehicle_temp.crossdock_route.push_back(this->instance.crossdocks[best_cd]);
+			vehicle_temp.delivery_route.push_back(temp_requests[i].customer);
+
+			if(vehicle_temp.feasible_route()){
+
+				flag = true;
+
+				if(selected_requests.size() < (unsigned)this->list_size){
+					selected_requests.push_back(make_tuple(temp_requests[i],best_cd));
+				}
+
+				else if(selected_requests.size() == (unsigned)this->list_size){
+					return make_tuple(selected_requests,flag);
+				}
+
+				else{
+					cout << "ERROR, SE SOBREPASO EL TAMAÑO DE LA LISTA"<<endl;
+				}
+				
+			}
+			
+	
+		}		
+	}
+
+	return make_tuple(selected_requests,flag);
+
+}
+
+
+
+Solution Grasp::timewindow_initial_solution(){
+
+	Solution solution = Solution();
+	vector<Request> requests = this->instance.requests;
+	bool found = true;
+	vector <Request>::iterator request_iterator;
+	vector<tuple<Request, int>> requests_list;
+	Request selected_request;
+	int random;
+
+	while(requests.size() != 0){
+		
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot);
+		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
+		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
+		found = true;
+
+		while (found){
+
+			tie(requests_list,found) = this->get_best_timewindow_requests(requests, vehicle);
+
+			//si encontro un request que cumpliera con las restricciones se le asigna el request al vehiculo
+			if(found){
+				//Se agrega la componente aleatoria
+				random = rand() % requests_list.size();
+				selected_request = get<0>(requests_list[random]);
+				int best_cd = get<1>(requests_list[random]);
+
+				vehicle.pickup_route.push_back(selected_request.suplier);
+				vehicle.delivery_route.push_back(selected_request.customer);
+
+				vehicle.crossdock_route.clear();
+				vehicle.crossdock_route.push_back(this->instance.crossdocks[best_cd]);
+
+				vehicle.remaining_capacity -= selected_request.demand;
+
+				vehicle.pickup_items.push_back(make_tuple(selected_request.demand, selected_request.suplier.id));
+				vehicle.delivery_items.push_back(make_tuple(selected_request.demand, selected_request.customer.id));
+
+				// se elimina el request asignado de la lista de requests
+				for (request_iterator = requests.begin(); request_iterator != requests.end(); ++request_iterator) {
+				    if (request_iterator->id == selected_request.id) {
+				        request_iterator = requests.erase(request_iterator); // luego de borrar el iterador pasa a la siguiente posicion.
+				        --request_iterator; // devuelve el iterador si quedo fuera de rango.
+				    }
+				}
+			}
+		
+		}
+		
+		vehicle.set_times();
+		solution.vehicles.push_back(vehicle);
 
 	}
 
@@ -822,9 +936,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 	//------------------------------------------------------------------------------
 
-	//Solution new_solution = this->initial_solution();
-	//Solution new_solution = this->initial_solution_2();
-	Solution new_solution = this->hybrid_initial_solution();
+	//Solution new_solution = this->distance_initial_solution();
+	//Solution new_solution = this->demand_initial_solution();
+	//Solution new_solution = this->hybrid_initial_solution();
+	Solution new_solution = this->timewindow_initial_solution();
 
 	Solution best_solution = new_solution;
 	int best_time = this->evaluation_function(best_solution);

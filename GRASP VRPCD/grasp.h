@@ -25,14 +25,18 @@ class Grasp{
 		tuple<vector<tuple<Request,int, float>>,bool> get_cheaper_requests(vector<Request>, Vehicle);
 		//funcion que retorna una lista con los request que optimicen el espacio a utilizar para el vehiculo
 		tuple<vector<tuple<Request, int>>,bool> get_best_demand_requests(vector<Request>, Vehicle);
+		//funcion que retorna una lista con los request que optimicen los tw de los proveedores
+		tuple<vector<tuple<Request, int>>,bool> get_best_timewindow_requests(vector<Request>, Vehicle);
 		//funcion que retorna el cd mas cercano desde un nodo
 		int get_closest_crossdock(Node);
 		//funcion que retorna una solucion inicial con el criterio de la ruta mas economica
-		Solution initial_solution();
+		Solution distance_initial_solution();
 		//funcion que retorna una solucion inicial con el criterio de acomodar demanda p ara optimizar vehiculos
-		Solution initial_solution_2();
+		Solution demand_initial_solution();
 		// funcion que retorna una solucion inicial de manera hibrida con las 2 anteriores
 		Solution hybrid_initial_solution();
+		// funcion que retorna una solucion inicial con el criterio de menor time window
+		Solution timewindow_initial_solution();
 		//funcion que retorna el valor de la funcion de evaluacion de una solucion (costo de la solucion)
 		float evaluation_function(Solution);
 		// Realiza el movimiento 2-opt a una solucion
