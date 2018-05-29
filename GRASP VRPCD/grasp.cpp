@@ -936,10 +936,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 	//------------------------------------------------------------------------------
 
-	//Solution new_solution = this->distance_initial_solution();
+	Solution new_solution = this->distance_initial_solution();
 	//Solution new_solution = this->demand_initial_solution();
 	//Solution new_solution = this->hybrid_initial_solution();
-	Solution new_solution = this->timewindow_initial_solution();
+	//Solution new_solution = this->timewindow_initial_solution();
 
 	Solution best_solution = new_solution;
 	int best_time = this->evaluation_function(best_solution);

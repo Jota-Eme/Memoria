@@ -13,7 +13,7 @@ suplier_y = []
 customer_x = []
 customer_y = []
 
-with open('instances_MI/R1_4_1_200m.txt'+instance) as f:
+with open('instances_MI/'+instance) as f:
 	read_data = f.readline()
 	read_data = f.readline() 
 
