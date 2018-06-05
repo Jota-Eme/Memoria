@@ -482,9 +482,6 @@ Solution Grasp::timewindow_initial_solution(){
 
 float Grasp::evaluation_function(Solution solution){
 
-	vector <Suplier>::iterator suplier_iterator;
-	vector <Customer>::iterator customer_iterator;
-	vector <Crossdock>::iterator crossdock_iterator;
 	vector <Vehicle>::iterator vehicle_iterator;
 	Node current_node;
 	float total_cost =0;
@@ -492,45 +489,8 @@ float Grasp::evaluation_function(Solution solution){
 	if(solution.vehicles.empty() == false){
 
 		for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator){
-			//POR EL MOMENTO SOLO HAY 1 CD COMO PUNTO DE PARTIDA, EN LA MEMORIA SE DEBE AGREGAR COMO ATRIBUTO PARA CADA VEHICULO
-			current_node = vehicle_iterator->vehicle_depot;
-
-			if(vehicle_iterator->pickup_route.empty() == false){
-
-				for (suplier_iterator = vehicle_iterator->pickup_route.begin(); suplier_iterator != vehicle_iterator->pickup_route.end(); ++suplier_iterator) {
-
-					Suplier &new_suplier = *suplier_iterator;
-					total_cost += current_node.get_distance(new_suplier);
-					current_node = new_suplier;
-				}
-
-			}
-
-			if(vehicle_iterator->crossdock_route.empty() == false){
-
-				for (crossdock_iterator = vehicle_iterator->crossdock_route.begin(); crossdock_iterator != vehicle_iterator->crossdock_route.end(); ++crossdock_iterator) {
-
-					Crossdock &new_crossdock = *crossdock_iterator;
-					total_cost += current_node.get_distance(new_crossdock);
-					current_node = new_crossdock;
-				}
-
-			}
-
-			if(vehicle_iterator->delivery_route.empty() == false){
-
-				for (customer_iterator = vehicle_iterator->delivery_route.begin(); customer_iterator != vehicle_iterator->delivery_route.end(); ++customer_iterator) {
-
-					Customer &new_customer = *customer_iterator;
-					total_cost += current_node.get_distance(new_customer);
-					current_node = new_customer;
-				}
-
-			}
-
-			//EN este caso siempre vuelve al CD inicial, PARA LA MEMORIA SE DEBEN CONSIDERAR LOS LUGARES TERMINALES
-			total_cost += current_node.get_distance(vehicle_iterator->vehicle_depot);
-
+			
+			total_cost += vehicle_iterator->get_total_cost();
 		}
 
 	}
@@ -541,17 +501,24 @@ float Grasp::evaluation_function(Solution solution){
 
 
 
-Solution Grasp::two_opt(Solution solution){
+Solution Grasp::mov_two_opt(Solution solution){
 	vector<Node> selected_route, new_route;
 	vector<tuple<int,int>> selected_items;
+	int vehicle_position = -1;
+	int type_route = -1;
 
-	//se selecciona el vehiculo al azar
-	int random_vehicle = rand() % solution.vehicles.size();
-	Vehicle selected_vehicle = solution.vehicles[random_vehicle];
+	tie(vehicle_position,type_route) = this->get_worst_route(solution);
+
+	//se selecciona la ruta mas cara
+	//int random_vehicle = rand() % solution.vehicles.size();
+
+
+
+	Vehicle selected_vehicle = solution.vehicles[vehicle_position];
 	// se selecciona la ruta a modificar del vehiculo al azar
-	int random_type_route = rand() % 2;
+	//int random_type_route = rand() % 2;
 
-	if(random_type_route == 0){
+	if(type_route == 0){
 		//SE retorna la misma solucion si se elije una ruta con 1 solo nodo
 		if(selected_vehicle.pickup_route.size() == 1){
 			return solution;
@@ -620,7 +587,7 @@ Solution Grasp::two_opt(Solution solution){
 		new_items.push_back(selected_items[j]);
 	}
 	// Se reemplaza la ruta antigua por la nueva segun corresponda
-	if(random_type_route == 0){
+	if(type_route == 0){
 
 		selected_vehicle.pickup_route.clear();
 
@@ -661,7 +628,7 @@ Solution Grasp::two_opt(Solution solution){
 
 	if(selected_vehicle.feasible_route()){
 		// FINALMENTE SE REEMPLAZA EL VEHICULO CAMBIADO CON LA NUEVA RUTA SI ESTA ES FACTIBLE
-		solution.vehicles[random_vehicle] = selected_vehicle;
+		solution.vehicles[vehicle_position] = selected_vehicle;
 		//cout<<"SII SOY FACTIBLE"<<endl;
 	}
 	else{
@@ -783,9 +750,9 @@ tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tupl
 	return make_tuple(v1, v2, true);
 }
 
+// MOVIMIENTO QUE INTERCAMBIA DOS NODOS DEL MISMO TIPO DE RUTA DE DOS VEHICULOS DISTINTOS
 
-
-Solution Grasp::swap_node(Solution solution, int type){
+Solution Grasp::mov_swap_node(Solution solution, int type){
 
 	int random_vehicle_1 = rand() % solution.vehicles.size();
 	int random_vehicle_2 = rand() % solution.vehicles.size();
@@ -880,8 +847,8 @@ Solution Grasp::swap_node(Solution solution, int type){
 
 }
 
-
-Solution Grasp::swap_cd(Solution solution){
+// MOVIMIENTO QUE INTERCAMBIA LOS CD DE UN VEHICULO
+Solution Grasp::mov_swap_cd(Solution solution){
 
 	if(this->instance.crossdocks_number == 1){
 		return solution;
@@ -915,8 +882,67 @@ Solution Grasp::swap_cd(Solution solution){
 
 	return solution;
 
+}
+
+
+//FUNCION QUE RETORNA LA RUTA MAS CARA ENTRE TODOS LOS VEHICULOS DE LA FORMA <POS_VEHICULO, TIPO_RUTA>
+tuple<int,int> Grasp::get_worst_route(Solution solution){
+
+	float max_pickup_cost = 0;
+	float max_delivery_cost = 0;
+	int max_pickup_vehicle = -1;
+	int max_delivery_vehicle = -1;
+	float actual_pickup_cost,actual_delivery_cost;
+
+  	for(int i=0; (unsigned)i<solution.vehicles.size(); i++){
+
+  		actual_pickup_cost = solution.vehicles[i].get_pickup_cost();
+  		actual_delivery_cost = solution.vehicles[i].get_delivery_cost();
+
+  		if (actual_pickup_cost > max_pickup_cost){
+  			max_pickup_cost = actual_pickup_cost;
+  			max_pickup_vehicle = i;
+  		}
+
+  		if (actual_delivery_cost > max_delivery_cost){
+  			max_delivery_cost = actual_delivery_cost;
+  			max_delivery_vehicle = i;
+  		}
+  	}
+
+  	if(max_pickup_cost > max_delivery_cost){
+  		return make_tuple(max_pickup_vehicle,0);
+  	}
+  	else if(max_delivery_cost > max_pickup_cost){
+  		return make_tuple(max_delivery_vehicle,1);
+  	}
+  	else{
+  		int random_type_route = rand() % 2;
+  		if(random_type_route == 0){
+  			return make_tuple(max_pickup_vehicle,0);
+  		}
+  		else{
+  			return make_tuple(max_delivery_vehicle,1);
+  		}
+  	}
 
 }
+
+
+
+Solution Grasp::mov_change_node(Solution solution){
+
+
+
+
+    return solution;
+
+}
+
+
+
+
+
 
 
 
@@ -941,6 +967,8 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	//Solution new_solution = this->hybrid_initial_solution();
 	//Solution new_solution = this->timewindow_initial_solution();
 
+	//Solution asd = this->mov_change_node(new_solution);
+
 	Solution best_solution = new_solution;
 	int best_time = this->evaluation_function(best_solution);
 	int new_time;
@@ -957,15 +985,15 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		int random_move_3 = rand() % 101;
 
 		if(random_move_1<porc_two_opt){
-			new_solution = this->two_opt(new_solution);
+			new_solution = this->mov_two_opt(new_solution);
 		}
 
 		if(random_move_2<porc_swap_node_pick){
-			new_solution = this->swap_node(new_solution,0);
+			new_solution = this->mov_swap_node(new_solution,0);
 		}
 
 		if(random_move_3<porc_swap_node_del){
-			new_solution = this->swap_node(new_solution,1);
+			new_solution = this->mov_swap_node(new_solution,1);
 		}
 
 

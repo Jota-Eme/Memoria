@@ -9,7 +9,6 @@ Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot
 	this->unit_time = unit_time;
 	this->vehicle_depot = vehicle_depot;
 	this->departure_cd_time = 0;
-
 }
 
 Vehicle::Vehicle(){
@@ -127,5 +126,85 @@ bool Vehicle::feasible_route(){
 	}
 
 	return feasible;
+
+}
+
+float Vehicle::get_pickup_cost(){
+	vector <Suplier>::iterator suplier_iterator;
+
+	Node current_node;
+	float total_cost =0;
+	current_node = this->vehicle_depot;
+
+	if(this->pickup_route.empty() == false){
+
+		for (suplier_iterator = this->pickup_route.begin(); suplier_iterator != this->pickup_route.end(); ++suplier_iterator) {
+
+			Suplier &new_suplier = *suplier_iterator;
+			total_cost += current_node.get_distance(new_suplier);
+			current_node = new_suplier;
+		}
+
+	}
+
+	total_cost += current_node.get_distance(this->crossdock_route[0]);
+
+	return total_cost;
+
+}
+
+float Vehicle::get_crossdock_cost(){
+
+	vector <Crossdock>::iterator crossdock_iterator;
+
+	Node current_node;
+	float total_cost =0;
+	current_node = this->crossdock_route[0];
+
+	if(this->crossdock_route.empty() == false){
+
+		for (crossdock_iterator = this->crossdock_route.begin(); crossdock_iterator != this->crossdock_route.end(); ++crossdock_iterator) {
+
+			Crossdock &new_crossdock = *crossdock_iterator;
+			total_cost += current_node.get_distance(new_crossdock);
+			current_node = new_crossdock;
+		}
+
+	}
+
+	return total_cost;
+}
+
+float Vehicle::get_delivery_cost(){
+
+	vector <Customer>::iterator customer_iterator;
+
+	Node current_node;
+	float total_cost =0;
+	current_node = this->crossdock_route.back();
+
+	if(this->delivery_route.empty() == false){
+
+		for (customer_iterator = this->delivery_route.begin(); customer_iterator != this->delivery_route.end(); ++customer_iterator) {
+
+			Customer &new_customer = *customer_iterator;
+			total_cost += current_node.get_distance(new_customer);
+			current_node = new_customer;
+		}
+
+	}
+
+	total_cost += current_node.get_distance(this->vehicle_depot);
+
+	return total_cost;
+
+}
+
+
+
+
+float Vehicle::get_total_cost(){
+
+	return this->get_pickup_cost() + this->get_crossdock_cost() + this->get_delivery_cost();
 
 }

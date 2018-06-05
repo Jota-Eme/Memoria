@@ -31,6 +31,11 @@ class Vehicle{
 		void set_times();
 		//funcion que determina si la rita cumple con los TW
 		bool feasible_route();
+		float get_pickup_cost();
+		float get_crossdock_cost();
+		float get_delivery_cost();
+		//funcion que retorna el costo del vehiculo
+		float get_total_cost();
 
 };
 #endif
