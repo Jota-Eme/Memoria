@@ -52,8 +52,8 @@ int main(int argc, char *argv[]) {
 
 	Solution new_solution = grasp.run(iterations_phase1,iterations_phase2,iterations_phase3,porc_movimiento_two_opt,porc_movimiento_swap_cd,porc_movimiento_swap_pickup,porc_movimiento_swap_delivery);	
 	Solution best_solution = new_solution;
-	int new_time = grasp.evaluation_function(new_solution);
-	int best_time = new_time;
+	float new_time = grasp.evaluation_function(new_solution);
+	float best_time = new_time;
 
 	for(int i=1; i<iterations_grasp ; i++){
 		new_solution = grasp.run(iterations_phase1,iterations_phase2,iterations_phase3,porc_movimiento_two_opt,porc_movimiento_swap_cd,porc_movimiento_swap_pickup,porc_movimiento_swap_delivery);	

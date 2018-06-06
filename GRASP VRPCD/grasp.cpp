@@ -482,7 +482,7 @@ Solution Grasp::timewindow_initial_solution(){
 
 float Grasp::evaluation_function(Solution solution){
 
-	vector <Vehicle>::iterator vehicle_iterator;
+	/*vector <Vehicle>::iterator vehicle_iterator;
 	Node current_node;
 	float total_cost =0;
 
@@ -491,6 +491,61 @@ float Grasp::evaluation_function(Solution solution){
 		for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator){
 			
 			total_cost += vehicle_iterator->get_total_cost();
+		}
+
+	}
+
+	return total_cost;*/
+
+	vector <Suplier>::iterator suplier_iterator;
+	vector <Customer>::iterator customer_iterator;
+	vector <Crossdock>::iterator crossdock_iterator;
+	vector <Vehicle>::iterator vehicle_iterator;
+	Node current_node;
+	float total_cost =0;
+
+	if(solution.vehicles.empty() == false){
+
+		for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator){
+			//POR EL MOMENTO SOLO HAY 1 CD COMO PUNTO DE PARTIDA, EN LA MEMORIA SE DEBE AGREGAR COMO ATRIBUTO PARA CADA VEHICULO
+			current_node = vehicle_iterator->vehicle_depot;
+
+			if(vehicle_iterator->pickup_route.empty() == false){
+
+				for (suplier_iterator = vehicle_iterator->pickup_route.begin(); suplier_iterator != vehicle_iterator->pickup_route.end(); ++suplier_iterator) {
+
+					Suplier &new_suplier = *suplier_iterator;
+					total_cost += current_node.get_distance(new_suplier);
+					current_node = new_suplier;
+				}
+
+			}
+
+			if(vehicle_iterator->crossdock_route.empty() == false){
+
+				for (crossdock_iterator = vehicle_iterator->crossdock_route.begin(); crossdock_iterator != vehicle_iterator->crossdock_route.end(); ++crossdock_iterator) {
+
+					Crossdock &new_crossdock = *crossdock_iterator;
+					total_cost += current_node.get_distance(new_crossdock);
+					current_node = new_crossdock;
+				}
+
+			}
+
+			if(vehicle_iterator->delivery_route.empty() == false){
+
+				for (customer_iterator = vehicle_iterator->delivery_route.begin(); customer_iterator != vehicle_iterator->delivery_route.end(); ++customer_iterator) {
+
+					Customer &new_customer = *customer_iterator;
+					total_cost += current_node.get_distance(new_customer);
+					current_node = new_customer;
+				}
+
+			}
+
+			//EN este caso siempre vuelve al CD inicial, PARA LA MEMORIA SE DEBEN CONSIDERAR LOS LUGARES TERMINALES
+			total_cost += current_node.get_distance(vehicle_iterator->vehicle_depot);
+
 		}
 
 	}
@@ -970,8 +1025,8 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	//Solution asd = this->mov_change_node(new_solution);
 
 	Solution best_solution = new_solution;
-	int best_time = this->evaluation_function(best_solution);
-	int new_time;
+	float best_time = this->evaluation_function(best_solution);
+	float new_time;
 
 	clock_t start_time, end_time;
 	double total_time;

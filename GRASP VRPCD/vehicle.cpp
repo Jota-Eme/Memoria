@@ -205,6 +205,6 @@ float Vehicle::get_delivery_cost(){
 
 float Vehicle::get_total_cost(){
 
-	return this->get_pickup_cost() + this->get_crossdock_cost() + this->get_delivery_cost();
+	return this->get_pickup_cost() + this->get_delivery_cost();
 
 }
