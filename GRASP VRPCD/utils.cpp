@@ -55,9 +55,10 @@ void print_solution(Solution solution){
 	vector <Customer>::iterator customer_iterator;
 	vector <Crossdock>::iterator crossdock_iterator;
 	vector<Vehicle> vehicles = solution.vehicles;
+	int i = 0;
 
 	for (vehicle_iterator = vehicles.begin(); vehicle_iterator != vehicles.end(); ++vehicle_iterator) {
-		cout<<"[ ";
+		cout<<i<<" [ ";
 	    for (suplier_iterator = vehicle_iterator->pickup_route.begin(); suplier_iterator != vehicle_iterator->pickup_route.end(); ++suplier_iterator) {
 	    	cout<<suplier_iterator->id<<" ";
 		}
@@ -71,8 +72,8 @@ void print_solution(Solution solution){
 		for (customer_iterator = vehicle_iterator->delivery_route.begin(); customer_iterator != vehicle_iterator->delivery_route.end(); ++customer_iterator) {
 	    	cout<<customer_iterator->id<<" ";
 		}
-		cout<<"]"<<"  esp. disp: "<<vehicle_iterator->remaining_capacity<< "  total cost: "<< vehicle_iterator->get_total_cost() <<endl;
-
+		cout<<"]"<<" | esp. disp: "<<vehicle_iterator->remaining_capacity<< "  |  pickup cost: "<< vehicle_iterator->get_pickup_cost() <<" |  delivery cost: "<< vehicle_iterator->get_delivery_cost()<<"  |  total cost: "<< vehicle_iterator->get_total_cost()<<endl;
+		i++;
 	}
 
 }

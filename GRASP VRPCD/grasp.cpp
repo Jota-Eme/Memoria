@@ -562,7 +562,7 @@ Solution Grasp::mov_two_opt(Solution solution){
 	int vehicle_position = -1;
 	int type_route = -1;
 
-	tie(vehicle_position,type_route) = this->get_worst_route(solution);
+	tie(vehicle_position,type_route) = this->get_worst_route(solution,-1);
 
 	//se selecciona la ruta mas cara
 	//int random_vehicle = rand() % solution.vehicles.size();
@@ -570,6 +570,7 @@ Solution Grasp::mov_two_opt(Solution solution){
 
 
 	Vehicle selected_vehicle = solution.vehicles[vehicle_position];
+	//cout<<"VEhiculo escogido: "<<vehicle_position<<endl;
 	// se selecciona la ruta a modificar del vehiculo al azar
 	//int random_type_route = rand() % 2;
 
@@ -809,21 +810,36 @@ tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tupl
 
 Solution Grasp::mov_swap_node(Solution solution, int type){
 
-	int random_vehicle_1 = rand() % solution.vehicles.size();
-	int random_vehicle_2 = rand() % solution.vehicles.size();
+	//int random_vehicle_1 = rand() % solution.vehicles.size();
+	//int random_vehicle_2 = rand() % solution.vehicles.size();
 
-	//cout<<"Los vehiculos fueron: "<<random_vehicle_1<<" y "<<random_vehicle_2<<endl;
+	//SE encuentra el vehiculo que posea la ruta mas cara
+	int type_temp,pos_vehicle_1,pos_vehicle_2;
+	tie(pos_vehicle_1,type_temp) = get_worst_route(solution,type);
 
-	while(random_vehicle_1 == random_vehicle_2 || solution.vehicles[random_vehicle_1].crossdock_route[0].id != solution.vehicles[random_vehicle_2].crossdock_route[0].id){
-		//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
-		random_vehicle_2 = rand() % solution.vehicles.size();
-		random_vehicle_1 = rand() % solution.vehicles.size();
+	Solution temp_solution = solution;
+
+	temp_solution.vehicles.erase(temp_solution.vehicles.begin() + pos_vehicle_1);
+	//SE ENCUENTRA EL SEGUNDO VEHICULO CON RUTA MAS CARA
+	tie(pos_vehicle_2,type_temp) = get_worst_route(temp_solution,type);
+
+	//SE calcula el indice del vehiculo 2, considerando la solucion con todo los vehiculos (sin eliminar 1)
+	if(pos_vehicle_2 >= pos_vehicle_1){
+		pos_vehicle_2 += 1;
 	}
 
 	//cout<<"Los vehiculos fueron: "<<random_vehicle_1<<" y "<<random_vehicle_2<<endl;
 
-	Vehicle vehicle_1 = solution.vehicles[random_vehicle_1];
-	Vehicle vehicle_2 = solution.vehicles[random_vehicle_2];
+	/*while(random_vehicle_1 == random_vehicle_2 || solution.vehicles[random_vehicle_1].crossdock_route[0].id != solution.vehicles[random_vehicle_2].crossdock_route[0].id){
+		//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
+		random_vehicle_2 = rand() % solution.vehicles.size();
+		random_vehicle_1 = rand() % solution.vehicles.size();
+	}*/
+
+	//cout<<"Los vehiculos fueron: "<<pos_vehicle_1<<" y "<<pos_vehicle_2<<endl;
+
+	Vehicle vehicle_1 = solution.vehicles[pos_vehicle_1];
+	Vehicle vehicle_2 = solution.vehicles[pos_vehicle_2];
 
 	/*cout<<"ruta vehiculo 1 antes"<<endl;
 
@@ -868,8 +884,8 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 		if(vehicle_1.feasible_route() && vehicle_2.feasible_route()){
 			//cout<<"movimiento SIIIIII FACTIBLE"<<endl;
 
-			solution.vehicles[random_vehicle_1] = vehicle_1;
-			solution.vehicles[random_vehicle_2] = vehicle_2;
+			solution.vehicles[pos_vehicle_1] = vehicle_1;
+			solution.vehicles[pos_vehicle_2] = vehicle_2;
 
 			/*cout<<"ruta vehiculo 1 despues"<<endl;
 
@@ -940,8 +956,8 @@ Solution Grasp::mov_swap_cd(Solution solution){
 }
 
 
-//FUNCION QUE RETORNA LA RUTA MAS CARA ENTRE TODOS LOS VEHICULOS DE LA FORMA <POS_VEHICULO, TIPO_RUTA>
-tuple<int,int> Grasp::get_worst_route(Solution solution){
+//FUNCION QUE RETORNA LA RUTA MAS CARA ENTRE TODOS LOS VEHICULOS DE LA FORMA <POS_VEHICULO, TIPO_RUTA>, SI TYPE ES -1 BUSCA ENTRE TODAS LAS RUTAS, SI ES 0 EN PICKUP SI ES 1 EN DELIVERY
+tuple<int,int> Grasp::get_worst_route(Solution solution, int type){
 
 	float max_pickup_cost = 0;
 	float max_delivery_cost = 0;
@@ -951,35 +967,65 @@ tuple<int,int> Grasp::get_worst_route(Solution solution){
 
   	for(int i=0; (unsigned)i<solution.vehicles.size(); i++){
 
-  		actual_pickup_cost = solution.vehicles[i].get_pickup_cost();
-  		actual_delivery_cost = solution.vehicles[i].get_delivery_cost();
+  		if(type == -1){
 
-  		if (actual_pickup_cost > max_pickup_cost){
-  			max_pickup_cost = actual_pickup_cost;
-  			max_pickup_vehicle = i;
-  		}
+	  		actual_pickup_cost = solution.vehicles[i].get_pickup_cost();
+	  		actual_delivery_cost = solution.vehicles[i].get_delivery_cost();
 
-  		if (actual_delivery_cost > max_delivery_cost){
-  			max_delivery_cost = actual_delivery_cost;
-  			max_delivery_vehicle = i;
-  		}
+	  		if (actual_pickup_cost > max_pickup_cost){
+	  			max_pickup_cost = actual_pickup_cost;
+	  			max_pickup_vehicle = i;
+	  		}
+
+	  		if (actual_delivery_cost > max_delivery_cost){
+	  			max_delivery_cost = actual_delivery_cost;
+	  			max_delivery_vehicle = i;
+	  		}
+	  	}
+
+
+	  	else if(type==0){
+	  		actual_pickup_cost = solution.vehicles[i].get_pickup_cost();
+	  		if (actual_pickup_cost > max_pickup_cost){
+	  			max_pickup_cost = actual_pickup_cost;
+	  			max_pickup_vehicle = i;
+	  		}
+	  	}
+
+	  	else{
+	  		actual_delivery_cost = solution.vehicles[i].get_delivery_cost();
+			if (actual_delivery_cost > max_delivery_cost){
+	  			max_delivery_cost = actual_delivery_cost;
+	  			max_delivery_vehicle = i;
+	  		}
+	  	}
   	}
 
-  	if(max_pickup_cost > max_delivery_cost){
+  	if(type == -1){
+	  	if(max_pickup_cost > max_delivery_cost){
+	  		return make_tuple(max_pickup_vehicle,0);
+	  	}
+	  	else if(max_delivery_cost > max_pickup_cost){
+	  		return make_tuple(max_delivery_vehicle,1);
+	  	}
+	  	else{
+	  		int random_type_route = rand() % 2;
+	  		if(random_type_route == 0){
+	  			return make_tuple(max_pickup_vehicle,0);
+	  		}
+	  		else{
+	  			return make_tuple(max_delivery_vehicle,1);
+	  		}
+	  	}
+  	}
+  	else if(type == 0){
   		return make_tuple(max_pickup_vehicle,0);
   	}
-  	else if(max_delivery_cost > max_pickup_cost){
+  	else{
   		return make_tuple(max_delivery_vehicle,1);
   	}
-  	else{
-  		int random_type_route = rand() % 2;
-  		if(random_type_route == 0){
-  			return make_tuple(max_pickup_vehicle,0);
-  		}
-  		else{
-  			return make_tuple(max_delivery_vehicle,1);
-  		}
-  	}
+
+  	
 
 }
 
