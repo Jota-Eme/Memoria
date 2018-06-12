@@ -50,9 +50,11 @@ class Grasp{
 		//funcion que retorna el vehiculo que posea la ruta mas cara y especifica que tipo de ruta es
 		tuple<int,int> get_worst_route(Solution,int);
 		// funcion que retorna el vehiculo que posea la mayor capacidad de acuerdo a la ruta especificada
-		int get_more_capacity(Solution, int)
+		int get_more_capacity(Solution, int);
 		// MOVIMIENTO QUE QUITA UN NODO DE LA RUTA MAS LARGA Y LO COLOCA EN EL QUE TENGA MAS ESPACIO.
 		Solution mov_change_node(Solution);
+		// funcion que determina si una solucion es factible respecto a todas las restricciones
+		bool feasible_solution(Solution);
 		// FUNCION QUE EJECUTA EL ALGORITMO GRASP, HACIENDO TODOS LOS PASOS DE ESTE
 		Solution run(int,int,int,int,int,int,int);
 

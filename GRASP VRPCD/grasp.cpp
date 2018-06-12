@@ -709,7 +709,7 @@ Solution Grasp::mov_two_opt(Solution solution){
 	return solution;
 }
 
-// FUNCION QUE REALIZA LA CONSOLIDACION ENTRE 2 VEHICULOS Y CALCULA EL TIEMPO DE SALIDA DEL CD. (POR AHORA SOLO CONSIDERA EL DELIVERY ROUTE)
+// FUNCION QUE REALIZA LA CONSOLIDACION ENTRE 2 VEHICULOS Y CALCULA EL TIEMPO DE SALIDA DEL CD. 
 // VERIFICA EN PRIMER LUGAR QUE LA CONSOLIDACION SEA FACTIBLE EN CUANTO A CAPACIDAD
 // SETEA EL CAMPO DEPARTURE_CD_TIME DE CADA VEHICULO, SETEA EL REMAINING_CAPACITY Y MODIFICA LOS DELIVERY_ITEMS SEGUN LA CONSOLIDACION
 tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tuple<Vehicle, int> tuple2, int type){
@@ -1025,8 +1025,6 @@ tuple<int,int> Grasp::get_worst_route(Solution solution, int type){
   		return make_tuple(max_delivery_vehicle,1);
   	}
 
-  	
-
 }
 
 
@@ -1058,14 +1056,36 @@ int Grasp::get_more_capacity(Solution solution, int type){
   	}
 
   	if(type == 0){
-  		max_pickup_vehicle;
+  		return max_pickup_vehicle;
   	}
 
   	else{
-  		max_delivery_vehicle;
+  		return max_delivery_vehicle;
   	}
   	
 }
+
+Solution Grasp::consolidation(Solution solution){
+
+	// SE debe calcular el tiempo de descarga para todos los vehiculos
+	
+
+}
+
+
+bool Grasp::feasible_solution(Solution solution){
+
+	//verifica si es factible en cuanto a capacidad
+	if(!(solution->feasible_capacity())) return false;
+
+	// se aplica set_times() a todos los vehiculos
+	solution.set_vehicles_times();
+
+
+
+}
+
+
 
 
 Solution Grasp::mov_change_node(Solution solution){
@@ -1084,14 +1104,10 @@ Solution Grasp::mov_change_node(Solution solution){
 		pos_vehicle_2 += 1;
 	}
 
+
     return solution;
 
 }
-
-
-
-
-
 
 
 

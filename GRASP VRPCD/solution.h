@@ -15,5 +15,9 @@ class Solution{
 
 		// funciones de la clase
 		Solution();
+		// funcion que verifica si la solucion es factible o no respecto a todas las restricciones
+		bool feasible_capacity();
+		// funcion que aplica set_times() a todos los vehiculos
+		void set_vehicles_times();
 };
 #endif
