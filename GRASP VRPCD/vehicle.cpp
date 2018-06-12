@@ -208,3 +208,18 @@ float Vehicle::get_total_cost(){
 	return this->get_pickup_cost() + this->get_delivery_cost();
 
 }
+
+
+int Vehicle::get_pickup_capacity(){
+
+	int remaining_capacity = this->total_capacity;
+	int demand;
+
+	for(int i=0; (unsigned)i<this->pickup_items.size();i++){
+
+		demand = get<0>(this->pickup_items[i]);
+		remaining_capacity -= demand;
+	}
+
+	return remaining_capacity;
+}

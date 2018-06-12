@@ -1030,11 +1030,59 @@ tuple<int,int> Grasp::get_worst_route(Solution solution, int type){
 }
 
 
+int Grasp::get_more_capacity(Solution solution, int type){
+
+	float max_pickup_capacity = 0;
+	float max_delivery_capacity = 0;
+	int max_pickup_vehicle = -1;
+	int max_delivery_vehicle = -1;
+	float actual_pickup_capacity,actual_delivery_capacity;
+
+  	for(int i=0; (unsigned)i<solution.vehicles.size(); i++){
+
+	  	if(type==0){
+	  		actual_pickup_capacity = solution.vehicles[i].get_pickup_capacity();
+	  		if (actual_pickup_capacity > max_pickup_capacity){
+	  			max_pickup_capacity = actual_pickup_capacity;
+	  			max_pickup_vehicle = i;
+	  		}
+	  	}
+
+	  	else{
+	  		actual_delivery_capacity = solution.vehicles[i].remaining_capacity;
+			if (actual_delivery_capacity > max_delivery_capacity){
+	  			max_delivery_capacity = actual_delivery_capacity;
+	  			max_delivery_vehicle = i;
+	  		}
+	  	}
+  	}
+
+  	if(type == 0){
+  		max_pickup_vehicle;
+  	}
+
+  	else{
+  		max_delivery_vehicle;
+  	}
+  	
+}
+
 
 Solution Grasp::mov_change_node(Solution solution){
 
+	int type_route,pos_vehicle_1,pos_vehicle_2;
+	tie(pos_vehicle_1,type_route) = get_worst_route(solution,-1);
 
+	Solution temp_solution = solution;
 
+	temp_solution.vehicles.erase(temp_solution.vehicles.begin() + pos_vehicle_1);
+	//SE ENCUENTRA EL  VEHICULO QUE TENGA MAS CAPACIDAD SEGUN LA RUTA ESPECIFICADA
+	pos_vehicle_2 = get_more_capacity(temp_solution,type_route);
+
+	//SE calcula el indice del vehiculo 2, considerando la solucion con todo los vehiculos (sin eliminar 1)
+	if(pos_vehicle_2 >= pos_vehicle_1){
+		pos_vehicle_2 += 1;
+	}
 
     return solution;
 

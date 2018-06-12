@@ -36,6 +36,8 @@ class Vehicle{
 		float get_delivery_cost();
 		//funcion que retorna el costo del vehiculo
 		float get_total_cost();
+		//funcion que obtiene la capacidad restante con la que llega al CD luego de la ruta de pickup
+		int get_pickup_capacity();
 
 };
 #endif

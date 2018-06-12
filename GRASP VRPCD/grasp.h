@@ -47,8 +47,10 @@ class Grasp{
 		Solution mov_swap_node(Solution,int);
 		// FUNCION QUE EJECUTA EL MOVIMIENTO CAMBIO DE CROSSDOCKS
 		Solution mov_swap_cd(Solution);
-		//funcion que retorna el vehiculo mas caro
+		//funcion que retorna el vehiculo que posea la ruta mas cara y especifica que tipo de ruta es
 		tuple<int,int> get_worst_route(Solution,int);
+		// funcion que retorna el vehiculo que posea la mayor capacidad de acuerdo a la ruta especificada
+		int get_more_capacity(Solution, int)
 		// MOVIMIENTO QUE QUITA UN NODO DE LA RUTA MAS LARGA Y LO COLOCA EN EL QUE TENGA MAS ESPACIO.
 		Solution mov_change_node(Solution);
 		// FUNCION QUE EJECUTA EL ALGORITMO GRASP, HACIENDO TODOS LOS PASOS DE ESTE
