@@ -1066,30 +1066,77 @@ int Grasp::get_more_capacity(Solution solution, int type){
 }
 
 
+vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
+
+	vector<int> upload_item_position;
+	vector<int> vehicles_position;
+	vector<int> pickup_id;
+	int id;
+	// primero se obtienen la posicion de los items que estan en delivery y no en pickup (los que debe cargar)
+	upload_item_position = vehicle.get_items(1);
+	// luego se obtienen los id de los nodos correspondientes a los items
+	for(int i : upload_item_position){
+		// verificacion para testear, luego se puede sacar
+		id = (get<1>(vehicle.delivery_items[i])) * -1;
+		if(vehicle.delivery_route[i].id != id * -1){
+			cout<<" ERROR EN LA CONSOLIDACION, EL ITEM NO CORRESPONDE AL NODO GET INVOLVED VEHICLES" <<endl;
+		}
+		// -------------------------------------------------------------- 
+
+		// SE busca entre todos los vehiculos, aquel que posea el nodo correspondiente en la ruta de pickup y se guarda la posicion
+		for( int i=0; (unsigned)i < solution.vehicles.size(); i++ ){
+
+			pickup_id.clear();
+
+			// se crea el vector de enteros con los id para usar el find
+			for(int j=0;(unsigned)j < solution.vehicles[i].pickup_route.size();j++){
+
+				pickup_id.push_back(solution.vehicles[i].pickup_route[j].id );
+
+			}
+			// si el id se encuentra en la ruta de pickup del vehiculo i, se agrega esta posicion como vehiculo involucrado
+			if ( find(pickup_id.begin(), pickup_id.end(), id) != pickup_id.end() ){
+
+				if(!(find(vehicles_position.begin(), vehicles_position.end(), i) != vehicles_position.end())){
+					vehicles_position.push_back(i);
+				}
+
+				break;
+			}
+
+		}
+
+	}
+
+	return vehicles_position;
+}
+
+
 
 Solution Grasp::consolidation2(Solution solution){
 
 	// SE debe calcular el tiempo de descarga para todos los vehiculos
 	vector<int> download_item_position;
 	vector <Vehicle>::iterator vehicle_iterator;
-	int cdtime, arrival_time, unload_items, load_items;
+	int cdtime, arrival_time, unload_items;
 	// tiempo en el que termina de descargar todos los productos
 	int d_time;
 	// vector que contiene los tiempos de descarga de todos los vehiculos
 	vector<int> download_times;
+	Solution temp_solution = solution;
 
-	for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator) {
+	for (vehicle_iterator = temp_solution.vehicles.begin(); vehicle_iterator != temp_solution.vehicles.end(); ++vehicle_iterator) {
 
 		download_item_position = vehicle_iterator->get_items(0);
 		cdtime = get<0>(vehicle_iterator->crossdock_times[0]);
 		arrival_time = max(cdtime, vehicle_iterator->crossdock_route[0].ready_time);
 		d_time = 0;
-		
+
 		for(int i : download_item_position){
 			// verificacion para testear, luego se puede sacar
 			int id = get<1>(vehicle_iterator->pickup_items[i]);
 			if(vehicle_iterator->pickup_route[i].id != id){
-				cout<<" ERROR EN LA CONSOLIDACION, EL ITEM NO CORRESPONDE AL NODO" <<endl;
+				cout<<" ERROR EN LA CONSOLIDACION, EL ITEM NO CORRESPONDE AL NODO CONSOLIDATION2 DOWNLOAD" <<endl;
 			}
 			// -------------------------------------------------------------- 
 
@@ -1098,18 +1145,77 @@ Solution Grasp::consolidation2(Solution solution){
 
 		}
 
-		d_time += arrival_time + vehicle_iterator->fixed_time;
+		// si no hay items que descargar, el tiempo en el que esta listo es el arrival time
+		if(download_item_position.empty()){
+			d_time += arrival_time;
+		}
+		else{
+			d_time += arrival_time + vehicle_iterator->fixed_time;
+		}
+
 	 	download_times.push_back(d_time);
 
 	}
 
 	//---------------------------------------------------------------------
 
-	// SE DEBEN ENCONTRAR LOS VEHICULOS INVOLUCRADOS (LOS QUE SE ENCUENTREN EN DELIVERY Y NO EN PICKUP)
+	// PARA CADA VEHICULO SE DEBEN ENCONTRAR LOS VEHICULOS INVOLUCRADOS (LOS QUE SE ENCUENTREN EN DELIVERY Y NO EN PICKUP)
+	vector<int> involved_vehicles_pos; 
+	int ready_load_time, u_time, reload_items;
 
 
+	for (int i = 0; (unsigned)i < temp_solution.vehicles.size(); i++){
 
-	return solution;
+		involved_vehicles_pos = this->get_involved_vehicles(temp_solution.vehicles[i],solution);
+		// si no hay vehiculos involucrados el departure_cd_time = d_time
+		if(involved_vehicles_pos.empty()){
+			temp_solution.vehicles[i].departure_cd_time = download_times[i];
+		}
+		else{
+
+			vector<int> download_involved_times;
+
+			for(int j : involved_vehicles_pos){
+				download_involved_times.push_back(download_times[j]);
+			}
+			// se agrega el tiempo de descarga del vehiculo i 
+			download_involved_times.push_back(download_times[i]);
+
+			// SE CALCULA EL READY LOAD TIME
+			vector<int>::const_iterator it;
+			it = max_element(download_involved_times.begin(), download_involved_times.end());
+			ready_load_time = *it;
+
+			// SE CALCULA EL TIEMPO DE CARGA DE ITEMS
+			vector<int> upload_item_position = temp_solution.vehicles[i].get_items(1);
+
+			u_time = 0;
+
+			for(int j : upload_item_position){
+				// verificacion para testear, luego se puede sacar
+				int id = get<1>(temp_solution.vehicles[i].delivery_items[j]);
+				if(temp_solution.vehicles[i].delivery_route[j].id != id){
+					cout<<" ERROR EN LA CONSOLIDACION, EL ITEM NO CORRESPONDE AL NODO CONSOLIDATION2 UPLOAD" <<endl;
+				}
+				// -------------------------------------------------------------- 
+
+				reload_items = get<0>(temp_solution.vehicles[i].delivery_items[j]);
+		 		u_time +=  reload_items * temp_solution.vehicles[i].unit_time;
+
+			}
+
+			// tiempo de carga total para el vehiculo i
+			u_time += temp_solution.vehicles[i].fixed_time;
+
+			// finalmente se setea el departure_time
+			temp_solution.vehicles[i].departure_cd_time = ready_load_time + u_time;
+
+		}
+		
+	}
+
+
+	return temp_solution;
 
 }
 
@@ -1122,8 +1228,17 @@ bool Grasp::feasible_solution(Solution solution){
 	// se aplica set_times() a todos los vehiculos
 	solution.set_vehicles_times();
 
+	//se aplica la consolidacion
+	solution = this->consolidation2(solution);
+
+	// se aplica nuevamente el set_times() a todos los vehiculos para setear el departure_cd_time
+	solution.set_vehicles_times();
+
+	// se revisa la factibilidad en cuanto a TW
+	if(!(solution.feasible_tw())) return false;
 
 
+	return true;
 }
 
 

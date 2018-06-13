@@ -267,3 +267,5 @@ vector<int> Vehicle::get_items(int type){
 	return items_position;
 
 }
+
+

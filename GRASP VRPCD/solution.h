@@ -17,6 +17,8 @@ class Solution{
 		Solution();
 		// funcion que verifica si la solucion es factible o no respecto a todas las restricciones
 		bool feasible_capacity();
+		// funcion que verifica si la solucion es factible en relacion a TW
+		bool feasible_tw();
 		// funcion que aplica set_times() a todos los vehiculos
 		void set_vehicles_times();
 };

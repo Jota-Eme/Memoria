@@ -7,12 +7,13 @@ Solution::Solution(){
 bool Solution::feasible_capacity(){
 
 	vector <Vehicle>::iterator vehicle_iterator;
-	int capacity,demand,remaining_pickup_capacity,remaining_delivery_capacity;
+	int demand,remaining_pickup_capacity,remaining_delivery_capacity;
 
 
 	for (vehicle_iterator = this->vehicles.begin(); vehicle_iterator != this->vehicles.end(); ++vehicle_iterator) {
 
-		capacity = vehicle_iterator->total_capacity;
+		remaining_pickup_capacity = vehicle_iterator->total_capacity;
+		remaining_delivery_capacity = vehicle_iterator->total_capacity;
 
 		for(int i=0; (unsigned)i<vehicle_iterator->pickup_items.size();i++){
 
@@ -35,6 +36,13 @@ bool Solution::feasible_capacity(){
 	return true;
 }
 
+bool Solution::feasible_tw(){
+	
+	for (int i=0; (unsigned)i < this->vehicles.size(); i++) {
+		if(!this->vehicles[i].feasible_route()) return false;
+	}
+	return true
+}
 
 void Solution::set_vehicles_times(){
 	// se aplica set_times() a todos los vehiculos

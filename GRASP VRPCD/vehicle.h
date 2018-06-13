@@ -7,6 +7,8 @@
 #include "crossdock.h"
 #include "node.h"
 
+
+
 class Vehicle{
 	public:
 		int total_capacity,fixed_time,unit_time,remaining_capacity;
@@ -40,6 +42,7 @@ class Vehicle{
 		int get_pickup_capacity();
 		// funcion que obtiene los items a descargar en un CD si la opcion es 0, y los items a cargar en un CD si la opcion es 1
 		vector<int> get_items(int);
+		
 
 };
 #endif
