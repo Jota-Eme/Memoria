@@ -38,6 +38,8 @@ class Vehicle{
 		float get_total_cost();
 		//funcion que obtiene la capacidad restante con la que llega al CD luego de la ruta de pickup
 		int get_pickup_capacity();
+		// funcion que obtiene los items a descargar en un CD si la opcion es 0, y los items a cargar en un CD si la opcion es 1
+		vector<int> get_items(int);
 
 };
 #endif

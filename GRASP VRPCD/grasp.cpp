@@ -1065,10 +1065,51 @@ int Grasp::get_more_capacity(Solution solution, int type){
   	
 }
 
-Solution Grasp::consolidation(Solution solution){
+
+
+Solution Grasp::consolidation2(Solution solution){
 
 	// SE debe calcular el tiempo de descarga para todos los vehiculos
-	
+	vector<int> download_item_position;
+	vector <Vehicle>::iterator vehicle_iterator;
+	int cdtime, arrival_time, unload_items, load_items;
+	// tiempo en el que termina de descargar todos los productos
+	int d_time;
+	// vector que contiene los tiempos de descarga de todos los vehiculos
+	vector<int> download_times;
+
+	for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator) {
+
+		download_item_position = vehicle_iterator->get_items(0);
+		cdtime = get<0>(vehicle_iterator->crossdock_times[0]);
+		arrival_time = max(cdtime, vehicle_iterator->crossdock_route[0].ready_time);
+		d_time = 0;
+		
+		for(int i : download_item_position){
+			// verificacion para testear, luego se puede sacar
+			int id = get<1>(vehicle_iterator->pickup_items[i]);
+			if(vehicle_iterator->pickup_route[i].id != id){
+				cout<<" ERROR EN LA CONSOLIDACION, EL ITEM NO CORRESPONDE AL NODO" <<endl;
+			}
+			// -------------------------------------------------------------- 
+
+			unload_items = get<0>(vehicle_iterator->pickup_items[i]);
+	 		d_time +=  unload_items * vehicle_iterator->unit_time;
+
+		}
+
+		d_time += arrival_time + vehicle_iterator->fixed_time;
+	 	download_times.push_back(d_time);
+
+	}
+
+	//---------------------------------------------------------------------
+
+	// SE DEBEN ENCONTRAR LOS VEHICULOS INVOLUCRADOS (LOS QUE SE ENCUENTREN EN DELIVERY Y NO EN PICKUP)
+
+
+
+	return solution;
 
 }
 
@@ -1076,7 +1117,7 @@ Solution Grasp::consolidation(Solution solution){
 bool Grasp::feasible_solution(Solution solution){
 
 	//verifica si es factible en cuanto a capacidad
-	if(!(solution->feasible_capacity())) return false;
+	if(!(solution.feasible_capacity())) return false;
 
 	// se aplica set_times() a todos los vehiculos
 	solution.set_vehicles_times();

@@ -55,6 +55,8 @@ class Grasp{
 		Solution mov_change_node(Solution);
 		// funcion que determina si una solucion es factible respecto a todas las restricciones
 		bool feasible_solution(Solution);
+		//funcion que realiza todo el proceso de consolidacion y setea el atributo departure_cd_time
+		Solution consolidation2(Solution);
 		// FUNCION QUE EJECUTA EL ALGORITMO GRASP, HACIENDO TODOS LOS PASOS DE ESTE
 		Solution run(int,int,int,int,int,int,int);
 

@@ -223,3 +223,47 @@ int Vehicle::get_pickup_capacity(){
 
 	return remaining_capacity;
 }
+
+
+vector<int> Vehicle::get_items(int type){
+
+	vector<int> pickup_id, delivery_id,items_position;
+
+	for(int i=0;(unsigned)i<this->pickup_route.size();i++){
+
+		pickup_id.push_back(this->pickup_route[i].id );
+
+	}
+
+	for(int i=0;(unsigned)i<this->delivery_route.size();i++){
+
+		delivery_id.push_back(this->delivery_route[i].id * -1);
+
+	}
+
+ // BUSCA LOS ITEMS DE DESCARGA (LOS QUE ESTAN EN PICKUP Y NO EN DELIVERY)
+	if(type == 0){
+
+		for(int i=0; (unsigned)i < pickup_id.size(); i++){
+
+			if ( !(find(delivery_id.begin(), delivery_id.end(), pickup_id[i]) != delivery_id.end() )){
+				items_position.push_back(i);
+			}
+		}
+
+	}
+
+// BUSCA LOS ITEMS DE CARGA (LOS QUE ESTAN EN DELIVERY Y NO EN PICKUP)
+	else{
+
+		for(int i=0; (unsigned)i < delivery_id.size(); i++){
+
+			if ( !(find(pickup_id.begin(), pickup_id.end(), delivery_id[i]) != pickup_id.end() )){
+				items_position.push_back(i);
+			}
+		}
+	}
+
+	return items_position;
+
+}
