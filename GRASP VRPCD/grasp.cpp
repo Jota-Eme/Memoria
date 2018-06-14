@@ -1290,7 +1290,7 @@ Solution Grasp::mov_change_node(Solution solution){
 	}
 
 	// se setean los vehiculos correspondietnes
-	Vehicle vehicle1 = solution[pos_vehicle_1];
+	Vehicle vehicle1 = solution.vehicles.[pos_vehicle_1];
 	Vehicle vehicle2;
 
 	//se quita el nodo de la ruta mas cara y se pone en todos los posibles lugares del vehiculo con mas capacidad
@@ -1309,7 +1309,7 @@ Solution Grasp::mov_change_node(Solution solution){
 		for(int i=0; (unsigned)i <= vehicle2.pickup_route.size(); i++){
 
 			temp_solution = solution;
-			vehicle2 = temp_solution[pos_vehicle_2];
+			vehicle2 = temp_solution.vehicles.[pos_vehicle_2];
 			temp_solution.vehicles[pos_vehicle_1] = vehicle1;
 
 			vehicle2.pickup_route.insert(vehicle2.pickup_route.begin()+i, suplier_node);
@@ -1335,10 +1335,10 @@ Solution Grasp::mov_change_node(Solution solution){
 		vehicle1.delivery_route.erase(vehicle1.delivery_route.begin() + random_node);
 		// agrego el vehiculo con el nodo quitado a la solucion
 		// se comienza a probar todos los posibles lugares de insercion del nodo
-		for(int i=0; (unsigned)i <= vehicle_2.delivery_route.size(); i++){
+		for(int i=0; (unsigned)i <= vehicle2.delivery_route.size(); i++){
 
 			temp_solution = solution;
-			vehicle2 = temp_solution[pos_vehicle_2];
+			vehicle2 = temp_solution.vehicles.[pos_vehicle_2];
 			temp_solution.vehicles[pos_vehicle_1] = vehicle1;
 
 			vehicle2.delivery_route.insert(vehicle2.delivery_route.begin()+i, customer_node);
