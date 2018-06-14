@@ -1154,6 +1154,9 @@ Solution Grasp::consolidation2(Solution solution){
 	vector<int> download_times;
 	Solution temp_solution = solution;
 
+	cout<<"consolidation antes primer FOR"<<endl;
+
+
 	for (vehicle_iterator = temp_solution.vehicles.begin(); vehicle_iterator != temp_solution.vehicles.end(); ++vehicle_iterator) {
 
 		download_item_position = vehicle_iterator->get_items(0);
@@ -1191,6 +1194,7 @@ Solution Grasp::consolidation2(Solution solution){
 	// PARA CADA VEHICULO SE DEBEN ENCONTRAR LOS VEHICULOS INVOLUCRADOS (LOS QUE SE ENCUENTREN EN DELIVERY Y NO EN PICKUP)
 	vector<int> involved_vehicles_pos; 
 	int ready_load_time, u_time, reload_items;
+	cout<<"consolidation antes 2 FOR"<<endl;
 
 
 	for (int i = 0; (unsigned)i < temp_solution.vehicles.size(); i++){
@@ -1252,6 +1256,8 @@ Solution Grasp::consolidation2(Solution solution){
 bool Grasp::feasible_solution(Solution solution){
 
 	//verifica si es factible en cuanto a capacidad
+	cout<<"ANTES DE  capacity"<<endl;
+
 	if(!(solution.feasible_capacity())) return false;
 	cout<<"pase  capacity"<<endl;
 
@@ -1391,6 +1397,8 @@ Solution Grasp::mov_change_node(Solution solution){
 					best_solution = temp_solution;
 				}
 			}
+			cout<<"NO ENTRE AL IF FEASIBLE SOLUTION"<<endl;
+
 
 		}
 

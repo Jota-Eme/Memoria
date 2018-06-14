@@ -9,17 +9,19 @@ bool Solution::feasible_capacity(){
 	vector <Vehicle>::iterator vehicle_iterator;
 	int demand,remaining_pickup_capacity,remaining_delivery_capacity;
 
-
+	cout<<"FEASIBLE CAPACITY: ANTES PRIMER FOR"<<endl;
 	for (vehicle_iterator = this->vehicles.begin(); vehicle_iterator != this->vehicles.end(); ++vehicle_iterator) {
 
 		remaining_pickup_capacity = vehicle_iterator->total_capacity;
 		remaining_delivery_capacity = vehicle_iterator->total_capacity;
+	cout<<"FEASIBLE CAPACITY: ANTES SEGUNDO FOR"<<endl;
 
 		for(int i=0; (unsigned)i<vehicle_iterator->pickup_items.size();i++){
 
 			demand = get<0>(vehicle_iterator->pickup_items[i]);
 			remaining_pickup_capacity -= demand;
 		}
+	cout<<"FEASIBLE CAPACITY: ANTES TERCER FOR"<<endl;
 
 		for(int i=0; (unsigned)i<vehicle_iterator->delivery_items.size();i++){
 
