@@ -1290,7 +1290,7 @@ Solution Grasp::mov_change_node(Solution solution){
 	}
 
 	// se setean los vehiculos correspondietnes
-	Vehicle vehicle1 = solution.vehicles.[pos_vehicle_1];
+	Vehicle vehicle1 = solution.vehicles[pos_vehicle_1];
 	Vehicle vehicle2;
 
 	//se quita el nodo de la ruta mas cara y se pone en todos los posibles lugares del vehiculo con mas capacidad
@@ -1298,21 +1298,28 @@ Solution Grasp::mov_change_node(Solution solution){
 	Solution best_solution = solution;
 	float best_cost = this->evaluation_function(solution);
 	float actual_cost;
-
+	cout<<"antes de un if"<<endl;
 	if(type_route == 0){
 
 		random_node = rand() % vehicle1.pickup_route.size();
 		Suplier suplier_node = vehicle1.pickup_route[random_node];
+		tuple<int,int> item = vehicle1.pickup_items[random_node];
 		vehicle1.pickup_route.erase(vehicle1.pickup_route.begin() + random_node);
+		vehicle1.pickup_items.erase(vehicle1.pickup_items.begin() + random_node);
 		// agrego el vehiculo con el nodo quitado a la solucion
 		// se comienza a probar todos los posibles lugares de insercion del nodo
+		cout<<"dentro de if pickup antes de for"<<endl;
+
 		for(int i=0; (unsigned)i <= vehicle2.pickup_route.size(); i++){
+			cout<<vehicle2.pickup_route.size()<<endl;
+			cout<<"dentro del for pickup"<<endl;
 
 			temp_solution = solution;
-			vehicle2 = temp_solution.vehicles.[pos_vehicle_2];
+			vehicle2 = temp_solution.vehicles[pos_vehicle_2];
 			temp_solution.vehicles[pos_vehicle_1] = vehicle1;
 
 			vehicle2.pickup_route.insert(vehicle2.pickup_route.begin()+i, suplier_node);
+			vehicle2.pickup_items.insert(vehicle2.pickup_items.begin()+i, item);
 			temp_solution.vehicles[pos_vehicle_2] = vehicle2;
 
 			if(this->feasible_solution(temp_solution)){
@@ -1332,16 +1339,24 @@ Solution Grasp::mov_change_node(Solution solution){
 		
 		random_node = rand() % vehicle1.delivery_route.size();
 		Customer customer_node = vehicle1.delivery_route[random_node];
+		tuple<int,int> item = vehicle1.delivery_items[random_node];
 		vehicle1.delivery_route.erase(vehicle1.delivery_route.begin() + random_node);
+		vehicle1.delivery_items.erase(vehicle1.delivery_items.begin() + random_node);
 		// agrego el vehiculo con el nodo quitado a la solucion
 		// se comienza a probar todos los posibles lugares de insercion del nodo
+		cout<<"dentro de if delivery antes de for"<<endl;
+
 		for(int i=0; (unsigned)i <= vehicle2.delivery_route.size(); i++){
+			cout<<vehicle2.delivery_route.size()<<endl;
+			
+			cout<<"dentro de for delivery"<<endl;
 
 			temp_solution = solution;
-			vehicle2 = temp_solution.vehicles.[pos_vehicle_2];
+			vehicle2 = temp_solution.vehicles[pos_vehicle_2];
 			temp_solution.vehicles[pos_vehicle_1] = vehicle1;
 
 			vehicle2.delivery_route.insert(vehicle2.delivery_route.begin()+i, customer_node);
+			vehicle2.delivery_items.insert(vehicle2.delivery_items.begin()+i, item);
 			temp_solution.vehicles[pos_vehicle_2] = vehicle2;
 
 			if(this->feasible_solution(temp_solution)){
