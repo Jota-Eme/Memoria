@@ -269,3 +269,18 @@ vector<int> Vehicle::get_items(int type){
 }
 
 
+void Vehicle::set_remaining_capacity(){
+
+	int remaining_cap = this->total_capacity;
+	int demand;
+
+	for(int i=0; (unsigned)i<this->delivery_items.size();i++){
+		demand = get<0>(this->delivery_items[i]);
+		remaining_cap -= demand;
+	}
+
+	this->remaining_capacity = remaining_cap;
+
+}
+
+

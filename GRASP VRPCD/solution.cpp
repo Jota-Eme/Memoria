@@ -37,11 +37,11 @@ bool Solution::feasible_capacity(){
 }
 
 bool Solution::feasible_tw(){
-	
+
 	for (int i=0; (unsigned)i < this->vehicles.size(); i++) {
 		if(!this->vehicles[i].feasible_route()) return false;
 	}
-	return true
+	return true;
 }
 
 void Solution::set_vehicles_times(){

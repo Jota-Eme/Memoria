@@ -74,6 +74,24 @@ void print_solution(Solution solution){
 		}
 		cout<<"]"<<" | esp. disp: "<<vehicle_iterator->remaining_capacity<< "  |  pickup cost: "<< vehicle_iterator->get_pickup_cost() <<" |  delivery cost: "<< vehicle_iterator->get_delivery_cost()<<"  |  total cost: "<< vehicle_iterator->get_total_cost()<<endl;
 		i++;
+
+
+		cout<<" < ";
+		for(int j=0; (unsigned)j<vehicle_iterator->pickup_items.size();j++ ){
+
+			cout<<get<1>(vehicle_iterator->pickup_items[j])<<" ";
+
+		}
+		cout<<" >   ";
+		cout<<" < ";
+		for(int j=0; (unsigned)j<vehicle_iterator->delivery_items.size();j++ ){
+
+			cout<<get<1>(vehicle_iterator->delivery_items[j])<<" ";
+
+		}
+
+		cout<<" > "<<endl;
+
 	}
 
 }
@@ -102,7 +120,7 @@ void print_times(Solution solution){
 
 }
 
-bool feasible_solution(Solution solution){
+/*bool feasible_solution(Solution solution){
 	
 	vector <Vehicle>::iterator vehicle_iterator;
 	vector<Vehicle> vehicles = solution.vehicles;
@@ -111,7 +129,7 @@ bool feasible_solution(Solution solution){
 		if(vehicle_iterator->feasible_route() == false) feasible = false;
 	}
 	return feasible;
-}
+}*/
 
 
 void export_solution(Solution solution){
