@@ -1253,18 +1253,28 @@ bool Grasp::feasible_solution(Solution solution){
 
 	//verifica si es factible en cuanto a capacidad
 	if(!(solution.feasible_capacity())) return false;
+	cout<<"pase  capacity"<<endl;
+
 
 	// se aplica set_times() a todos los vehiculos
 	solution.set_vehicles_times();
+	cout<<"pase  times"<<endl;
+
 
 	//se aplica la consolidacion
 	solution = this->consolidation2(solution);
+	cout<<"pase  consolidation"<<endl;
+
 
 	// se aplica nuevamente el set_times() a todos los vehiculos para setear el departure_cd_time
 	solution.set_vehicles_times();
+	cout<<"pase  times 2"<<endl;
+
 
 	// se revisa la factibilidad en cuanto a TW
 	if(!(solution.feasible_tw())) return false;
+	cout<<"pase  tw"<<endl;
+
 
 
 	return true;
@@ -1276,22 +1286,29 @@ Solution Grasp::mov_change_node(Solution solution){
 
 	int type_route,pos_vehicle_1,pos_vehicle_2;
 	// SE encuentra el vehiculo con la ruta mas cara
+	cout<<"antes get get_worst_route"<<endl;
+
 	tie(pos_vehicle_1,type_route) = get_worst_route(solution,-1);
 
 	Solution temp_solution = solution;
+	cout<<"antes 1282"<<endl;
 
 	temp_solution.vehicles.erase(temp_solution.vehicles.begin() + pos_vehicle_1);
 	//SE ENCUENTRA EL  VEHICULO QUE TENGA MAS CAPACIDAD SEGUN LA RUTA ESPECIFICADA
+	cout<<"antes get get_more_capacity"<<endl;
+
 	pos_vehicle_2 = get_more_capacity(temp_solution,type_route);
+	cout<<"antes if 1286"<<endl;
 
 	//SE calcula el indice del vehiculo 2, considerando la solucion con todo los vehiculos (sin eliminar 1)
 	if(pos_vehicle_2 >= pos_vehicle_1){
 		pos_vehicle_2 += 1;
 	}
+	cout<<"antes vehicles"<<endl;
 
 	// se setean los vehiculos correspondietnes
 	Vehicle vehicle1 = solution.vehicles[pos_vehicle_1];
-	Vehicle vehicle2;
+	Vehicle vehicle2 = solution.vehicles[pos_vehicle_2];
 
 	//se quita el nodo de la ruta mas cara y se pone en todos los posibles lugares del vehiculo con mas capacidad
 	int random_node;
@@ -1354,14 +1371,20 @@ Solution Grasp::mov_change_node(Solution solution){
 			temp_solution = solution;
 			vehicle2 = temp_solution.vehicles[pos_vehicle_2];
 			temp_solution.vehicles[pos_vehicle_1] = vehicle1;
+			cout<<"dentro de for delivery 1364"<<endl;
 
 			vehicle2.delivery_route.insert(vehicle2.delivery_route.begin()+i, customer_node);
 			vehicle2.delivery_items.insert(vehicle2.delivery_items.begin()+i, item);
 			temp_solution.vehicles[pos_vehicle_2] = vehicle2;
+			cout<<"dentro de for delivery 1369"<<endl;
+
 
 			if(this->feasible_solution(temp_solution)){
+			cout<<"dentro de feasible solution delivery"<<endl;
+
 
 				actual_cost = this->evaluation_function(temp_solution);
+			cout<<"despues evaluaation function"<<endl;
 
 				if(actual_cost <= best_cost){
 					best_cost = actual_cost;
@@ -1422,18 +1445,26 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 		if(random_move_1<porc_two_opt){
 			new_solution = this->mov_two_opt(new_solution);
+			cout<<"termine 2opt"<<endl;
+
 		}
 
 		if(random_move_2<porc_swap_node_pick){
 			new_solution = this->mov_swap_node(new_solution,0);
+			cout<<"termine swap pick"<<endl;
+
 		}
 
 		if(random_move_3<porc_swap_node_del){
 			new_solution = this->mov_swap_node(new_solution,1);
+			cout<<"termine swap delivery"<<endl;
+
 		}
 
 		if(random_move_4<porc_change_node){
 			new_solution = this->mov_change_node(new_solution);
+			cout<<"termine change node"<<endl;
+
 		}
 
 		new_time = this->evaluation_function(new_solution);
