@@ -26,6 +26,12 @@ class Vehicle{
 		int departure_cd_time;
 
 
+		// PRE PROCESAMIENTO ------------------------------------------
+
+		// lista de vehiculos involucrados (los que tienen items que se deben cargar)
+		vector<Vehicle> involved;
+
+
 		// funciones de la clase
 		Vehicle(int,int,int, Node);
 		Vehicle();
