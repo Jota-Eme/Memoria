@@ -2,10 +2,12 @@
 
 
 // CONSTRUCTOR
-Grasp::Grasp (Instance instance, int list_size, int tabu_capacity_size){
+Grasp::Grasp (Instance instance, int list_size, int tabu_capacity_size, int tabu_worst_route_size ){
 	this->instance = instance;
 	this->list_size = list_size;
 	this->tabu_capacity_size = tabu_capacity_size;
+	this->tabu_worst_route_size = tabu_worst_route_size;
+	this->criteria = 0;
 }
 
 Grasp::Grasp(){
@@ -569,8 +571,9 @@ Solution Grasp::mov_two_opt(Solution solution){
 	vector<tuple<int,int>> selected_items;
 	int vehicle_position = -1;
 	int type_route = -1;
+	vector<int> tabu_worst_route;
 
-	tie(vehicle_position,type_route) = this->get_worst_route(solution,-1);
+	tie(vehicle_position,type_route) = this->get_worst_route(solution,-1,tabu_worst_route);
 
 	//se selecciona la ruta mas cara
 	//int random_vehicle = rand() % solution.vehicles.size();
@@ -828,13 +831,14 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 
 	//SE encuentra el vehiculo que posea la ruta mas cara
 	int type_temp,pos_vehicle_1,pos_vehicle_2;
-	tie(pos_vehicle_1,type_temp) = get_worst_route(solution,type);
+	vector<int> tabu_worst_route;
+	tie(pos_vehicle_1,type_temp) = get_worst_route(solution,type,tabu_worst_route);
 
 	Solution temp_solution = solution;
 
 	temp_solution.vehicles.erase(temp_solution.vehicles.begin() + pos_vehicle_1);
 	//SE ENCUENTRA EL SEGUNDO VEHICULO CON RUTA MAS CARA
-	tie(pos_vehicle_2,type_temp) = get_worst_route(temp_solution,type);
+	tie(pos_vehicle_2,type_temp) = get_worst_route(temp_solution,type,tabu_worst_route);
 
 	//SE calcula el indice del vehiculo 2, considerando la solucion con todo los vehiculos (sin eliminar 1)
 	if(pos_vehicle_2 >= pos_vehicle_1){
@@ -993,7 +997,7 @@ Solution Grasp::mov_swap_cd(Solution solution){
 
 
 //FUNCION QUE RETORNA LA RUTA MAS CARA ENTRE TODOS LOS VEHICULOS DE LA FORMA <POS_VEHICULO, TIPO_RUTA>, SI TYPE ES -1 BUSCA ENTRE TODAS LAS RUTAS, SI ES 0 EN PICKUP SI ES 1 EN DELIVERY
-tuple<int,int> Grasp::get_worst_route(Solution solution, int type){
+tuple<int,int> Grasp::get_worst_route(Solution solution, int type, vector<int> tabu_worst_route){
 
 	float max_pickup_cost = 0;
 	float max_delivery_cost = 0;
@@ -1002,39 +1006,41 @@ tuple<int,int> Grasp::get_worst_route(Solution solution, int type){
 	float actual_pickup_cost,actual_delivery_cost;
 
   	for(int i=0; (unsigned)i<solution.vehicles.size(); i++){
+  		if (!(find(tabu_worst_route.begin(), tabu_worst_route.end(), solution.vehicles[i].id) != tabu_worst_route.end())){
 
-  		if(type == -1){
+	  		if(type == -1){
 
-	  		actual_pickup_cost = solution.vehicles[i].get_pickup_cost();
-	  		actual_delivery_cost = solution.vehicles[i].get_delivery_cost();
+		  		actual_pickup_cost = solution.vehicles[i].get_pickup_cost();
+		  		actual_delivery_cost = solution.vehicles[i].get_delivery_cost();
 
-	  		if (actual_pickup_cost > max_pickup_cost){
-	  			max_pickup_cost = actual_pickup_cost;
-	  			max_pickup_vehicle = i;
-	  		}
+		  		if (actual_pickup_cost > max_pickup_cost){
+		  			max_pickup_cost = actual_pickup_cost;
+		  			max_pickup_vehicle = i;
+		  		}
 
-	  		if (actual_delivery_cost > max_delivery_cost){
-	  			max_delivery_cost = actual_delivery_cost;
-	  			max_delivery_vehicle = i;
-	  		}
-	  	}
+		  		if (actual_delivery_cost > max_delivery_cost){
+		  			max_delivery_cost = actual_delivery_cost;
+		  			max_delivery_vehicle = i;
+		  		}
+		  	}
 
 
-	  	else if(type==0){
-	  		actual_pickup_cost = solution.vehicles[i].get_pickup_cost();
-	  		if (actual_pickup_cost > max_pickup_cost){
-	  			max_pickup_cost = actual_pickup_cost;
-	  			max_pickup_vehicle = i;
-	  		}
-	  	}
+		  	else if(type==0){
+		  		actual_pickup_cost = solution.vehicles[i].get_pickup_cost();
+		  		if (actual_pickup_cost > max_pickup_cost){
+		  			max_pickup_cost = actual_pickup_cost;
+		  			max_pickup_vehicle = i;
+		  		}
+		  	}
 
-	  	else{
-	  		actual_delivery_cost = solution.vehicles[i].get_delivery_cost();
-			if (actual_delivery_cost > max_delivery_cost){
-	  			max_delivery_cost = actual_delivery_cost;
-	  			max_delivery_vehicle = i;
-	  		}
-	  	}
+		  	else{
+		  		actual_delivery_cost = solution.vehicles[i].get_delivery_cost();
+				if (actual_delivery_cost > max_delivery_cost){
+		  			max_delivery_cost = actual_delivery_cost;
+		  			max_delivery_vehicle = i;
+		  		}
+		  	}
+		}
   	}
 
   	if(type == -1){
@@ -1300,12 +1306,12 @@ bool Grasp::feasible_solution(Solution solution){
 
 
 
-tuple<Solution,vector<int>> Grasp::mov_change_node(Solution solution, vector<int> tabu_more_capacity){
+tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solution, vector<int> tabu_more_capacity,vector<int> tabu_worst_route){
 
 	int type_route,pos_vehicle_1,pos_vehicle_2;
 	// SE encuentra el vehiculo con la ruta mas cara
 
-	tie(pos_vehicle_1,type_route) = get_worst_route(solution,-1);
+	tie(pos_vehicle_1,type_route) = get_worst_route(solution,-1,tabu_worst_route);
 
 	Solution temp_solution = solution;
 
@@ -1418,18 +1424,34 @@ tuple<Solution,vector<int>> Grasp::mov_change_node(Solution solution, vector<int
 		}
 
 	}
+	// ACTUALIZACION LISTA TABU 
 
 	if(add_tabu){
 		if(tabu_more_capacity.size() == (unsigned)this->tabu_capacity_size){
 			tabu_more_capacity.erase(tabu_more_capacity.begin() + 0);
 			tabu_more_capacity.push_back(solution.vehicles[pos_vehicle_2].id);
+			this->criteria ++;
 		}
 		else{
 			tabu_more_capacity.push_back(solution.vehicles[pos_vehicle_2].id);
 		}
+
+		// CRITERIO PARA TRABAJAR CON EL TABU DE WORST ROUTE
+		// actualmente si se actualiza la lista tabu la misma cantidad de veces que su tamano se utiliza la otra lista
+		if(this->criteria == this->tabu_capacity_size){
+			if(tabu_worst_route.size() == (unsigned)this->tabu_worst_route_size){
+				tabu_worst_route.erase(tabu_worst_route.begin() + 0);
+				tabu_worst_route.push_back(solution.vehicles[pos_vehicle_1].id);
+			}
+			else{
+				tabu_worst_route.push_back(solution.vehicles[pos_vehicle_1].id);
+			}
+			this->criteria = 0;
+		}
+
 	}
 
-    return make_tuple(best_solution,tabu_more_capacity);
+    return make_tuple(best_solution,tabu_more_capacity,tabu_worst_route);
 
 }
 
@@ -1451,7 +1473,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	myfile.open ("result.txt");
 
 	//------------------------------------------------------------------------------
-
+	this->criteria = 0;
 	Solution new_solution = this->distance_initial_solution();
 	//Solution new_solution = this->demand_initial_solution();
 	//Solution new_solution = this->hybrid_initial_solution();
@@ -1463,6 +1485,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	float best_time = this->evaluation_function(best_solution);
 	float new_time;
 	vector<int> tabu_more_capacity;
+	vector<int> tabu_worst_route;
 
 	clock_t start_time, end_time;
 	double total_time;
@@ -1475,6 +1498,30 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		int random_move_2 = rand() % 101;
 		int random_move_3 = rand() % 101;
 		int random_move_4 = rand() % 101;
+
+
+		if(random_move_4<porc_change_node){
+			tie(new_solution,tabu_more_capacity,tabu_worst_route) = this->mov_change_node(new_solution,tabu_more_capacity,tabu_worst_route);
+			//cout<<"termine change node"<<endl;
+
+			/*new_time = this->evaluation_function(new_solution);
+				
+			if(new_time < best_time){
+				cout<<"Mejor= "<<best_time<<endl;
+				cout<<"Actual= "<<new_time<<endl;
+				best_solution = new_solution;
+				best_time = new_time;
+				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
+
+				end_time = clock();
+				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+				myfile << total_time <<"-"<< best_time << "\n";
+			}
+			else{
+				new_solution = best_solution;
+			}*/
+		}
+
 
 		if(random_move_1<porc_two_opt){
 			new_solution = this->mov_two_opt(new_solution);
@@ -1545,28 +1592,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 		}
 
-		if(random_move_4<porc_change_node){
-			tie(new_solution,tabu_more_capacity) = this->mov_change_node(new_solution,tabu_more_capacity);
-			//cout<<"termine change node"<<endl;
-
-			/*new_time = this->evaluation_function(new_solution);
-				
-			if(new_time < best_time){
-				cout<<"Mejor= "<<best_time<<endl;
-				cout<<"Actual= "<<new_time<<endl;
-				best_solution = new_solution;
-				best_time = new_time;
-				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
-
-				end_time = clock();
-				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
-				myfile << total_time <<"-"<< best_time << "\n";
-			}
-			else{
-				new_solution = best_solution;
-			}*/
-
-		}
+	
 
 		new_time = this->evaluation_function(new_solution);
 				

@@ -18,11 +18,16 @@ class Grasp{
 		Instance instance;
 		// largo de la lista del GRASP
 		int list_size;
-		// largo de la lista tabu de vehiculos con mayor capacidad
+		// largo de la lista tabu de more capacity
 		int tabu_capacity_size;
+		// largo de la lista tabu de worst route
+		int tabu_worst_route_size;
+		// criterio de cambio de listas tabu
+		int criteria;
+
 
 		// constructores
-		Grasp(Instance,int,int);
+		Grasp(Instance,int,int,int);
 		Grasp();
 		//funcion que retorna una lista con los request de menos costo que cumplan las restricciones
 		tuple<vector<tuple<Request,int, float>>,bool> get_cheaper_requests(vector<Request>, Vehicle);
@@ -51,11 +56,11 @@ class Grasp{
 		// FUNCION QUE EJECUTA EL MOVIMIENTO CAMBIO DE CROSSDOCKS
 		Solution mov_swap_cd(Solution);
 		//funcion que retorna el vehiculo que posea la ruta mas cara y especifica que tipo de ruta es
-		tuple<int,int> get_worst_route(Solution,int);
+		tuple<int,int> get_worst_route(Solution,int,vector<int>);
 		// funcion que retorna el vehiculo que posea la mayor capacidad de acuerdo a la ruta especificada
 		int get_more_capacity(Solution, int, vector<int>);
 		// MOVIMIENTO QUE QUITA UN NODO DE LA RUTA MAS LARGA Y LO COLOCA EN EL QUE TENGA MAS ESPACIO.
-		tuple<Solution,vector<int>> mov_change_node(Solution, vector<int>);
+		tuple<Solution,vector<int>,vector<int>> mov_change_node(Solution, vector<int>,vector<int>);
 		// funcion que determina si una solucion es factible respecto a todas las restricciones
 		bool feasible_solution(Solution);
 		//funcion que realiza todo el proceso de consolidacion y setea el atributo departure_cd_time
