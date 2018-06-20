@@ -2,9 +2,10 @@
 
 
 // CONSTRUCTOR
-Grasp::Grasp (Instance instance, int list_size){
+Grasp::Grasp (Instance instance, int list_size, int tabu_capacity_size){
 	this->instance = instance;
 	this->list_size = list_size;
+	this->tabu_capacity_size = tabu_capacity_size;
 }
 
 Grasp::Grasp(){
@@ -117,10 +118,11 @@ Solution Grasp::distance_initial_solution(){
 	vector<tuple<Request,int,float>> requests_list;
 	Request selected_request;
 	int random;
+	int id=0;
 
 	while(requests.size() != 0){
 		
-		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot);
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id);
 		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
 		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
@@ -160,6 +162,7 @@ Solution Grasp::distance_initial_solution(){
 		
 		vehicle.set_times();
 		solution.vehicles.push_back(vehicle);
+		id++;
 
 	}
 
@@ -233,10 +236,11 @@ Solution Grasp::demand_initial_solution(){
 	vector<tuple<Request, int>> requests_list;
 	Request selected_request;
 	int random;
+	int id=0;
 
 	while(requests.size() != 0){
 		
-		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot);
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id);
 		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
 		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
@@ -276,7 +280,7 @@ Solution Grasp::demand_initial_solution(){
 		
 		vehicle.set_times();
 		solution.vehicles.push_back(vehicle);
-
+		id++;
 	}
 
 	return solution;
@@ -294,10 +298,11 @@ Solution Grasp::hybrid_initial_solution(){
 	Request selected_request;
 	int random;
 	bool changed = false;
+	int id=0;
 
 	while(requests.size() != 0){
 		
-		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot);
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id);
 		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
 		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
@@ -357,6 +362,7 @@ Solution Grasp::hybrid_initial_solution(){
 		if(vehicle.remaining_capacity >= 5){
 			changed = true;
 		}
+		id++;
 
 	}
 
@@ -428,10 +434,11 @@ Solution Grasp::timewindow_initial_solution(){
 	vector<tuple<Request, int>> requests_list;
 	Request selected_request;
 	int random;
+	int id=0;
 
 	while(requests.size() != 0){
 		
-		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot);
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id);
 		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
 		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
@@ -471,6 +478,7 @@ Solution Grasp::timewindow_initial_solution(){
 		
 		vehicle.set_times();
 		solution.vehicles.push_back(vehicle);
+		id++;
 
 	}
 
@@ -1056,7 +1064,7 @@ tuple<int,int> Grasp::get_worst_route(Solution solution, int type){
 }
 
 
-int Grasp::get_more_capacity(Solution solution, int type){
+int Grasp::get_more_capacity(Solution solution, int type, vector<int> tabu_more_capacity){
 
 	float max_pickup_capacity = 0;
 	float max_delivery_capacity = 0;
@@ -1066,21 +1074,25 @@ int Grasp::get_more_capacity(Solution solution, int type){
 
   	for(int i=0; (unsigned)i<solution.vehicles.size(); i++){
 
-	  	if(type==0){
-	  		actual_pickup_capacity = solution.vehicles[i].get_pickup_capacity();
-	  		if (actual_pickup_capacity > max_pickup_capacity){
-	  			max_pickup_capacity = actual_pickup_capacity;
-	  			max_pickup_vehicle = i;
-	  		}
-	  	}
+		if (!(find(tabu_more_capacity.begin(), tabu_more_capacity.end(), solution.vehicles[i].id) != tabu_more_capacity.end())){
 
-	  	else{
-	  		actual_delivery_capacity = solution.vehicles[i].remaining_capacity;
-			if (actual_delivery_capacity > max_delivery_capacity){
-	  			max_delivery_capacity = actual_delivery_capacity;
-	  			max_delivery_vehicle = i;
-	  		}
-	  	}
+		  	if(type==0){
+		  		actual_pickup_capacity = solution.vehicles[i].get_pickup_capacity();
+		  		if (actual_pickup_capacity > max_pickup_capacity){
+		  			max_pickup_capacity = actual_pickup_capacity;
+		  			max_pickup_vehicle = i;
+		  		}
+		  	}
+
+		  	else{
+		  		actual_delivery_capacity = solution.vehicles[i].remaining_capacity;
+				if (actual_delivery_capacity > max_delivery_capacity){
+		  			max_delivery_capacity = actual_delivery_capacity;
+		  			max_delivery_vehicle = i;
+		  		}
+		  	}
+		}
+
   	}
 
   	if(type == 0){
@@ -1288,29 +1300,24 @@ bool Grasp::feasible_solution(Solution solution){
 
 
 
-Solution Grasp::mov_change_node(Solution solution){
+tuple<Solution,vector<int>> Grasp::mov_change_node(Solution solution, vector<int> tabu_more_capacity){
 
 	int type_route,pos_vehicle_1,pos_vehicle_2;
 	// SE encuentra el vehiculo con la ruta mas cara
-	//cout<<"antes get get_worst_route"<<endl;
 
 	tie(pos_vehicle_1,type_route) = get_worst_route(solution,-1);
 
 	Solution temp_solution = solution;
-	//cout<<"antes 1282"<<endl;
 
 	temp_solution.vehicles.erase(temp_solution.vehicles.begin() + pos_vehicle_1);
 	//SE ENCUENTRA EL  VEHICULO QUE TENGA MAS CAPACIDAD SEGUN LA RUTA ESPECIFICADA
-	//cout<<"antes get get_more_capacity"<<endl;
 
-	pos_vehicle_2 = get_more_capacity(temp_solution,type_route);
-	//cout<<"antes if 1286"<<endl;
+	pos_vehicle_2 = get_more_capacity(temp_solution,type_route,tabu_more_capacity);
 
 	//SE calcula el indice del vehiculo 2, considerando la solucion con todo los vehiculos (sin eliminar 1)
 	if(pos_vehicle_2 >= pos_vehicle_1){
 		pos_vehicle_2 += 1;
 	}
-	//cout<<"antes vehicles"<<endl;
 
 	// se setean los vehiculos correspondietnes
 	Vehicle vehicle1 = Vehicle();
@@ -1327,7 +1334,9 @@ Solution Grasp::mov_change_node(Solution solution){
 	Solution best_solution = solution;
 	float best_cost = FLT_MAX;
 	float actual_cost;
-	//cout<<"antes de un if"<<endl;
+
+	bool add_tabu = true;
+
 	if(type_route == 0){
 
 		random_node = rand() % vehicle1.pickup_route.size();
@@ -1337,14 +1346,11 @@ Solution Grasp::mov_change_node(Solution solution){
 		vehicle1.pickup_items.erase(vehicle1.pickup_items.begin() + random_node);
 		// agrego el vehiculo con el nodo quitado a la solucion
 		// se comienza a probar todos los posibles lugares de insercion del nodo
-		//cout<<"dentro de if pickup antes de for"<<endl;
 
 		int iterations = vehicle2.pickup_route.size();
 
 
 		for(int i=0; i <= iterations; i++){
-			//cout<<vehicle2.pickup_route.size()<<endl;
-			//cout<<"dentro del for pickup"<<endl;
 
 			temp_solution = solution;
 			vehicle2 = solution.vehicles[pos_vehicle_2];
@@ -1357,6 +1363,8 @@ Solution Grasp::mov_change_node(Solution solution){
 			temp_solution.vehicles[pos_vehicle_2] = vehicle2;
 
 			if(this->feasible_solution(temp_solution)){
+
+				add_tabu = false;
 
 				actual_cost = this->evaluation_function(temp_solution);
 
@@ -1378,51 +1386,50 @@ Solution Grasp::mov_change_node(Solution solution){
 		vehicle1.delivery_items.erase(vehicle1.delivery_items.begin() + random_node);
 		// agrego el vehiculo con el nodo quitado a la solucion
 		// se comienza a probar todos los posibles lugares de insercion del nodo
-		//cout<<"dentro de if delivery antes de for"<<endl;
 
 		int iterations = vehicle2.delivery_route.size();
 
 
 
 		for(int i=0; i <= iterations; i++){
-			//cout<<vehicle2.delivery_route.size()<<endl;
 			
-			//cout<<"dentro de for delivery"<<endl;
-
 			temp_solution = solution;
 			vehicle2 = solution.vehicles[pos_vehicle_2];
 			temp_solution.vehicles[pos_vehicle_1] = vehicle1;
-			//cout<<"dentro de for delivery 1364"<<endl;
 
 			vehicle2.delivery_route.insert(vehicle2.delivery_route.begin()+i, customer_node);
 			vehicle2.delivery_items.insert(vehicle2.delivery_items.begin()+i, item);
 
 
 			temp_solution.vehicles[pos_vehicle_2] = vehicle2;
-			//cout<<"dentro de for delivery 1369"<<endl;
 
 
 			if(this->feasible_solution(temp_solution)){
-			//cout<<"dentro de feasible solution delivery"<<endl;
 
+				add_tabu = false;
 
 				actual_cost = this->evaluation_function(temp_solution);
-			//cout<<"despues evaluaation function"<<endl;
 
 				if(actual_cost <= best_cost){
 					best_cost = actual_cost;
 					best_solution = temp_solution;
 				}
 			}
-			//cout<<"NO ENTRE AL IF FEASIBLE SOLUTION"<<endl;
-
-
 		}
 
 	}
 
+	if(add_tabu){
+		if(tabu_more_capacity.size() == (unsigned)this->tabu_capacity_size){
+			tabu_more_capacity.erase(tabu_more_capacity.begin() + 0);
+			tabu_more_capacity.push_back(solution.vehicles[pos_vehicle_2].id);
+		}
+		else{
+			tabu_more_capacity.push_back(solution.vehicles[pos_vehicle_2].id);
+		}
+	}
 
-    return best_solution;
+    return make_tuple(best_solution,tabu_more_capacity);
 
 }
 
@@ -1455,6 +1462,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	Solution best_solution = new_solution;
 	float best_time = this->evaluation_function(best_solution);
 	float new_time;
+	vector<int> tabu_more_capacity;
 
 	clock_t start_time, end_time;
 	double total_time;
@@ -1538,7 +1546,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		}
 
 		if(random_move_4<porc_change_node){
-			new_solution = this->mov_change_node(new_solution);
+			tie(new_solution,tabu_more_capacity) = this->mov_change_node(new_solution,tabu_more_capacity);
 			//cout<<"termine change node"<<endl;
 
 			/*new_time = this->evaluation_function(new_solution);

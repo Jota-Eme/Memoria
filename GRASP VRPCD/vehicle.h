@@ -11,7 +11,7 @@
 
 class Vehicle{
 	public:
-		int total_capacity,fixed_time,unit_time,remaining_capacity;
+		int total_capacity,fixed_time,unit_time,remaining_capacity, id;
 		vector<Suplier> pickup_route;
 		vector<Customer> delivery_route;
 		// rutas de crossdocks luego del pickup route (para IAA siempre habra solo 1 CD)
@@ -33,7 +33,7 @@ class Vehicle{
 
 
 		// funciones de la clase
-		Vehicle(int,int,int, Node);
+		Vehicle(int,int,int, Node, int);
 		Vehicle();
 		//funcion que setea los tiempos de llegada y salida de cada nodo de todas las rutas
 		void set_times();

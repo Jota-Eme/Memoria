@@ -16,10 +16,13 @@ class Grasp{
 	public:
 		//atributos de clase
 		Instance instance;
+		// largo de la lista del GRASP
 		int list_size;
+		// largo de la lista tabu de vehiculos con mayor capacidad
+		int tabu_capacity_size;
 
 		// constructores
-		Grasp(Instance,int);
+		Grasp(Instance,int,int);
 		Grasp();
 		//funcion que retorna una lista con los request de menos costo que cumplan las restricciones
 		tuple<vector<tuple<Request,int, float>>,bool> get_cheaper_requests(vector<Request>, Vehicle);
@@ -50,9 +53,9 @@ class Grasp{
 		//funcion que retorna el vehiculo que posea la ruta mas cara y especifica que tipo de ruta es
 		tuple<int,int> get_worst_route(Solution,int);
 		// funcion que retorna el vehiculo que posea la mayor capacidad de acuerdo a la ruta especificada
-		int get_more_capacity(Solution, int);
+		int get_more_capacity(Solution, int, vector<int>);
 		// MOVIMIENTO QUE QUITA UN NODO DE LA RUTA MAS LARGA Y LO COLOCA EN EL QUE TENGA MAS ESPACIO.
-		Solution mov_change_node(Solution);
+		tuple<Solution,vector<int>> mov_change_node(Solution, vector<int>);
 		// funcion que determina si una solucion es factible respecto a todas las restricciones
 		bool feasible_solution(Solution);
 		//funcion que realiza todo el proceso de consolidacion y setea el atributo departure_cd_time

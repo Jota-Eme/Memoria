@@ -58,7 +58,7 @@ void print_solution(Solution solution){
 	int i = 0;
 
 	for (vehicle_iterator = vehicles.begin(); vehicle_iterator != vehicles.end(); ++vehicle_iterator) {
-		cout<<i<<" [ ";
+		cout<<vehicle_iterator->id<<" [ ";
 	    for (suplier_iterator = vehicle_iterator->pickup_route.begin(); suplier_iterator != vehicle_iterator->pickup_route.end(); ++suplier_iterator) {
 	    	cout<<suplier_iterator->id<<" ";
 		}

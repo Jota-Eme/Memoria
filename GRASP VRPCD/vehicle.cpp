@@ -2,13 +2,14 @@
 #include "vehicle.h"
 
 // CONSTRUCTOR
-Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot){
+Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot, int id){
 	this->total_capacity = capacity;
 	this->remaining_capacity = capacity;
 	this->fixed_time = fixed_time;
 	this->unit_time = unit_time;
 	this->vehicle_depot = vehicle_depot;
 	this->departure_cd_time = 0;
+	this->id = id;
 }
 
 Vehicle::Vehicle(){
