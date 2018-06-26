@@ -142,17 +142,29 @@ void export_solution(Solution solution){
 
 	for (vehicle_iterator = vehicles.begin(); vehicle_iterator != vehicles.end(); ++vehicle_iterator) {
 
-		myfile << vehicle_iterator->pickup_route[0].x_coord << "," << vehicle_iterator->pickup_route[0].y_coord;
+		if(!vehicle_iterator->pickup_route.empty()){
 
-		for (int i=1; (unsigned)i<vehicle_iterator->pickup_route.size(); i++) {
-			myfile << "-" << vehicle_iterator->pickup_route[i].x_coord << "," << vehicle_iterator->pickup_route[i].y_coord;
-	    }
-	    for (int i=0; (unsigned)i<vehicle_iterator->crossdock_route.size(); i++) {
-			myfile << "-" << vehicle_iterator->crossdock_route[i].x_coord << "," << vehicle_iterator->crossdock_route[i].y_coord;
-	    }
-	    for (int i=0; (unsigned)i<vehicle_iterator->delivery_route.size(); i++) {
-			myfile  << "-" << vehicle_iterator->delivery_route[i].x_coord << "," << vehicle_iterator->delivery_route[i].y_coord;
-	    }
+			myfile << vehicle_iterator->pickup_route[0].x_coord << "," << vehicle_iterator->pickup_route[0].y_coord;
+
+			for (int i=1; (unsigned)i<vehicle_iterator->pickup_route.size(); i++) {
+				myfile << "-" << vehicle_iterator->pickup_route[i].x_coord << "," << vehicle_iterator->pickup_route[i].y_coord;
+		    }
+		}
+
+		if(!vehicle_iterator->crossdock_route.empty()){
+			for (int i=0; (unsigned)i<vehicle_iterator->crossdock_route.size(); i++) {
+				myfile << "-" << vehicle_iterator->crossdock_route[i].x_coord << "," << vehicle_iterator->crossdock_route[i].y_coord;
+	    	}
+		}
+	    
+
+		if(!vehicle_iterator->delivery_route.empty()){
+
+		    for (int i=0; (unsigned)i<vehicle_iterator->delivery_route.size(); i++) {
+				myfile  << "-" << vehicle_iterator->delivery_route[i].x_coord << "," << vehicle_iterator->delivery_route[i].y_coord;
+		    }
+		}
+		
 	    myfile<<"\n";
 
 	}

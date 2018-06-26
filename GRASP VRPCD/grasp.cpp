@@ -514,51 +514,49 @@ float Grasp::evaluation_function(Solution solution){
 	Node current_node;
 	float total_cost =0;
 
-	if(solution.vehicles.empty() == false){
 
-		for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator){
-			//POR EL MOMENTO SOLO HAY 1 CD COMO PUNTO DE PARTIDA, EN LA MEMORIA SE DEBE AGREGAR COMO ATRIBUTO PARA CADA VEHICULO
-			current_node = vehicle_iterator->vehicle_depot;
+	for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator){
+		//POR EL MOMENTO SOLO HAY 1 CD COMO PUNTO DE PARTIDA, EN LA MEMORIA SE DEBE AGREGAR COMO ATRIBUTO PARA CADA VEHICULO
+		current_node = vehicle_iterator->vehicle_depot;
 
-			if(vehicle_iterator->pickup_route.empty() == false){
+		if(vehicle_iterator->pickup_route.empty() == false){
 
-				for (suplier_iterator = vehicle_iterator->pickup_route.begin(); suplier_iterator != vehicle_iterator->pickup_route.end(); ++suplier_iterator) {
+			for (suplier_iterator = vehicle_iterator->pickup_route.begin(); suplier_iterator != vehicle_iterator->pickup_route.end(); ++suplier_iterator) {
 
-					Suplier &new_suplier = *suplier_iterator;
-					total_cost += current_node.get_distance(new_suplier);
-					current_node = new_suplier;
-				}
-
+				Suplier &new_suplier = *suplier_iterator;
+				total_cost += current_node.get_distance(new_suplier);
+				current_node = new_suplier;
 			}
-
-			if(vehicle_iterator->crossdock_route.empty() == false){
-
-				for (crossdock_iterator = vehicle_iterator->crossdock_route.begin(); crossdock_iterator != vehicle_iterator->crossdock_route.end(); ++crossdock_iterator) {
-
-					Crossdock &new_crossdock = *crossdock_iterator;
-					total_cost += current_node.get_distance(new_crossdock);
-					current_node = new_crossdock;
-				}
-
-			}
-
-			if(vehicle_iterator->delivery_route.empty() == false){
-
-				for (customer_iterator = vehicle_iterator->delivery_route.begin(); customer_iterator != vehicle_iterator->delivery_route.end(); ++customer_iterator) {
-
-					Customer &new_customer = *customer_iterator;
-					total_cost += current_node.get_distance(new_customer);
-					current_node = new_customer;
-				}
-
-			}
-
-			//EN este caso siempre vuelve al CD inicial, PARA LA MEMORIA SE DEBEN CONSIDERAR LOS LUGARES TERMINALES
-			total_cost += current_node.get_distance(vehicle_iterator->vehicle_depot);
 
 		}
 
+		if(vehicle_iterator->crossdock_route.empty() == false){
+
+			for (crossdock_iterator = vehicle_iterator->crossdock_route.begin(); crossdock_iterator != vehicle_iterator->crossdock_route.end(); ++crossdock_iterator) {
+
+				Crossdock &new_crossdock = *crossdock_iterator;
+				total_cost += current_node.get_distance(new_crossdock);
+				current_node = new_crossdock;
+			}
+
+		}
+
+		if(vehicle_iterator->delivery_route.empty() == false){
+
+			for (customer_iterator = vehicle_iterator->delivery_route.begin(); customer_iterator != vehicle_iterator->delivery_route.end(); ++customer_iterator) {
+
+				Customer &new_customer = *customer_iterator;
+				total_cost += current_node.get_distance(new_customer);
+				current_node = new_customer;
+			}
+
+		}
+
+		//EN este caso siempre vuelve al CD inicial, PARA LA MEMORIA SE DEBEN CONSIDERAR LOS LUGARES TERMINALES
+		total_cost += current_node.get_distance(vehicle_iterator->vehicle_depot);
+
 	}
+
 
 	return total_cost;
 
@@ -576,16 +574,29 @@ Solution Grasp::mov_two_opt(Solution solution){
 	//tie(vehicle_position,type_route) = this->get_worst_route(solution,-1,tabu_worst_route);
 
 	//se selecciona la ruta mas cara
-	int random_vehicle = rand() % solution.vehicles.size();
+	int type_route = rand() % 2;
+	int vehicle_position = rand() % solution.vehicles.size();
 
+	if(type_route == 0){
+		while(solution.vehicles[vehicle_position].pickup_route.size() == 0){
+			//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
+			vehicle_position = rand() % solution.vehicles.size();
+		}
+	}
+	else{
+		while(solution.vehicles[vehicle_position].delivery_route.size() == 0 ){
+			//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
+			vehicle_position = rand() % solution.vehicles.size();
+		}
+	}
 
+// -----------------------------------------------------------------------------
 
-	Vehicle selected_vehicle = solution.vehicles[random_vehicle];
-	//cout<<"VEhiculo escogido: " << random_vehicle << endl;
+	Vehicle selected_vehicle = solution.vehicles[vehicle_position];
+	//cout<<"VEhiculo escogido: " << vehicle_position << endl;
 	// se selecciona la ruta a modificar del vehiculo al azar
-	int random_type_route = rand() % 2;
 
-	if(random_type_route == 0){
+	if(type_route == 0){
 		//SE retorna la misma solucion si se elije una ruta con 1 solo nodo
 		if(selected_vehicle.pickup_route.size() == 1){
 			return solution;
@@ -654,7 +665,7 @@ Solution Grasp::mov_two_opt(Solution solution){
 		new_items.push_back(selected_items[j]);
 	}
 	// Se reemplaza la ruta antigua por la nueva segun corresponda
-	if(random_type_route == 0){
+	if(type_route == 0){
 
 		selected_vehicle.pickup_route.clear();
 
@@ -694,7 +705,7 @@ Solution Grasp::mov_two_opt(Solution solution){
 	//selected_vehicle.set_times();
 
 	Solution temp_solution = solution;
-	temp_solution.vehicles[random_vehicle] = selected_vehicle;
+	temp_solution.vehicles[vehicle_position] = selected_vehicle;
 
 	if(this->feasible_solution(temp_solution)){
 		// FINALMENTE SE REEMPLAZA EL VEHICULO CAMBIADO CON LA NUEVA RUTA SI ESTA ES FACTIBLE
@@ -826,8 +837,26 @@ Solution Grasp::mov_two_opt(Solution solution){
 
 Solution Grasp::mov_swap_node(Solution solution, int type){
 
-	int random_vehicle_1 = rand() % solution.vehicles.size();
-	int random_vehicle_2 = rand() % solution.vehicles.size();
+	int pos_vehicle_1 = rand() % solution.vehicles.size();
+	int pos_vehicle_2 = rand() % solution.vehicles.size();
+
+	if(type == 0){
+		while(pos_vehicle_1 == pos_vehicle_2 || solution.vehicles[pos_vehicle_1].crossdock_route[0].id != solution.vehicles[pos_vehicle_2].crossdock_route[0].id || solution.vehicles[pos_vehicle_1].pickup_route.size() == 0 || solution.vehicles[pos_vehicle_2].pickup_route.size() == 0){
+			//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
+			pos_vehicle_1 = rand() % solution.vehicles.size();
+			pos_vehicle_2 = rand() % solution.vehicles.size();
+		}
+	}
+	else{
+		while(pos_vehicle_1 == pos_vehicle_2 || solution.vehicles[pos_vehicle_1].crossdock_route[0].id != solution.vehicles[pos_vehicle_2].crossdock_route[0].id || solution.vehicles[pos_vehicle_1].delivery_route.size() == 0 || solution.vehicles[pos_vehicle_2].delivery_route.size() == 0){
+			//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
+			pos_vehicle_1 = rand() % solution.vehicles.size();
+			pos_vehicle_2 = rand() % solution.vehicles.size();
+		}
+	}
+
+
+
 
 	//SE encuentra el vehiculo que posea la ruta mas cara
 	//int type_temp,pos_vehicle_1,pos_vehicle_2;
@@ -847,16 +876,12 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 
 	//cout<<"Los vehiculos fueron: "<<random_vehicle_1<<" y "<<random_vehicle_2<<endl;
 
-	while(random_vehicle_1 == random_vehicle_2 || solution.vehicles[random_vehicle_1].crossdock_route[0].id != solution.vehicles[random_vehicle_2].crossdock_route[0].id){
-		//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
-		random_vehicle_2 = rand() % solution.vehicles.size();
-		random_vehicle_1 = rand() % solution.vehicles.size();
-	}
+	
 
 	//cout<<"Los vehiculos fueron: "<<pos_vehicle_1<<" y "<<pos_vehicle_2<<endl;
 
-	Vehicle vehicle_1 = solution.vehicles[random_vehicle_1];
-	Vehicle vehicle_2 = solution.vehicles[random_vehicle_2];
+	Vehicle vehicle_1 = solution.vehicles[pos_vehicle_1];
+	Vehicle vehicle_2 = solution.vehicles[pos_vehicle_2];
 
 	/*cout<<"ruta vehiculo 1 antes"<<endl;
 
@@ -912,13 +937,13 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 
 	Solution temp_solution = solution;
 
-	temp_solution.vehicles[random_vehicle_1] = vehicle_1;
-	temp_solution.vehicles[random_vehicle_2] = vehicle_2;
+	temp_solution.vehicles[pos_vehicle_1] = vehicle_1;
+	temp_solution.vehicles[pos_vehicle_2] = vehicle_2;
 
 	if(this->feasible_solution(temp_solution)){
 		//cout<<"movimiento SIIIIII FACTIBLE"<<endl;
-		temp_solution.vehicles[random_vehicle_1].set_remaining_capacity();
-		temp_solution.vehicles[random_vehicle_2].set_remaining_capacity();
+		temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
+		temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
 
 		return temp_solution;
 		
@@ -927,8 +952,8 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 
 		cout<< " [";
 
-		for(int l=0; (unsigned)l < solution.vehicles[random_vehicle_1].delivery_route.size();l++){
-			cout<<" "<<solution.vehicles[random_vehicle_1].delivery_route[l].id;
+		for(int l=0; (unsigned)l < solution.vehicles[pos_vehicle_1].delivery_route.size();l++){
+			cout<<" "<<solution.vehicles[pos_vehicle_1].delivery_route[l].id;
 		}
 		cout<< " ]" <<endl;
 
@@ -936,8 +961,8 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 
 		cout<< " [";
 
-		for(int l=0; (unsigned)l < solution.vehicles[random_vehicle_2].delivery_route.size();l++){
-			cout<<" "<<solution.vehicles[random_vehicle_2].delivery_route[l].id;
+		for(int l=0; (unsigned)l < solution.vehicles[pos_vehicle_2].delivery_route.size();l++){
+			cout<<" "<<solution.vehicles[pos_vehicle_2].delivery_route[l].id;
 		}
 		cout<< " ]" <<endl;*/
 
@@ -1308,6 +1333,30 @@ bool Grasp::feasible_solution(Solution solution){
 
 tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solution, vector<int> tabu_more_capacity,vector<int> tabu_worst_route){
 
+	int pos_vehicle_1 = rand() % solution.vehicles.size();
+	int type_route = rand() % 2;
+
+	if(type_route == 0){
+		while(solution.vehicles[pos_vehicle_1].pickup_route.size() == 0){
+			pos_vehicle_1 = rand() % solution.vehicles.size();
+		}
+	}
+	else{
+		while(solution.vehicles[pos_vehicle_1].delivery_route.size() == 0){
+			pos_vehicle_1 = rand() % solution.vehicles.size();
+		}
+	}
+
+	int pos_vehicle_2 = rand() % solution.vehicles.size();
+
+	while(pos_vehicle_1 == pos_vehicle_2 || solution.vehicles[pos_vehicle_1].crossdock_route[0].id != solution.vehicles[pos_vehicle_2].crossdock_route[0].id){
+		//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
+		pos_vehicle_2 = rand() % solution.vehicles.size();
+	}
+
+
+
+/*
 	int type_route,pos_vehicle_1,pos_vehicle_2;
 	// SE encuentra el vehiculo con la ruta mas cara
 
@@ -1324,13 +1373,12 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 	if(pos_vehicle_2 >= pos_vehicle_1){
 		pos_vehicle_2 += 1;
 	}
+*/
+	// se setean los vehiculos correspondietne
+	Vehicle vehicle1 = solution.vehicles[pos_vehicle_1];
+	Vehicle vehicle2 = solution.vehicles[pos_vehicle_2];
 
-	// se setean los vehiculos correspondietnes
-	Vehicle vehicle1 = Vehicle();
-	Vehicle vehicle2 = Vehicle();
-
-	vehicle1 = solution.vehicles[pos_vehicle_1];
-	vehicle2 = solution.vehicles[pos_vehicle_2];
+	Solution temp_solution = solution;
 
 	//cout<<"vehiuclo mas caro: "<<pos_vehicle_1<<endl;
 	//cout<<"vehiuclo mas capacidad: "<<pos_vehicle_2<<endl;
@@ -1344,9 +1392,13 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 	bool add_tabu = true;
 
 	if(type_route == 0){
+		//cout<<"size pickup:"<<vehicle1.delivery_route.size()<<endl;
 
 		random_node = rand() % vehicle1.pickup_route.size();
+		//cout<<"node pickup:"<<random_node<<endl;
 		Suplier suplier_node = vehicle1.pickup_route[random_node];
+		//cout<<"tengo suplier"<<endl;
+
 		tuple<int,int> item = vehicle1.pickup_items[random_node];
 		vehicle1.pickup_route.erase(vehicle1.pickup_route.begin() + random_node);
 		vehicle1.pickup_items.erase(vehicle1.pickup_items.begin() + random_node);
@@ -1384,9 +1436,12 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 
 	}
 	else{
-		
+		//cout<<"size delivery:"<<vehicle1.delivery_route.size()<<endl;
 		random_node = rand() % vehicle1.delivery_route.size();
+		//cout<<"node delivery:"<<random_node<<endl;
+		
 		Customer customer_node = vehicle1.delivery_route[random_node];
+		//cout<<"tengo customer"<<endl;
 		tuple<int,int> item = vehicle1.delivery_items[random_node];
 		vehicle1.delivery_route.erase(vehicle1.delivery_route.begin() + random_node);
 		vehicle1.delivery_items.erase(vehicle1.delivery_items.begin() + random_node);
@@ -1425,7 +1480,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 
 	}
 	// ACTUALIZACION LISTA TABU 
-
+	/*
 	if(add_tabu){
 		if(tabu_more_capacity.size() == (unsigned)this->tabu_capacity_size){
 			tabu_more_capacity.erase(tabu_more_capacity.begin() + 0);
@@ -1450,6 +1505,10 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 			//tabu_more_capacity.clear();
 		}
 
+	}*/
+
+	if(best_solution.vehicles[pos_vehicle_1].pickup_route.empty() && best_solution.vehicles[pos_vehicle_1].delivery_route.empty()){
+		best_solution.vehicles.erase(best_solution.vehicles.begin() + pos_vehicle_1);
 	}
 
     return make_tuple(best_solution,tabu_more_capacity,tabu_worst_route);
@@ -1505,7 +1564,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			tie(new_solution,tabu_more_capacity,tabu_worst_route) = this->mov_change_node(new_solution,tabu_more_capacity,tabu_worst_route);
 			//cout<<"termine change node"<<endl;
 
-			/*new_time = this->evaluation_function(new_solution);
+			new_time = this->evaluation_function(new_solution);
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
@@ -1520,7 +1579,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			}
 			else{
 				new_solution = best_solution;
-			}*/
+			}
 		}
 
 
@@ -1528,7 +1587,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			new_solution = this->mov_two_opt(new_solution);
 			//cout<<"termine 2opt"<<endl;
 
-			/*new_time = this->evaluation_function(new_solution);
+			new_time = this->evaluation_function(new_solution);
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
@@ -1543,7 +1602,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			}
 			else{
 				new_solution = best_solution;
-			}*/
+			}
 
 		}
 
@@ -1551,7 +1610,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			new_solution = this->mov_swap_node(new_solution,0);
 			//cout<<"termine swap pick"<<endl;
 
-			/*new_time = this->evaluation_function(new_solution);
+			new_time = this->evaluation_function(new_solution);
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
@@ -1566,7 +1625,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			}
 			else{
 				new_solution = best_solution;
-			}*/
+			}
 
 		}
 
@@ -1574,7 +1633,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			new_solution = this->mov_swap_node(new_solution,1);
 			//cout<<"termine swap delivery"<<endl;
 
-			/*new_time = this->evaluation_function(new_solution);
+			new_time = this->evaluation_function(new_solution);
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
@@ -1589,12 +1648,12 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			}
 			else{
 				new_solution = best_solution;
-			}*/
+			}
 
 		}
 
 	
-
+		/*
 		new_time = this->evaluation_function(new_solution);
 				
 		if(new_time < best_time){
@@ -1610,7 +1669,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		}
 		else{
 			new_solution = best_solution;
-		}
+		}*/
 		
 	}
 

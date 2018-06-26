@@ -31,43 +31,42 @@ void Vehicle::set_times(){
 
 	// PARA EL CASO DE IAA SOLO HABRA 1 CD SIEMPRE.
 	Node current_node = this->vehicle_depot;
+	
+	//ITERA SOBRE LOS NODOS DE LA RUTA DE PICKUP Y CALCULA LOS RESPECTIVOS TIEMPOS EN CADA NODO
+	for (suplier_iterator = this->pickup_route.begin(); suplier_iterator != this->pickup_route.end(); ++suplier_iterator) {
 
-	if(this->pickup_route.empty() == false && this->delivery_route.empty() == false){
-		//ITERA SOBRE LOS NODOS DE LA RUTA DE PICKUP Y CALCULA LOS RESPECTIVOS TIEMPOS EN CADA NODO
-		for (suplier_iterator = this->pickup_route.begin(); suplier_iterator != this->pickup_route.end(); ++suplier_iterator) {
+		Suplier &new_suplier = *suplier_iterator;
+		arrival_time = departure_time + current_node.get_distance(new_suplier);
+		departure_time = max(arrival_time, (float)new_suplier.ready_time);
 
-			Suplier &new_suplier = *suplier_iterator;
-			arrival_time = departure_time + current_node.get_distance(new_suplier);
-			departure_time = max(arrival_time, (float)new_suplier.ready_time);
-
-			current_node = new_suplier;
-			this->pickup_times.push_back(make_tuple(arrival_time,departure_time));
-		}
-
-		//SE LLEGA AL CROSSDOCK PARA COMENZAR LA CONSOLIDACION 
-		for (crossdock_iterator = this->crossdock_route.begin(); crossdock_iterator != this->crossdock_route.end(); ++crossdock_iterator) {
-
-			Crossdock &new_crossdock = *crossdock_iterator;
-			arrival_time = departure_time + current_node.get_distance(new_crossdock);
-			int real_arrival = max(arrival_time, (float)new_crossdock.ready_time);
-			departure_time = max(real_arrival, this->departure_cd_time);
-
-			current_node = new_crossdock;
-			this->crossdock_times.push_back(make_tuple(arrival_time,departure_time));
-		}
-
-		//ITERA SOBRE LOS NODOS DE LA RUTA DE DELIVERY Y CALCULA LOS TIEMPOS EN CADA NODO
-		for (customer_iterator = this->delivery_route.begin(); customer_iterator != this->delivery_route.end(); ++customer_iterator) {
-
-			Customer &new_customer = *customer_iterator;
-			arrival_time = departure_time + current_node.get_distance(new_customer);
-			departure_time = max(arrival_time, (float)new_customer.ready_time);
-
-			current_node = new_customer;
-			this->delivery_times.push_back(make_tuple(arrival_time,departure_time));
-		}
-
+		current_node = new_suplier;
+		this->pickup_times.push_back(make_tuple(arrival_time,departure_time));
 	}
+
+	//SE LLEGA AL CROSSDOCK PARA COMENZAR LA CONSOLIDACION 
+	for (crossdock_iterator = this->crossdock_route.begin(); crossdock_iterator != this->crossdock_route.end(); ++crossdock_iterator) {
+
+		Crossdock &new_crossdock = *crossdock_iterator;
+		arrival_time = departure_time + current_node.get_distance(new_crossdock);
+		int real_arrival = max(arrival_time, (float)new_crossdock.ready_time);
+		departure_time = max(real_arrival, this->departure_cd_time);
+
+		current_node = new_crossdock;
+		this->crossdock_times.push_back(make_tuple(arrival_time,departure_time));
+	}
+
+	//ITERA SOBRE LOS NODOS DE LA RUTA DE DELIVERY Y CALCULA LOS TIEMPOS EN CADA NODO
+	for (customer_iterator = this->delivery_route.begin(); customer_iterator != this->delivery_route.end(); ++customer_iterator) {
+
+		Customer &new_customer = *customer_iterator;
+		arrival_time = departure_time + current_node.get_distance(new_customer);
+		departure_time = max(arrival_time, (float)new_customer.ready_time);
+
+		current_node = new_customer;
+		this->delivery_times.push_back(make_tuple(arrival_time,departure_time));
+	}
+
+	
 
 }
 
