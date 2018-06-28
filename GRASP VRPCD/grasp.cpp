@@ -1430,7 +1430,7 @@ int Grasp::get_more_capacity(Solution solution, int type, vector<int> tabu_more_
 }
 
 
-vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
+/*vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
 
 	vector<int> upload_item_position;
 	vector<int> vehicles_position;
@@ -1474,6 +1474,22 @@ vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
 	}
 
 	return vehicles_position;
+}*/
+
+
+vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
+
+	vector<int> involved;
+
+	for(int i : vehicle.involved_delivery){
+
+		if(i != vehicle.id && !(find(involved.begin(), involved.end(), i) != involved.end()) ){
+			involved.push_back(i);
+		}
+
+	}
+
+	return involved;
 }
 
 
