@@ -53,4 +53,17 @@ void Solution::set_vehicles_times(){
 	}
 }
 
+tuple<int,int> Solution::count_nodes(){
+	vector <Vehicle>::iterator vehicle_iterator;
+	int pickup_nodes = 0;
+	int delivery_nodes = 0;
 
+	for (vehicle_iterator = this->vehicles.begin(); vehicle_iterator != this->vehicles.end(); ++vehicle_iterator) {
+
+		pickup_nodes += vehicle_iterator->pickup_route.size();
+		delivery_nodes += vehicle_iterator->delivery_route.size();
+
+	}
+
+	return make_tuple(pickup_nodes,delivery_nodes);
+}

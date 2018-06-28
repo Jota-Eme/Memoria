@@ -21,5 +21,7 @@ class Solution{
 		bool feasible_tw();
 		// funcion que aplica set_times() a todos los vehiculos
 		void set_vehicles_times();
+
+		tuple<int,int> count_nodes();
 };
 #endif

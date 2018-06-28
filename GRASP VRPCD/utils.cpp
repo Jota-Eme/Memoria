@@ -76,7 +76,7 @@ void print_solution(Solution solution){
 		i++;
 
 
-		cout<<" < ";
+		/*cout<<" < ";
 		for(int j=0; (unsigned)j<vehicle_iterator->pickup_items.size();j++ ){
 
 			cout<<get<1>(vehicle_iterator->pickup_items[j])<<" ";
@@ -90,7 +90,24 @@ void print_solution(Solution solution){
 
 		}
 
+		cout<<" > "<<endl;*/
+
+		cout<<" < ";
+		for(int j=0; (unsigned)j<vehicle_iterator->involved_pickup.size();j++ ){
+
+			cout<< vehicle_iterator->involved_pickup[j] <<" ";
+
+		}
+		cout<<" >   ";
+		cout<<" < ";
+		for(int j=0; (unsigned)j<vehicle_iterator->involved_delivery.size();j++ ){
+
+			cout<< vehicle_iterator->involved_delivery[j] <<" ";
+
+		}
+
 		cout<<" > "<<endl;
+
 
 	}
 

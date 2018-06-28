@@ -27,9 +27,9 @@ class Vehicle{
 
 
 		// PRE PROCESAMIENTO ------------------------------------------
-
-		// lista de vehiculos involucrados (los que tienen items que se deben cargar)
-		vector<Vehicle> involved;
+		// Estructuras que guardan la id de los vehiculos involucrados en cada item
+		vector<int> involved_pickup;
+		vector<int> involved_delivery;
 
 
 		// funciones de la clase

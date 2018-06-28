@@ -90,6 +90,11 @@ int main(int argc, char *argv[]) {
 	double total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 	cout<<" Se demoro: "<< total_time << " segundos" << endl;
 
+	int pickup_nodes, delivery_nodes;
+	tie(pickup_nodes,delivery_nodes) = best_solution.count_nodes();
+	cout<<"CANTIDAD NODOS PICKUP: "<<pickup_nodes<<endl;
+	cout<<"CANTIDAD NODOS DELIVERY: "<<delivery_nodes<<endl;
+
 
 	export_solution(best_solution);
 
