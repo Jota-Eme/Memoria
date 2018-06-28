@@ -67,6 +67,7 @@ class Grasp{
 		Solution consolidation2(Solution);
 		//funcion que obtiene los vehiculos involucrados en la consolidacion (los vehiculos que tiene q esperar para cargar items)
 		vector<int> get_involved_vehicles(Vehicle,Solution);
+		vector<int> get_involved_vehicles2(Vehicle);
 		// FUNCION QUE EJECUTA EL ALGORITMO GRASP, HACIENDO TODOS LOS PASOS DE ESTE
 		Solution run(int,int,int,int,int,int,int,int);
 

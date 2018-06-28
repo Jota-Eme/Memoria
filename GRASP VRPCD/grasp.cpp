@@ -1430,7 +1430,7 @@ int Grasp::get_more_capacity(Solution solution, int type, vector<int> tabu_more_
 }
 
 
-/*vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
+vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
 
 	vector<int> upload_item_position;
 	vector<int> vehicles_position;
@@ -1474,10 +1474,10 @@ int Grasp::get_more_capacity(Solution solution, int type, vector<int> tabu_more_
 	}
 
 	return vehicles_position;
-}*/
+}
 
 
-vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
+vector<int> Grasp::get_involved_vehicles2(Vehicle vehicle){
 
 	vector<int> involved;
 
@@ -1545,6 +1545,7 @@ Solution Grasp::consolidation2(Solution solution){
 
 	// PARA CADA VEHICULO SE DEBEN ENCONTRAR LOS VEHICULOS INVOLUCRADOS (LOS QUE SE ENCUENTREN EN DELIVERY Y NO EN PICKUP)
 	vector<int> involved_vehicles_pos; 
+	vector<int> involved_vehicles_pos2; 
 	int ready_load_time, u_time, reload_items;
 	//cout<<"consolidation antes 2 FOR"<<endl;
 
@@ -1552,6 +1553,26 @@ Solution Grasp::consolidation2(Solution solution){
 	for (int i = 0; (unsigned)i < temp_solution.vehicles.size(); i++){
 
 		involved_vehicles_pos = this->get_involved_vehicles(temp_solution.vehicles[i],solution);
+		//involved_vehicles_pos2 = this->get_involved_vehicles2(temp_solution.vehicles[i]);
+
+
+		/*cout<<"INVOLVED 1 vehiculo"<< temp_solution.vehicles[i].id<<" : ";
+		for(int i: involved_vehicles_pos){
+			cout<<i<<" ";
+		}
+		cout<<endl;
+
+		cout<<"INVOLVED 2 vehiculo"<< temp_solution.vehicles[i].id<<" : ";
+		for(int i: involved_vehicles_pos2){
+			cout<<i<<" ";
+		}
+		cout<<endl;
+
+		if(involved_vehicles_pos.size() != involved_vehicles_pos2.size()){
+			print_solution(temp_solution);
+		}*/
+
+
 		// si no hay vehiculos involucrados el departure_cd_time = d_time
 		if(involved_vehicles_pos.empty()){
 			temp_solution.vehicles[i].departure_cd_time = download_times[i];
@@ -1643,7 +1664,7 @@ bool Grasp::feasible_solution(Solution solution){
 tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solution, vector<int> tabu_more_capacity,vector<int> tabu_worst_route){
 
 	int pos_vehicle_1 = rand() % solution.vehicles.size();
-	int type_route = rand() % 2;
+	int type_route = 0;
 
 	if(type_route == 0){
 		while(solution.vehicles[pos_vehicle_1].pickup_route.size() == 0){
@@ -1719,6 +1740,27 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		// agrego el vehiculo con el nodo quitado a la solucion
 		// se comienza a probar todos los posibles lugares de insercion del nodo
 
+		if(vehicle1.id == id_involved){
+
+			int id = suplier_node.id * -1;
+			auto it = find_if(vehicle1.delivery_route.begin(), vehicle1.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
+
+			if (it != vehicle1.delivery_route.end()){
+
+			 	auto index = distance(vehicle1.delivery_route.begin(), it);
+				vehicle1.involved_delivery[index] = vehicle2.id;
+
+			}
+			else{
+				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
+				cout<<"vehiculo: "<<vehicle1.id << "nodo a encontrar en pickup: "<< id<<endl;
+				cout<<"id correcto: "<<id_involved<<endl;
+
+
+			}
+
+		}
+
 
 		int iterations = vehicle2.pickup_route.size();
 
@@ -1730,6 +1772,26 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 			vehicle2.pickup_route.insert(vehicle2.pickup_route.begin()+i, suplier_node);
 			vehicle2.pickup_items.insert(vehicle2.pickup_items.begin()+i, item);
 			vehicle2.involved_pickup.insert(vehicle2.involved_pickup.begin()+i, id_involved);
+
+
+			if(vehicle2.id == id_involved){
+
+				int id = suplier_node.id * -1;
+				auto it = find_if(vehicle2.delivery_route.begin(), vehicle2.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
+
+				if (it != vehicle2.delivery_route.end()){
+
+				 	auto index = distance(vehicle2.delivery_route.begin(), it);
+					vehicle2.involved_delivery[index] = vehicle2.id;
+
+				}
+				else{
+					cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
+					cout<<"vehiculo: "<<vehicle2.id << "nodo a encontrar en pickup: "<< id<<endl;
+					cout<<"id correcto: "<<id_involved<<endl;
+
+				}
+			}
 
 		//cout<<"TAMANO pickup justo despues V1: "<<vehicle1.pickup_route.size()<<endl;
 
@@ -1763,8 +1825,8 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		// SE buscan los vehiculos que va a entregar cada nodo a cambiar
 		// caso en el que el primer nodo pertenezca al V1
 
-		if(!add_tabu){
-
+	
+		if(vehicle2.id != id_involved && vehicle1.id != id_involved){
 			Vehicle vehicle = best_solution.vehicles[id_involved];
 		
 			// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
@@ -1772,7 +1834,6 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 			auto it = find_if(vehicle.delivery_route.begin(), vehicle.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
 
 			if (it != vehicle.delivery_route.end()){
-
 			 	auto index = distance(vehicle.delivery_route.begin(), it);
 				vehicle.involved_delivery[index] = vehicle2.id;
 
@@ -1817,6 +1878,27 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		// SE buscan los vehiculos que va a entregar cada nodo a cambiar
 		// caso en el que el primer nodo pertenezca al V1
 
+		if(vehicle1.id == id_involved){
+
+			int id = customer_node.id * -1;
+			auto it = find_if(vehicle1.pickup_route.begin(), vehicle1.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+
+			if (it != vehicle1.pickup_route.end()){
+
+			 	auto index = distance(vehicle1.pickup_route.begin(), it);
+				vehicle1.involved_pickup[index] = vehicle2.id;
+
+			}
+			else{
+				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
+				cout<<"vehiculo: "<<vehicle1.id << "nodo a encontrar en pickup: "<< id<<endl;
+				cout<<"id correcto: "<<id_involved<<endl;
+
+
+			}
+
+		}
+
 
 		// agrego el vehiculo con el nodo quitado a la solucion
 		// se comienza a probar todos los posibles lugares de insercion del nodo
@@ -1834,6 +1916,27 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 			vehicle2.delivery_route.insert(vehicle2.delivery_route.begin()+i, customer_node);
 			vehicle2.delivery_items.insert(vehicle2.delivery_items.begin()+i, item);
 			vehicle2.involved_delivery.insert(vehicle2.involved_delivery.begin()+i, id_involved);
+
+
+
+			if(vehicle2.id == id_involved){
+
+				int id = customer_node.id * -1;
+				auto it = find_if(vehicle2.pickup_route.begin(), vehicle2.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+
+				if (it != vehicle2.pickup_route.end()){
+
+				 	auto index = distance(vehicle2.pickup_route.begin(), it);
+					vehicle2.involved_pickup[index] = vehicle2.id;
+
+				}
+				else{
+					cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
+					cout<<"vehiculo: "<<vehicle2.id << "nodo a encontrar en pickup: "<< id<<endl;
+					cout<<"id correcto: "<<id_involved<<endl;
+
+				}
+			}
 
 
 		//cout<<"TAMANO DELIVERY justo despues V1: "<<vehicle1.delivery_route.size()<<endl;
@@ -1864,8 +1967,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		//cout<<"TAMANO DELIVERY DESPUES V1: "<<best_solution.vehicles[pos_vehicle_1].delivery_route.size()<<endl;
 		//cout<<"TAMANO DELIVERY DESPUES V2: "<<best_solution.vehicles[pos_vehicle_2].delivery_route.size()<<endl;
 
-		if(!add_tabu){
-
+		if(vehicle2.id != id_involved && vehicle1.id != id_involved){
 			Vehicle vehicle = best_solution.vehicles[id_involved];
 		
 			// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
@@ -1873,7 +1975,6 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 			auto it = find_if(vehicle.pickup_route.begin(), vehicle.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
 
 			if (it != vehicle.pickup_route.end()){
-
 			 	auto index = distance(vehicle.pickup_route.begin(), it);
 				vehicle.involved_pickup[index] = vehicle2.id;
 
