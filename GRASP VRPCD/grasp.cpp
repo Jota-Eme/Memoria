@@ -1430,7 +1430,7 @@ int Grasp::get_more_capacity(Solution solution, int type, vector<int> tabu_more_
 }
 
 
-vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
+/*vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
 
 	vector<int> upload_item_position;
 	vector<int> vehicles_position;
@@ -1474,10 +1474,10 @@ vector<int> Grasp::get_involved_vehicles(Vehicle vehicle, Solution solution){
 	}
 
 	return vehicles_position;
-}
+}*/
 
 
-vector<int> Grasp::get_involved_vehicles2(Vehicle vehicle){
+vector<int> Grasp::get_involved_vehicles(Vehicle vehicle){
 
 	vector<int> involved;
 
@@ -1552,26 +1552,7 @@ Solution Grasp::consolidation2(Solution solution){
 
 	for (int i = 0; (unsigned)i < temp_solution.vehicles.size(); i++){
 
-		involved_vehicles_pos = this->get_involved_vehicles(temp_solution.vehicles[i],solution);
-		//involved_vehicles_pos2 = this->get_involved_vehicles2(temp_solution.vehicles[i]);
-
-
-		/*cout<<"INVOLVED 1 vehiculo"<< temp_solution.vehicles[i].id<<" : ";
-		for(int i: involved_vehicles_pos){
-			cout<<i<<" ";
-		}
-		cout<<endl;
-
-		cout<<"INVOLVED 2 vehiculo"<< temp_solution.vehicles[i].id<<" : ";
-		for(int i: involved_vehicles_pos2){
-			cout<<i<<" ";
-		}
-		cout<<endl;
-
-		if(involved_vehicles_pos.size() != involved_vehicles_pos2.size()){
-			print_solution(temp_solution);
-		}*/
-
+		involved_vehicles_pos = this->get_involved_vehicles(temp_solution.vehicles[i]);
 
 		// si no hay vehiculos involucrados el departure_cd_time = d_time
 		if(involved_vehicles_pos.empty()){
@@ -1664,7 +1645,7 @@ bool Grasp::feasible_solution(Solution solution){
 tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solution, vector<int> tabu_more_capacity,vector<int> tabu_worst_route){
 
 	int pos_vehicle_1 = rand() % solution.vehicles.size();
-	int type_route = 0;
+	int type_route = rand() % 2;
 
 	if(type_route == 0){
 		while(solution.vehicles[pos_vehicle_1].pickup_route.size() == 0){
@@ -1720,7 +1701,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 	float best_cost = FLT_MAX;
 	float actual_cost;
 
-	bool add_tabu = true;
+	//bool add_tabu = true;
 
 	if(type_route == 0){
 
@@ -1803,7 +1784,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 			if(this->feasible_solution(temp_solution)){
 				//cout<<"ENCONTRE FACTIBILIDAD"<<endl;
 
-				add_tabu = false;
+				//add_tabu = false;
 
 				actual_cost = this->evaluation_function(temp_solution);
 
@@ -1950,7 +1931,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 			if(this->feasible_solution(temp_solution)){
 			//cout<<"-------------ENCONTRE FACTIBILIDAD--------------"<<endl;
 
-				add_tabu = false;
+				//add_tabu = false;
 
 				actual_cost = this->evaluation_function(temp_solution);
 
