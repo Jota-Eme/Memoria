@@ -932,10 +932,10 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 		random_node_1 = rand() % vehicle_1.pickup_route.size();
 		random_node_2 = rand() % vehicle_2.pickup_route.size();
 
-		cout<<"VEHICULO 1: "<<vehicle_1.id << " nodo: "<<random_node_1<<endl;
-		cout<<"VEHICULO 2: "<<vehicle_2.id << " nodo: "<<random_node_2<<endl;
+		//cout<<"VEHICULO 1: "<<vehicle_1.id << " nodo: "<<random_node_1<<endl;
+		//cout<<"VEHICULO 2: "<<vehicle_2.id << " nodo: "<<random_node_2<<endl;
 
-		print_solution(temp_solution);
+		//print_solution(temp_solution);
 
 
 		//CAMBIO ESTRUCTURAS INVOLVED
@@ -1085,10 +1085,10 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 		random_node_1 = rand() % vehicle_1.delivery_route.size();
 		random_node_2 = rand() % vehicle_2.delivery_route.size();
 
-		cout<<"VEHICULO 1: "<<vehicle_1.id << " nodo: "<<random_node_1<<endl;
-		cout<<"VEHICULO 2: "<<vehicle_2.id << " nodo: "<<random_node_2<<endl;
+		//cout<<"VEHICULO 1: "<<vehicle_1.id << " nodo: "<<random_node_1<<endl;
+		//cout<<"VEHICULO 2: "<<vehicle_2.id << " nodo: "<<random_node_2<<endl;
 
-		print_solution(temp_solution);
+		//print_solution(temp_solution);
 
 		//CAMBIO ESTRUCTURAS INVOLVED
 		// SE buscan los vehiculos que va a entregar cada nodo a cambiar
@@ -1712,7 +1712,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 
 	if(type_route == 0){
 
-		cout<<"RUTA VEHICULO 1 id: "<<vehicle1.id<<" PICKUP: [ ";
+		/*cout<<"RUTA VEHICULO 1 id: "<<vehicle1.id<<" PICKUP: [ ";
 		for(int i=0; (unsigned)i<vehicle1.pickup_route.size();i++){
 
 			cout<<vehicle1.pickup_route[i].id<<" ";
@@ -1744,12 +1744,12 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		}
 		cout<<"]"<<endl;
 
-		print_solution(temp_solution);
+		print_solution(temp_solution);*/
 
 
 		random_node = rand() % vehicle1.pickup_route.size();
 		Suplier suplier_node = vehicle1.pickup_route[random_node];
-		cout<<"nodo a cambiar: "<<suplier_node.id<<endl;
+		//cout<<"nodo a cambiar: "<<suplier_node.id<<endl;
 
 		tuple<int,int> item = vehicle1.pickup_items[random_node];
 		// estructura involved
@@ -1882,7 +1882,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 	}
 	else{
 
-
+/*
 		cout<<"RUTA VEHICULO 1 id: "<<vehicle1.id<<" DELIVERY: [ ";
 		for(int i=0; (unsigned)i<vehicle1.delivery_route.size();i++){
 
@@ -1917,7 +1917,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		cout<<"]"<<endl;
 
 
-		print_solution(temp_solution);
+		print_solution(temp_solution);*/
 		
 
 
@@ -1925,7 +1925,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		random_node = rand() % vehicle1.delivery_route.size();
 		
 		Customer customer_node = vehicle1.delivery_route[random_node];
-		cout<<"nodo a cambiar: "<<customer_node.id<<endl;
+		//cout<<"nodo a cambiar: "<<customer_node.id<<endl;
 
 		tuple<int,int> item = vehicle1.delivery_items[random_node];
 		// estructura involved
@@ -2104,7 +2104,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 
 
 
-Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_phase3, int porc_two_opt, int porc_swap_cd, int porc_swap_node_pick, int porc_swap_node_del, int porc_change_node){
+Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_phase3, int porc_two_opt, int porc_swap_cd, int porc_swap_node_pick, int porc_swap_node_del, int porc_change_node,int time_limit ,clock_t global_start_time){
 
 
 	cout<<"iteraciones phase 1: "<< iterations_phase1<<endl;
@@ -2134,8 +2134,8 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	vector<int> tabu_more_capacity;
 	vector<int> tabu_worst_route;
 
-	clock_t start_time, end_time;
-	double total_time;
+	clock_t start_time, end_time,global_end_time;
+	double total_time,global_total_time;
 	start_time = clock();
 
 	// Se comienzan las iteraciones haciendo el 2-opt, solo se acepta el cambio en la solucion si esta mejora
@@ -2147,9 +2147,18 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		int random_move_4 = rand() % 101;
 
 
+		global_end_time = clock();
+		global_total_time = (double)(global_end_time - global_start_time)/CLOCKS_PER_SEC;
+	
+
+		if(global_total_time >= time_limit){
+			break;
+		}
+
+
 		if(random_move_4<porc_change_node){
 			tie(new_solution,tabu_more_capacity,tabu_worst_route) = this->mov_change_node(new_solution,tabu_more_capacity,tabu_worst_route);
-			cout<<"termine change node"<<endl;
+			//cout<<"termine change node"<<endl;
 
 			/*new_time = this->evaluation_function(new_solution);
 				
@@ -2172,7 +2181,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 		if(random_move_1<porc_two_opt){
 			new_solution = this->mov_two_opt(new_solution);
-			cout<<"termine 2opt"<<endl;
+			//cout<<"termine 2opt"<<endl;
 
 			/*new_time = this->evaluation_function(new_solution);
 				
@@ -2195,7 +2204,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 		if(random_move_2<porc_swap_node_pick){
 			new_solution = this->mov_swap_node(new_solution,0);
-			cout<<"termine swap pick"<<endl;
+			//cout<<"termine swap pick"<<endl;
 
 			/*new_time = this->evaluation_function(new_solution);
 				
@@ -2218,7 +2227,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 		if(random_move_3<porc_swap_node_del){
 			new_solution = this->mov_swap_node(new_solution,1);
-			cout<<"termine swap delivery"<<endl;
+			//cout<<"termine swap delivery"<<endl;
 
 			/*new_time = this->evaluation_function(new_solution);
 				
