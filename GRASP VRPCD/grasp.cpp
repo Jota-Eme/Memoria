@@ -2094,9 +2094,9 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 
 	}*/
 
-	if(best_solution.vehicles[pos_vehicle_1].pickup_route.empty() && best_solution.vehicles[pos_vehicle_1].delivery_route.empty()){
+	/*if(best_solution.vehicles[pos_vehicle_1].pickup_route.empty() && best_solution.vehicles[pos_vehicle_1].delivery_route.empty()){
 		best_solution.vehicles.erase(best_solution.vehicles.begin() + pos_vehicle_1);
-	}
+	}*/
 
     return make_tuple(best_solution,tabu_more_capacity,tabu_worst_route);
 
@@ -2159,8 +2159,8 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		if(random_move_4<porc_change_node){
 			tie(new_solution,tabu_more_capacity,tabu_worst_route) = this->mov_change_node(new_solution,tabu_more_capacity,tabu_worst_route);
 			//cout<<"termine change node"<<endl;
-
-			/*new_time = this->evaluation_function(new_solution);
+			/*
+			new_time = this->evaluation_function(new_solution);
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
@@ -2183,7 +2183,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			new_solution = this->mov_two_opt(new_solution);
 			//cout<<"termine 2opt"<<endl;
 
-			/*new_time = this->evaluation_function(new_solution);
+			new_time = this->evaluation_function(new_solution);
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
@@ -2198,7 +2198,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			}
 			else{
 				new_solution = best_solution;
-			}*/
+			}
 
 		}
 
@@ -2206,7 +2206,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			new_solution = this->mov_swap_node(new_solution,0);
 			//cout<<"termine swap pick"<<endl;
 
-			/*new_time = this->evaluation_function(new_solution);
+			new_time = this->evaluation_function(new_solution);
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
@@ -2221,7 +2221,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			}
 			else{
 				new_solution = best_solution;
-			}*/
+			}
 
 		}
 
@@ -2229,7 +2229,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			new_solution = this->mov_swap_node(new_solution,1);
 			//cout<<"termine swap delivery"<<endl;
 
-			/*new_time = this->evaluation_function(new_solution);
+			new_time = this->evaluation_function(new_solution);
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
@@ -2244,12 +2244,12 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			}
 			else{
 				new_solution = best_solution;
-			}*/
+			}
 
 		}
 
 	
-		
+		/*
 		new_time = this->evaluation_function(new_solution);
 				
 		if(new_time < best_time){
@@ -2265,7 +2265,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		}
 		else{
 			new_solution = best_solution;
-		}
+		}*/
 		
 	}
 
