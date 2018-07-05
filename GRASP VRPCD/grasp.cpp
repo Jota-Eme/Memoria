@@ -648,7 +648,7 @@ Solution Grasp::mov_two_opt(Solution solution){
 	//SE comienza a realizar el 2-opt, primero se seleccionan los 2 putnos de corte
 	// y se verifica que no sean el mismo, luego se ordenan para que el i sea el menor y el k el mayor por conveniencia
 	int i = rand() % selected_route.size();
-	int k = rand() % selected_route.size();
+	/*int k = rand() % selected_route.size();
 	while(i == k){
 		i = rand() % selected_route.size();
 		k = rand() % selected_route.size();
@@ -657,7 +657,20 @@ Solution Grasp::mov_two_opt(Solution solution){
 		int temp = i;
 		i=k;
 		k=temp;
+	}*/
+
+	int k=-1;
+
+	if((unsigned)i == selected_route.size() -1){
+		k = i-1;
 	}
+	else{
+		k = i+1;
+	}
+
+
+
+
 
 	//cout<<"Los puntos escogidos son: "<<i<<" y "<<k<<endl;
 
@@ -2159,7 +2172,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		if(random_move_4<porc_change_node){
 			tie(new_solution,tabu_more_capacity,tabu_worst_route) = this->mov_change_node(new_solution,tabu_more_capacity,tabu_worst_route);
 			//cout<<"termine change node"<<endl;
-			/*
+			
 			new_time = this->evaluation_function(new_solution);
 				
 			if(new_time < best_time){
@@ -2175,7 +2188,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			}
 			else{
 				new_solution = best_solution;
-			}*/
+			}
 		}
 
 

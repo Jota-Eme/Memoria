@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
 	Solution best_solution = new_solution;
 	float new_time = grasp.evaluation_function(new_solution);
 	float best_time = new_time;
+	int graspit = 1;
 
 
 	for(int i=1; i<iterations_grasp ; i++){
@@ -77,6 +78,8 @@ int main(int argc, char *argv[]) {
 			best_solution = new_solution;
 			best_time = new_time;
 		}
+
+		graspit+=1;
 	}
 
 	end_time = clock();
@@ -106,6 +109,7 @@ int main(int argc, char *argv[]) {
 	tie(pickup_nodes,delivery_nodes) = best_solution.count_nodes();
 	cout<<"CANTIDAD NODOS PICKUP: "<<pickup_nodes<<endl;
 	cout<<"CANTIDAD NODOS DELIVERY: "<<delivery_nodes<<endl;
+	cout<<"iteraciones grasp ejecurtadas: "<<graspit<<endl;
 
 
 	export_solution(best_solution);
