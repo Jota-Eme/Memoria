@@ -25,6 +25,9 @@ class Vehicle{
 		// TIempo en el que el vehiculo deja un crossdock luego de la consolidacion
 		int departure_cd_time;
 
+		// VELLOCIDAD DE LOS VEHICULOS EN EL PAPPER ESTA EN KM/H, PERO se almacena en m/s
+		float speed;
+
 
 		// PRE PROCESAMIENTO ------------------------------------------
 		// Estructuras que guardan la id de los vehiculos involucrados en cada item
@@ -33,7 +36,7 @@ class Vehicle{
 
 
 		// funciones de la clase
-		Vehicle(int,int,int, Node, int);
+		Vehicle(int,int,int, Node, int,float);
 		Vehicle();
 		//funcion que setea los tiempos de llegada y salida de cada nodo de todas las rutas
 		void set_times();

@@ -124,7 +124,7 @@ Solution Grasp::distance_initial_solution(){
 
 	while(requests.size() != 0){
 		
-		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id);
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id, this->instance.speed);
 		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
 		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
@@ -245,7 +245,7 @@ Solution Grasp::demand_initial_solution(){
 
 	while(requests.size() != 0){
 		
-		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id);
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id,this->instance.speed);
 		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
 		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
@@ -310,7 +310,7 @@ Solution Grasp::hybrid_initial_solution(){
 
 	while(requests.size() != 0){
 		
-		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id);
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id,this->instance.speed);
 		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
 		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
@@ -449,7 +449,7 @@ Solution Grasp::timewindow_initial_solution(){
 
 	while(requests.size() != 0){
 		
-		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id);
+		Vehicle vehicle(this->instance.vehicle_capacity, this->instance.fixed_time_preparation, this->instance.unit_time_pallet, this->instance.vehicle_depot, id,this->instance.speed);
 		// POR EL MOMENTO SE ASUME QUE EL PUNTO DE COMIENZO DE CADA VEHICULO ES EL PRIMERO CROSSDOCK DE LA INSTANCIA
 		//vehicle.crossdock_route.push_back(this->instance.crossdocks[0]);
 		found = true;
@@ -536,7 +536,7 @@ float Grasp::evaluation_function(Solution solution){
 			for (suplier_iterator = vehicle_iterator->pickup_route.begin(); suplier_iterator != vehicle_iterator->pickup_route.end(); ++suplier_iterator) {
 
 				Suplier &new_suplier = *suplier_iterator;
-				total_cost += current_node.get_distance(new_suplier);
+				total_cost += current_node.get_distance(new_suplier)/vehicle_iterator->speed;
 				current_node = new_suplier;
 			}
 
@@ -547,7 +547,7 @@ float Grasp::evaluation_function(Solution solution){
 			for (crossdock_iterator = vehicle_iterator->crossdock_route.begin(); crossdock_iterator != vehicle_iterator->crossdock_route.end(); ++crossdock_iterator) {
 
 				Crossdock &new_crossdock = *crossdock_iterator;
-				total_cost += current_node.get_distance(new_crossdock);
+				total_cost += current_node.get_distance(new_crossdock)/vehicle_iterator->speed;
 				current_node = new_crossdock;
 			}
 
@@ -558,14 +558,14 @@ float Grasp::evaluation_function(Solution solution){
 			for (customer_iterator = vehicle_iterator->delivery_route.begin(); customer_iterator != vehicle_iterator->delivery_route.end(); ++customer_iterator) {
 
 				Customer &new_customer = *customer_iterator;
-				total_cost += current_node.get_distance(new_customer);
+				total_cost += current_node.get_distance(new_customer)/vehicle_iterator->speed;
 				current_node = new_customer;
 			}
 
 		}
 
 		//EN este caso siempre vuelve al CD inicial, PARA LA MEMORIA SE DEBEN CONSIDERAR LOS LUGARES TERMINALES
-		total_cost += current_node.get_distance(vehicle_iterator->vehicle_depot);
+		total_cost += current_node.get_distance(vehicle_iterator->vehicle_depot)/vehicle_iterator->speed;
 
 	}
 

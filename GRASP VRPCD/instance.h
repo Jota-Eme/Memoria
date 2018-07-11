@@ -13,6 +13,8 @@ class Instance{
 		string input_file;
 
 		int request_number, vehicle_capacity, unit_time_pallet, fixed_time_preparation, crossdocks_number,total_demand;
+		//velocidad de vehiculos en KM/H
+		float speed;
 
 		Node vehicle_depot;
 		vector<Request> requests;

@@ -48,7 +48,12 @@ void Instance::read_instance(){
 	getline(file, line);
 	getline(file, line);
 	getline(file, line);
-  	this->vehicle_capacity = stoi(line);
+	prev_data = get_int_vector(line);
+
+  	prev_data.erase(remove(prev_data.begin(), prev_data.end(), -1), prev_data.end());
+
+  	this->vehicle_capacity = prev_data[0];
+	this->speed = (float)prev_data[1];
 
 	// LINEA 4: obtencion de los tiempos de carga y descarga
   	getline(file, line);

@@ -2,7 +2,7 @@
 #include "vehicle.h"
 
 // CONSTRUCTOR
-Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot, int id){
+Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot, int id,float speed){
 	this->total_capacity = capacity;
 	this->remaining_capacity = capacity;
 	this->fixed_time = fixed_time;
@@ -10,6 +10,13 @@ Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot
 	this->vehicle_depot = vehicle_depot;
 	this->departure_cd_time = 0;
 	this->id = id;
+
+	if(speed == 0){
+		this->speed = 1;
+	}
+	else{
+		this->speed = speed * 10 / 36;
+	}
 }
 
 Vehicle::Vehicle(){
@@ -36,7 +43,7 @@ void Vehicle::set_times(){
 	for (suplier_iterator = this->pickup_route.begin(); suplier_iterator != this->pickup_route.end(); ++suplier_iterator) {
 
 		Suplier &new_suplier = *suplier_iterator;
-		arrival_time = departure_time + current_node.get_distance(new_suplier);
+		arrival_time = departure_time + current_node.get_distance(new_suplier)/this->speed;
 		departure_time = max(arrival_time, (float)new_suplier.ready_time);
 
 		current_node = new_suplier;
@@ -47,7 +54,7 @@ void Vehicle::set_times(){
 	for (crossdock_iterator = this->crossdock_route.begin(); crossdock_iterator != this->crossdock_route.end(); ++crossdock_iterator) {
 
 		Crossdock &new_crossdock = *crossdock_iterator;
-		arrival_time = departure_time + current_node.get_distance(new_crossdock);
+		arrival_time = departure_time + current_node.get_distance(new_crossdock)/this->speed;
 		int real_arrival = max(arrival_time, (float)new_crossdock.ready_time);
 		departure_time = max(real_arrival, this->departure_cd_time);
 
@@ -59,7 +66,7 @@ void Vehicle::set_times(){
 	for (customer_iterator = this->delivery_route.begin(); customer_iterator != this->delivery_route.end(); ++customer_iterator) {
 
 		Customer &new_customer = *customer_iterator;
-		arrival_time = departure_time + current_node.get_distance(new_customer);
+		arrival_time = departure_time + current_node.get_distance(new_customer)/this->speed;
 		departure_time = max(arrival_time, (float)new_customer.ready_time);
 
 		current_node = new_customer;
@@ -141,13 +148,13 @@ float Vehicle::get_pickup_cost(){
 		for (suplier_iterator = this->pickup_route.begin(); suplier_iterator != this->pickup_route.end(); ++suplier_iterator) {
 
 			Suplier &new_suplier = *suplier_iterator;
-			total_cost += current_node.get_distance(new_suplier);
+			total_cost += current_node.get_distance(new_suplier)/this->speed;
 			current_node = new_suplier;
 		}
 
 	}
 
-	total_cost += current_node.get_distance(this->crossdock_route[0]);
+	total_cost += current_node.get_distance(this->crossdock_route[0])/this->speed;
 
 	return total_cost;
 
@@ -166,7 +173,7 @@ float Vehicle::get_crossdock_cost(){
 		for (crossdock_iterator = this->crossdock_route.begin(); crossdock_iterator != this->crossdock_route.end(); ++crossdock_iterator) {
 
 			Crossdock &new_crossdock = *crossdock_iterator;
-			total_cost += current_node.get_distance(new_crossdock);
+			total_cost += current_node.get_distance(new_crossdock)/this->speed;
 			current_node = new_crossdock;
 		}
 
@@ -188,13 +195,13 @@ float Vehicle::get_delivery_cost(){
 		for (customer_iterator = this->delivery_route.begin(); customer_iterator != this->delivery_route.end(); ++customer_iterator) {
 
 			Customer &new_customer = *customer_iterator;
-			total_cost += current_node.get_distance(new_customer);
+			total_cost += current_node.get_distance(new_customer)/this->speed;
 			current_node = new_customer;
 		}
 
 	}
 
-	total_cost += current_node.get_distance(this->vehicle_depot);
+	total_cost += current_node.get_distance(this->vehicle_depot)/this->speed;
 
 	return total_cost;
 
