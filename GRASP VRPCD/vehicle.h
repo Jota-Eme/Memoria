@@ -27,6 +27,10 @@ class Vehicle{
 
 		// VELLOCIDAD DE LOS VEHICULOS EN EL PAPPER ESTA EN KM/H, PERO se almacena en m/s
 		float speed;
+		// TIEMPO QUE SE DEMORA EN DESCARGAR LOS PRODUCTOS (NO ES EL TIEMPO EN EL QUE DESCARGA TODOS LOS PRODUCTOS).
+		float download_time;
+		// TIEMPO QUE SE DEMORA EN CARGAR LOS PRODUCTOS CORRESPONDIENTES.
+		float reload_time;
 
 
 		// PRE PROCESAMIENTO ------------------------------------------
@@ -53,6 +57,9 @@ class Vehicle{
 		void set_remaining_capacity();
 		// funcion que obtiene los items a descargar en un CD si la opcion es 0, y los items a cargar en un CD si la opcion es 1
 		vector<int> get_items(int);
+		//funciones que setean el atributo download_stime y upload_time
+		void set_download_time();
+		void set_reload_time();
 		
 
 };

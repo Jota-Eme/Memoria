@@ -1257,6 +1257,10 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 		//cout<<"movimiento SIIIIII FACTIBLE"<<endl;
 		temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
 		temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
+		temp_solution.vehicles[pos_vehicle_1].set_download_time();
+		temp_solution.vehicles[pos_vehicle_2].set_download_time();
+		temp_solution.vehicles[pos_vehicle_1].set_reload_time();
+		temp_solution.vehicles[pos_vehicle_2].set_reload_time();
 
 		return temp_solution;
 		
@@ -1513,13 +1517,11 @@ vector<int> Grasp::get_involved_vehicles(Vehicle vehicle){
 }
 
 
-
 Solution Grasp::consolidation2(Solution solution){
 
 	// SE debe calcular el tiempo de descarga para todos los vehiculos
 	vector<int> download_item_position;
 	vector <Vehicle>::iterator vehicle_iterator;
-	int  unload_items;
 	// tiempo en el que termina de descargar todos los productos
 	float d_time,cdtime,arrival_time;
 	// vector que contiene los tiempos de descarga de todos los vehiculos
@@ -1531,31 +1533,10 @@ Solution Grasp::consolidation2(Solution solution){
 
 	for (vehicle_iterator = temp_solution.vehicles.begin(); vehicle_iterator != temp_solution.vehicles.end(); ++vehicle_iterator) {
 
-		download_item_position = vehicle_iterator->get_items(0);
 		cdtime = get<0>(vehicle_iterator->crossdock_times[0]);
 		arrival_time = max(cdtime, (float)vehicle_iterator->crossdock_route[0].ready_time);
-		d_time = 0;
 
-		for(int i : download_item_position){
-			// verificacion para testear, luego se puede sacar
-			int id = get<1>(vehicle_iterator->pickup_items[i]);
-			if(vehicle_iterator->pickup_route[i].id != id){
-				cout<<" ERROR EN LA CONSOLIDACION, EL ITEM NO CORRESPONDE AL NODO CONSOLIDATION2 DOWNLOAD" <<endl;
-			}
-			// -------------------------------------------------------------- 
-
-			unload_items = get<0>(vehicle_iterator->pickup_items[i]);
-	 		d_time +=  unload_items * vehicle_iterator->unit_time;
-
-		}
-
-		// si no hay items que descargar, el tiempo en el que esta listo es el arrival time
-		if(download_item_position.empty()){
-			d_time += arrival_time;
-		}
-		else{
-			d_time += arrival_time + vehicle_iterator->fixed_time;
-		}
+		d_time = vehicle_iterator->download_time + arrival_time;
 
 	 	download_times.push_back(d_time);
 
@@ -1565,8 +1546,7 @@ Solution Grasp::consolidation2(Solution solution){
 
 	// PARA CADA VEHICULO SE DEBEN ENCONTRAR LOS VEHICULOS INVOLUCRADOS (LOS QUE SE ENCUENTREN EN DELIVERY Y NO EN PICKUP)
 	vector<int> involved_vehicles_pos; 
-	float ready_load_time, u_time;
-	int reload_items;
+	float ready_load_time;
 	//cout<<"consolidation antes 2 FOR"<<endl;
 
 
@@ -1594,28 +1574,9 @@ Solution Grasp::consolidation2(Solution solution){
 			ready_load_time = *it;
 
 			// SE CALCULA EL TIEMPO DE CARGA DE ITEMS
-			vector<int> upload_item_position = temp_solution.vehicles[i].get_items(1);
-
-			u_time = 0;
-
-			for(int j : upload_item_position){
-				// verificacion para testear, luego se puede sacar
-				int id = get<1>(temp_solution.vehicles[i].delivery_items[j]);
-				if(temp_solution.vehicles[i].delivery_route[j].id != id){
-					cout<<" ERROR EN LA CONSOLIDACION, EL ITEM NO CORRESPONDE AL NODO CONSOLIDATION2 UPLOAD" <<endl;
-				}
-				// -------------------------------------------------------------- 
-
-				reload_items = get<0>(temp_solution.vehicles[i].delivery_items[j]);
-		 		u_time +=  reload_items * temp_solution.vehicles[i].unit_time;
-
-			}
-
-			// tiempo de carga total para el vehiculo i
-			u_time += temp_solution.vehicles[i].fixed_time;
-
+			
 			// finalmente se setea el departure_time
-			temp_solution.vehicles[i].departure_cd_time = ready_load_time + u_time;
+			temp_solution.vehicles[i].departure_cd_time = ready_load_time + temp_solution.vehicles[i].reload_time;
 
 		}
 		
@@ -2113,6 +2074,11 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 
 	best_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
 	best_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
+	best_solution.vehicles[pos_vehicle_1].set_download_time();
+	best_solution.vehicles[pos_vehicle_2].set_download_time();
+	best_solution.vehicles[pos_vehicle_1].set_reload_time();
+	best_solution.vehicles[pos_vehicle_2].set_reload_time();
+
 
 
     return make_tuple(best_solution,tabu_more_capacity,tabu_worst_route);

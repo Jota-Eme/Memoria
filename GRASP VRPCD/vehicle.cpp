@@ -10,6 +10,8 @@ Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot
 	this->vehicle_depot = vehicle_depot;
 	this->departure_cd_time = 0;
 	this->id = id;
+	this->download_time = 0;
+	this->reload_time = 0;
 
 	if(speed == 0){
 		this->speed = 1;
@@ -231,7 +233,7 @@ int Vehicle::get_pickup_capacity(){
 	return remaining_capacity;
 }
 
-
+/*
 vector<int> Vehicle::get_items(int type){
 
 	vector<int> pickup_id, delivery_id,items_position;
@@ -273,7 +275,42 @@ vector<int> Vehicle::get_items(int type){
 
 	return items_position;
 
+}*/
+
+
+vector<int> Vehicle::get_items(int type){
+
+	vector<int> items;
+
+ // BUSCA LOS ITEMS DE DESCARGA (LOS QUE ESTAN EN PICKUP Y NO EN DELIVERY)
+	if(type == 0){
+
+		for(int i=0; (unsigned)i<this->involved_pickup.size();i++){
+
+			if(this->involved_pickup[i] != this->id){
+				items.push_back(i);
+			}
+
+		}
+
+	}
+
+// BUSCA LOS ITEMS DE CARGA (LOS QUE ESTAN EN DELIVERY Y NO EN PICKUP)
+	else{
+
+		for(int i=0; (unsigned)i<this->involved_delivery.size();i++){
+
+			if(this->involved_delivery[i] != this->id){
+				items.push_back(i);
+			}
+
+		}
+	}
+
+	return items;
+
 }
+
 
 
 void Vehicle::set_remaining_capacity(){
@@ -290,4 +327,73 @@ void Vehicle::set_remaining_capacity(){
 
 }
 
+
+void Vehicle::set_download_time(){
+
+	vector<int> download_item_position;
+	int d_time = 0;
+	int unload_items;
+
+	download_item_position = this->get_items(0);
+
+	if(download_item_position.empty()){
+		this->download_time = 0;
+		return;
+	}
+
+	else{
+		d_time += this->fixed_time;
+	}
+
+	for(int i : download_item_position){
+		// verificacion para testear, luego se puede sacar
+		int id = get<1>(this->pickup_items[i]);
+		if(this->pickup_route[i].id != id){
+			cout<<" ERROR EN LA CONSOLIDACION, EL ITEM NO CORRESPONDE AL NODO SET DOWNLOAD TIME" <<endl;
+		}
+		// -------------------------------------------------------------- 
+
+		unload_items = get<0>(this->pickup_items[i]);
+ 		d_time +=  unload_items * this->unit_time;
+
+	}
+	
+ 	this->download_time = d_time;
+ 	return;
+
+}
+
+void Vehicle::set_reload_time(){
+
+	vector<int> reload_item_position;
+	int r_time = 0;
+	int reload_items;
+
+	reload_item_position = this->get_items(1);
+
+	if(reload_item_position.empty()){
+		this->reload_time = 0;
+		return;
+	}
+
+	else{
+		r_time += this->fixed_time;
+	}
+
+	for(int i : reload_item_position){
+		// verificacion para testear, luego se puede sacar
+		int id = get<1>(this->delivery_items[i]);
+		if(this->delivery_route[i].id != id){
+			cout<<" ERROR EN LA CONSOLIDACION, EL ITEM NO CORRESPONDE AL NODO SET RELOAD TIME" <<endl;
+		}
+		// -------------------------------------------------------------- 
+
+		reload_items = get<0>(this->delivery_items[i]);
+ 		r_time +=  reload_items * this->unit_time;
+
+	}
+	
+ 	this->reload_time = r_time;
+ 	return;
+}
 
