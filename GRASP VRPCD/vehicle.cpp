@@ -15,7 +15,7 @@ Vehicle::Vehicle(int capacity, int fixed_time, int unit_time, Node vehicle_depot
 		this->speed = 1;
 	}
 	else{
-		this->speed = speed * 10 / 36;
+		this->speed = speed * 100 / 6;
 	}
 }
 

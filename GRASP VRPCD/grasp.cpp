@@ -2111,6 +2111,10 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		best_solution.vehicles.erase(best_solution.vehicles.begin() + pos_vehicle_1);
 	}*/
 
+	best_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
+	best_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
+
+
     return make_tuple(best_solution,tabu_more_capacity,tabu_worst_route);
 
 }
