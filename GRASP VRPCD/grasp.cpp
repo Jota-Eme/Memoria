@@ -2119,15 +2119,22 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 	clock_t start_time, end_time,global_end_time;
 	double total_time,global_total_time;
+
+	float change_node_score = 0.25;
+	float two_opt_score = 0.25;
+	float sn_pick_score = 0.25;
+	float sn_del_score = 0.25;
+
+
+	float alpha;
+
+
 	start_time = clock();
 
 	// Se comienzan las iteraciones haciendo el 2-opt, solo se acepta el cambio en la solucion si esta mejora
 	for(int i = 1; i <= iterations_phase1; i++){
 
-		int random_move_1 = rand() % 101;
-		int random_move_2 = rand() % 101;
-		int random_move_3 = rand() % 101;
-		int random_move_4 = rand() % 101;
+		float random_score = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
 
 		global_end_time = clock();
@@ -2139,7 +2146,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		}
 
 
-		if(random_move_4<porc_change_node){
+		if(0 < random_score <= change_node_score){
 			tie(new_solution,tabu_more_capacity,tabu_worst_route) = this->mov_change_node(new_solution,tabu_more_capacity,tabu_worst_route);
 			//cout<<"termine change node"<<endl;
 			
@@ -2148,6 +2155,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
 				cout<<"Actual= "<<new_time<<endl;
+
+				float dif = best_time - new_time;
+
 				best_solution = new_solution;
 				best_time = new_time;
 				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
@@ -2155,6 +2165,17 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 				myfile << total_time <<"-"<< best_time << "\n";
+
+				// SE MODIFICA EL SCORE SI MEJORA LA SOLUCION
+				change_node_score = change_node_score * (alpha * dif/criteria);
+
+				int sum = change_node_score + two_opt_score + sn_pick_score + sn_del_score;
+
+				change_node_score = change_node_score/sum;
+				two_opt_score = two_opt_score/sum;
+				sn_pick_score = sn_pick_score/sum;
+				sn_del_score = sn_pick_score/sum;
+
 			}
 			else{
 				new_solution = best_solution;
@@ -2162,7 +2183,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		}
 
 
-		if(random_move_1<porc_two_opt){
+		else if( change_node_score < random_score <= change_node_score + two_opt_score){
 			new_solution = this->mov_two_opt(new_solution);
 			//cout<<"termine 2opt"<<endl;
 
@@ -2171,6 +2192,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
 				cout<<"Actual= "<<new_time<<endl;
+
+				dif = best_time - new_time;
+
 				best_solution = new_solution;
 				best_time = new_time;
 				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
@@ -2178,6 +2202,17 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 				myfile << total_time <<"-"<< best_time << "\n";
+
+				// SE MODIFICA EL SCORE SI MEJORA LA SOLUCION
+				two_opt_score = two_opt_score * (alpha * dif/criteria);
+
+				int sum = change_node_score + two_opt_score + sn_pick_score + sn_del_score;
+
+				change_node_score = change_node_score/sum;
+				two_opt_score = two_opt_score/sum;
+				sn_pick_score = sn_pick_score/sum;
+				sn_del_score = sn_pick_score/sum;
+
 			}
 			else{
 				new_solution = best_solution;
@@ -2185,7 +2220,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 		}
 
-		if(random_move_2<porc_swap_node_pick){
+		else if(change_node_score + two_opt_score < random_score <= change_node_score + two_opt_score + sn_pick_score){
 			new_solution = this->mov_swap_node(new_solution,0);
 			//cout<<"termine swap pick"<<endl;
 
@@ -2194,6 +2229,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
 				cout<<"Actual= "<<new_time<<endl;
+
+				dif = best_time - new_time;
+
 				best_solution = new_solution;
 				best_time = new_time;
 				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
@@ -2201,6 +2239,16 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 				myfile << total_time <<"-"<< best_time << "\n";
+
+				// SE MODIFICA EL SCORE SI MEJORA LA SOLUCION
+				sn_pick_score = sn_pick_score * (alpha * dif/criteria);
+
+				int sum = change_node_score + two_opt_score + sn_pick_score + sn_del_score;
+
+				change_node_score = change_node_score/sum;
+				two_opt_score = two_opt_score/sum;
+				sn_pick_score = sn_pick_score/sum;
+				sn_del_score = sn_pick_score/sum;
 			}
 			else{
 				new_solution = best_solution;
@@ -2208,7 +2256,7 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 		}
 
-		if(random_move_3<porc_swap_node_del){
+		else (change_node_score + two_opt_score + sn_pick_score < random_score <= 1){
 			new_solution = this->mov_swap_node(new_solution,1);
 			//cout<<"termine swap delivery"<<endl;
 
@@ -2217,6 +2265,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
 				cout<<"Actual= "<<new_time<<endl;
+
+				dif = best_time - new_time;
+
 				best_solution = new_solution;
 				best_time = new_time;
 				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
@@ -2224,6 +2275,16 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 				myfile << total_time <<"-"<< best_time << "\n";
+
+				// SE MODIFICA EL SCORE SI MEJORA LA SOLUCION
+				sn_del_score = sn_del_score * (alpha * dif/criteria);
+
+				int sum = change_node_score + two_opt_score + sn_pick_score + sn_del_score;
+
+				change_node_score = change_node_score/sum;
+				two_opt_score = two_opt_score/sum;
+				sn_pick_score = sn_pick_score/sum;
+				sn_del_score = sn_pick_score/sum;
 			}
 			else{
 				new_solution = best_solution;
