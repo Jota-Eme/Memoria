@@ -25,9 +25,15 @@ class Grasp{
 		// criterio de cambio de listas tabu
 		int criteria;
 
+		// tamano slide window para el seteo de parametros
+		int size_window;
+		// factor decay que favorece la explotacion D
+		float decay_factor;
+		// factor que favorece la exploracion C
+		float explore_factor;
 
 		// constructores
-		Grasp(Instance,int,int,int);
+		Grasp(Instance,int,int,int,int,float,float);
 		Grasp();
 		//funcion que retorna una lista con los request de menos costo que cumplan las restricciones
 		tuple<vector<tuple<Request,int, float>>,bool> get_cheaper_requests(vector<Request>, Vehicle);

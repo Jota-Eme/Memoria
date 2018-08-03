@@ -6,7 +6,7 @@
 
 
 // FUNCION QUE LEERA LA VENTANA DE COMANDOS 
-tuple<string,int,int,int,int,int,int,int,int,int,int,int,int,int,int> read_input(int argc, char **argv){
+tuple<string,int,int,int,int,int,int,int,int,int,int,int,int,int,int,float,float,int> read_input(int argc, char **argv){
 
 	string input_file = (char *)(argv[1]);
 	int list_graps_size = stoi((char *)(argv[2]));
@@ -22,25 +22,28 @@ tuple<string,int,int,int,int,int,int,int,int,int,int,int,int,int,int> read_input
 	int porc_movimiento_swap_pickup = stoi((char *)(argv[12]));
 	int porc_movimiento_swap_delivery = stoi((char *)(argv[13]));
 	int porc_movimiento_change_node = stoi((char *)(argv[14]));
-	int seed = stoi((char *)(argv[15]));
+	int seed = stoi((char *)(argv[18]));
+	int size_window = stoi((char *)(argv[15]));
+	float decay_factor = stof((char *)(argv[16]));
+	float explore_factor = stof((char *)(argv[17]));
 	
-	return make_tuple(input_file,list_graps_size,tabu_capacity_size,tabu_worst_route_size,time_limit,iterations_grasp,iterations_phase1,iterations_phase2,iterations_phase3,porc_movimiento_two_opt,porc_movimiento_swap_cd,porc_movimiento_swap_pickup,porc_movimiento_swap_delivery,porc_movimiento_change_node,seed);
+	return make_tuple(input_file,list_graps_size,tabu_capacity_size,tabu_worst_route_size,time_limit,iterations_grasp,iterations_phase1,iterations_phase2,iterations_phase3,porc_movimiento_two_opt,porc_movimiento_swap_cd,porc_movimiento_swap_pickup,porc_movimiento_swap_delivery,porc_movimiento_change_node,size_window,decay_factor,explore_factor,seed);
 
 }
 
 
 int main(int argc, char *argv[]) {
 
-	if(argc != 16){
+	if(argc != 19){
 		cout<<argc<<endl;
 		cout << "El formato para la ejecucion es: " << argv[0] << " archivo_entrada tamaño_lista_grasp tamaño_lista_tabu_capcity tamaño_lista_tabu_worst_route tiempo_limite iteraciones_grasp iteraciones_phase1 iteraciones_phase2 iteraciones_phase3 porc_movimiento_two_opt porc_movimiento_swap_cd porc_movimiento_swap_pickup porc_movimiento_swap_delivery porc_movimiento_change_node semilla"<<endl;
 		return 0;
 	}
 
 	string input_file;
-	int list_graps_size,tabu_capacity_size,time_limit,tabu_worst_route_size,seed,iterations_grasp,iterations_phase1,iterations_phase2,iterations_phase3,porc_movimiento_two_opt,porc_movimiento_swap_cd,porc_movimiento_swap_pickup,porc_movimiento_swap_delivery,porc_movimiento_change_node;
-
-	tie(input_file,list_graps_size,tabu_capacity_size,tabu_worst_route_size,time_limit,iterations_grasp,iterations_phase1,iterations_phase2,iterations_phase3,porc_movimiento_two_opt,porc_movimiento_swap_cd,porc_movimiento_swap_pickup,porc_movimiento_swap_delivery,porc_movimiento_change_node,seed) = read_input(argc,argv);
+	int list_graps_size,tabu_capacity_size,time_limit,tabu_worst_route_size,seed,iterations_grasp,iterations_phase1,iterations_phase2,iterations_phase3,porc_movimiento_two_opt,porc_movimiento_swap_cd,porc_movimiento_swap_pickup,porc_movimiento_swap_delivery,porc_movimiento_change_node,size_window;
+	float decay_factor,explore_factor;
+	tie(input_file,list_graps_size,tabu_capacity_size,tabu_worst_route_size,time_limit,iterations_grasp,iterations_phase1,iterations_phase2,iterations_phase3,porc_movimiento_two_opt,porc_movimiento_swap_cd,porc_movimiento_swap_pickup,porc_movimiento_swap_delivery,porc_movimiento_change_node,size_window,decay_factor,explore_factor, seed) = read_input(argc,argv);
 
 	if(list_graps_size<=0){
 		cout<<"El tamaño de la lista debe ser mayor o igual a 1"<<endl;
@@ -50,7 +53,7 @@ int main(int argc, char *argv[]) {
 	srand(seed);
 	Instance instance(input_file);
 	instance.read_instance();
-	Grasp grasp(instance,list_graps_size,tabu_capacity_size,tabu_worst_route_size);
+	Grasp grasp(instance,list_graps_size,tabu_capacity_size,tabu_worst_route_size,size_window,decay_factor,explore_factor);
 
 	clock_t start_time = clock();
 	clock_t end_time;

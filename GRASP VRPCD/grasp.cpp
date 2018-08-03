@@ -2,12 +2,16 @@
 
 
 // CONSTRUCTOR
-Grasp::Grasp (Instance instance, int list_size, int tabu_capacity_size, int tabu_worst_route_size ){
+Grasp::Grasp (Instance instance, int list_size, int tabu_capacity_size, int tabu_worst_route_size, int size_window,float decay_factor,float explore_factor ){
 	this->instance = instance;
 	this->list_size = list_size;
 	this->tabu_capacity_size = tabu_capacity_size;
 	this->tabu_worst_route_size = tabu_worst_route_size;
 	this->criteria = 0;
+	this->size_window = size_window;
+	this->decay_factor = decay_factor;
+	this->explore_factor = explore_factor;
+
 }
 
 Grasp::Grasp(){
@@ -2124,6 +2128,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	cout<<"porcentaje swap pickup: "<< porc_swap_node_pick<<endl;
 	cout<<"porcentaje swap delivery: "<< porc_swap_node_del<<endl;
 	cout<<"porcentaje change node: "<< porc_change_node<<endl;
+	cout<<"size_window: "<< this->size_window<<endl;
+	cout<<"decay factor: "<< this->decay_factor<<endl;
+	cout<<"explore factor: "<< this->explore_factor<<endl;
 
 	ofstream myfile;
 	myfile.open ("result.txt");
@@ -2162,9 +2169,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	// indicador de score del movimiento en cierta iteracion (fitness improvement)
 	float fir;
 
-	int size_window = 50;
-	float decay_factor = 0.3;
-	float explore_factor = 1;
+	int size_window = this->size_window;
+	float decay_factor = this->decay_factor;
+	float explore_factor = this->explore_factor;
 	int selected_operator = -1;
 
 
