@@ -82,8 +82,8 @@ tuple<vector<tuple<Request,int, float>>,bool> Grasp::get_cheaper_requests(vector
 
 					else if(selected_requests.size() == (unsigned)this->list_size){
 						selected_requests.push_back(make_tuple(requests[i],best_cd,total_cost));
-						std::sort(begin(selected_requests), end(selected_requests), [](tuple<Request, int, float> const &t1, tuple<Request, int, float> const &t2) {
-					        return get<2>(t1) < get<2>(t2); 
+						sort(begin(selected_requests), end(selected_requests), [](tuple<Request, int, float> const &t1, tuple<Request, int, float> const &t2) {
+					    	return get<2>(t1) < get<2>(t2); 
 					    	}
 					    );
 						selected_requests.pop_back();
@@ -2079,16 +2079,42 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 	best_solution.vehicles[pos_vehicle_1].set_reload_time();
 	best_solution.vehicles[pos_vehicle_2].set_reload_time();
 
-
-
     return make_tuple(best_solution,tabu_more_capacity,tabu_worst_route);
 
 }
 
 
+tuple<vector<float>,vector<int>> get_rewards(vector<tuple<int,float>> sliding_window){
+
+	vector<float> rewards = {0,0,0,0};
+	vector<int> times_used = {0,0,0,0};
+	float fir;
+	int operator_id;
+
+	for(tuple<int,int> element : sliding_window){
+		operator_id = get<0>(element);
+		fir = get<1>(element);
+		times_used[operator_id] += 1;
+		rewards[operator_id] += fir;
+	}
+
+	return make_tuple(rewards,times_used);
+
+}
+
+
+vector<int> get_ranking(vector<tuple<int,float>> rewards){
+	vector<int> ranking = {0,0,0,0};
+	for(int i=0; (unsigned)i<rewards.size();i++){
+		int operator_id = get<0>(rewards[i]);
+		ranking[operator_id] = i+1;
+	}
+	return ranking;
+}
+
+
 
 Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_phase3, int porc_two_opt, int porc_swap_cd, int porc_swap_node_pick, int porc_swap_node_del, int porc_change_node,int time_limit ,clock_t global_start_time){
-
 
 	cout<<"iteraciones phase 1: "<< iterations_phase1<<endl;
 	cout<<"iteraciones phase 2: "<< iterations_phase2<<endl;
@@ -2109,24 +2135,37 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	//Solution new_solution = this->hybrid_initial_solution();
 	//Solution new_solution = this->timewindow_initial_solution();
 
-	//Solution asd = this->mov_change_node(new_solution);
-
 	Solution best_solution = new_solution;
+	Solution parent_solution = new_solution;
 	float best_time = this->evaluation_function(best_solution);
-	float new_time;
+	float new_time,parent_time;
 	vector<int> tabu_more_capacity;
 	vector<int> tabu_worst_route;
 
 	clock_t start_time, end_time,global_end_time;
 	double total_time,global_total_time;
 
-	float change_node_score = 0.25;
-	float two_opt_score = 0.25;
-	float sn_pick_score = 0.25;
-	float sn_del_score = 0.25;
+	// vector que almacena el fir y el operador a traves del tiempo de la forma <(op_id,fir)>
+	vector<tuple<int,float>> sliding_window;
+	// vector que almacena el operador con su recompenza(suma de fir en ventana) <(op_id,suma_fir)>
+	vector<tuple<int,float>> rewards;
+	// vector que almacena la cantidad de veces que se han seleccionado cada movimiento
+	vector<int> times_used = {0,0,0,0};
+	// vector que almacena el ranking de cada operador
+	vector<int> ranking = {0,0,0,0};
+	// vector que almacena el decay de cada operador
+	vector<float> decay = {0.0,0.0,0.0,0.0};
+	// vector que almacena el FRR 
+	vector<float> frr = {0.0,0.0,0.0,0.0};
+	// vector que almacena el score final de la iteracion para cada movimiento <(operator,score)>
+	vector<tuple<int,float>> final_score;
+	// indicador de score del movimiento en cierta iteracion (fitness improvement)
+	float fir;
 
-
-	float alpha;
+	int size_window = 50;
+	float decay_factor = 0.3;
+	float explore_factor = 1;
+	int selected_operator = -1;
 
 
 	start_time = clock();
@@ -2134,29 +2173,40 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	// Se comienzan las iteraciones haciendo el 2-opt, solo se acepta el cambio en la solucion si esta mejora
 	for(int i = 1; i <= iterations_phase1; i++){
 
-		float random_score = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
-
 		global_end_time = clock();
 		global_total_time = (double)(global_end_time - global_start_time)/CLOCKS_PER_SEC;
-	
-
 		if(global_total_time >= time_limit){
 			break;
 		}
 
+		//  ---------- SELECCION DE OPERADOR ......
+		if(i<=4){
+			selected_operator = rand() % 4;
+			while(times_used[selected_operator] != 0){
+				selected_operator = rand() % 4;
+			}
+		}
 
-		if(0 < random_score <= change_node_score){
-			tie(new_solution,tabu_more_capacity,tabu_worst_route) = this->mov_change_node(new_solution,tabu_more_capacity,tabu_worst_route);
+		else{
+			sort(begin(final_score), end(final_score), [](tuple<int,float> const &t1, tuple<int,float> const &t2) {
+		    	return get<1>(t1) > get<1>(t2); 
+		    	}
+		    );
+			selected_operator = get<0>(final_score[0]);
+		}
+
+
+		if(selected_operator == 0){
+			tie(new_solution,tabu_more_capacity,tabu_worst_route) = this->mov_change_node(parent_solution,tabu_more_capacity,tabu_worst_route);
 			//cout<<"termine change node"<<endl;
-			
+			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
+
+			fir = (parent_time - new_time)/parent_time;
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
 				cout<<"Actual= "<<new_time<<endl;
-
-				float dif = best_time - new_time;
 
 				best_solution = new_solution;
 				best_time = new_time;
@@ -2165,35 +2215,28 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 				myfile << total_time <<"-"<< best_time << "\n";
-
-				// SE MODIFICA EL SCORE SI MEJORA LA SOLUCION
-				change_node_score = change_node_score * (alpha * dif/criteria);
-
-				int sum = change_node_score + two_opt_score + sn_pick_score + sn_del_score;
-
-				change_node_score = change_node_score/sum;
-				two_opt_score = two_opt_score/sum;
-				sn_pick_score = sn_pick_score/sum;
-				sn_del_score = sn_pick_score/sum;
+				parent_solution = new_solution;
 
 			}
 			else{
-				new_solution = best_solution;
+				parent_solution = best_solution;
 			}
+
+		
 		}
 
 
-		else if( change_node_score < random_score <= change_node_score + two_opt_score){
-			new_solution = this->mov_two_opt(new_solution);
+		else if(selected_operator == 1){
+			new_solution = this->mov_two_opt(parent_solution);
 			//cout<<"termine 2opt"<<endl;
-
+			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
+
+			fir = (parent_time - new_time)/parent_time;
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
 				cout<<"Actual= "<<new_time<<endl;
-
-				dif = best_time - new_time;
 
 				best_solution = new_solution;
 				best_time = new_time;
@@ -2202,35 +2245,29 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 				myfile << total_time <<"-"<< best_time << "\n";
-
-				// SE MODIFICA EL SCORE SI MEJORA LA SOLUCION
-				two_opt_score = two_opt_score * (alpha * dif/criteria);
-
-				int sum = change_node_score + two_opt_score + sn_pick_score + sn_del_score;
-
-				change_node_score = change_node_score/sum;
-				two_opt_score = two_opt_score/sum;
-				sn_pick_score = sn_pick_score/sum;
-				sn_del_score = sn_pick_score/sum;
+				parent_solution = new_solution;
 
 			}
 			else{
-				new_solution = best_solution;
+
+				parent_solution = best_solution;
 			}
+
 
 		}
 
-		else if(change_node_score + two_opt_score < random_score <= change_node_score + two_opt_score + sn_pick_score){
-			new_solution = this->mov_swap_node(new_solution,0);
+		else if(selected_operator == 2){
+			new_solution = this->mov_swap_node(parent_solution,0);
 			//cout<<"termine swap pick"<<endl;
 
+			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
+
+			fir = (parent_time - new_time)/parent_time;
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
 				cout<<"Actual= "<<new_time<<endl;
-
-				dif = best_time - new_time;
 
 				best_solution = new_solution;
 				best_time = new_time;
@@ -2239,34 +2276,28 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 				myfile << total_time <<"-"<< best_time << "\n";
+				parent_solution = new_solution;
 
-				// SE MODIFICA EL SCORE SI MEJORA LA SOLUCION
-				sn_pick_score = sn_pick_score * (alpha * dif/criteria);
-
-				int sum = change_node_score + two_opt_score + sn_pick_score + sn_del_score;
-
-				change_node_score = change_node_score/sum;
-				two_opt_score = two_opt_score/sum;
-				sn_pick_score = sn_pick_score/sum;
-				sn_del_score = sn_pick_score/sum;
 			}
 			else{
-				new_solution = best_solution;
+				parent_solution = best_solution;
 			}
+
 
 		}
 
-		else (change_node_score + two_opt_score + sn_pick_score < random_score <= 1){
-			new_solution = this->mov_swap_node(new_solution,1);
+		else if(selected_operator == 3){
+			new_solution = this->mov_swap_node(parent_solution,1);
 			//cout<<"termine swap delivery"<<endl;
 
+			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
+
+			fir = (parent_time - new_time)/parent_time;
 				
 			if(new_time < best_time){
 				cout<<"Mejor= "<<best_time<<endl;
 				cout<<"Actual= "<<new_time<<endl;
-
-				dif = best_time - new_time;
 
 				best_solution = new_solution;
 				best_time = new_time;
@@ -2275,138 +2306,73 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
 				myfile << total_time <<"-"<< best_time << "\n";
+				parent_solution = new_solution;
 
-				// SE MODIFICA EL SCORE SI MEJORA LA SOLUCION
-				sn_del_score = sn_del_score * (alpha * dif/criteria);
-
-				int sum = change_node_score + two_opt_score + sn_pick_score + sn_del_score;
-
-				change_node_score = change_node_score/sum;
-				two_opt_score = two_opt_score/sum;
-				sn_pick_score = sn_pick_score/sum;
-				sn_del_score = sn_pick_score/sum;
 			}
 			else{
-				new_solution = best_solution;
+				parent_solution = best_solution;
 			}
 
+
 		}
 
-	
-		/*
-		new_time = this->evaluation_function(new_solution);
-				
-		if(new_time < best_time){
-			cout<<"Mejor= "<<best_time<<endl;
-			cout<<"Actual= "<<new_time<<endl;
-			best_solution = new_solution;
-			best_time = new_time;
-			cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
+		else{
+			cout<<"------ERROR: EL OPERADOR SELECCIONADO NO EXISTE "<<endl;
+			break;
+		}
 
-			end_time = clock();
-			total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
-			myfile << total_time <<"-"<< best_time << "\n";
+
+		// SE AGREGA EL OPERADOR SELECCIONADO Y SU FIR CORRESPONDIENTE A LA VENTANA
+		if(sliding_window.size() == (unsigned)size_window){
+			sliding_window.erase(sliding_window.begin() + 0);
+			sliding_window.push_back(make_tuple(selected_operator,fir));
+		
 		}
 		else{
-			new_solution = best_solution;
-		}*/
-		
-	}
-
-
-	//--------------------------------------------------------------------------------------
-
-/*-------------------------------------------------------------------------------------------------------
-	Solution new_solution = this->initial_solution();
-	Solution best_solution = new_solution;
-	int best_time = this->evaluation_function(best_solution);
-	int new_time;
-	// COMIENZA la FASE 1 en donde se aplican los movimientos 2-opt
-	clock_t start_time, end_time;
-	double total_time;
-	start_time = clock();
-	for(int i = 1; i <= iterations_phase1; i++){
-
-		new_solution = this->two_opt(new_solution);
-
-		new_time = this->evaluation_function(new_solution);
-				
-		if(new_time < best_time){
-			cout<<"Mejor= "<<best_time<<endl;
-			cout<<"Actual= "<<new_time<<endl;
-			best_solution = new_solution;
-			best_time = new_time;
-			cout<<"-------------- MEJORE LA SOLUCION EN 2-OPT------------------"<<endl;
-
-			end_time = clock();
-			total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
-			myfile << total_time <<"-"<< best_time << "\n";
-
+			sliding_window.push_back(make_tuple(selected_operator,fir));
 		}
-		else{
-			new_solution = best_solution;
+
+		// SE CALCULA LA RECOMPENZA (SUMA DE FIR EN VENTANA)
+		vector<float> rewards_temp;
+		tie(rewards_temp,times_used) = get_rewards(sliding_window);
+		for(int i=0; (unsigned)i<rewards_temp.size();i++){
+			rewards.push_back(make_tuple(i,rewards_temp[i]));
 		}
 		
-	}
+		// SE REALIZA EL RANKING DE OPERADORES
+		sort(begin(rewards), end(rewards), [](tuple<int,float> const &t1, tuple<int,float> const &t2) {
+	    	return get<1>(t1) > get<1>(t2); 
+	    	}
+	    );
 
-	// COMIENZA la FASE 2 en donde se aplican los movimientos swap CD
+		ranking = get_ranking(rewards);
 
-	for(int j = 1; j <= iterations_phase2; j++){
-	
-		new_solution = this->swap_cd(new_solution);
-
-		new_time = this->evaluation_function(new_solution);
-				
-		if(new_time < best_time){
-			cout<<"Mejor= "<<best_time<<endl;
-			cout<<"Actual= "<<new_time<<endl;
-			best_solution = new_solution;
-			best_time = new_time;
-			cout<<"-------------- MEJORE LA SOLUCION EN SWAP CD------------------"<<endl;
-
-			end_time = clock();
-			total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
-			myfile << total_time <<"-"<< best_time<< "\n";
-		}
-		else{
-			new_solution = best_solution;
-		}
-		
-	}
-
-	for(int k=1; k<=iterations_phase3;k++){
-		
-		int random_move_swap_node_del = rand() % 101;
-		int random_move_swap_node_pick = rand() % 101;
-
-		if(random_move_swap_node_pick<porc_swap_node_pick){
-			new_solution = this->swap_node(new_solution,0);
+		float decay_sum = 0;
+		// SE CALCULA EL DECAY Y la suma de los decay
+		for(int i=0; (unsigned)i<decay.size();i++){
+			float dec_value = pow(decay_factor,ranking[i]) * rewards_temp[i];
+			decay[i] = dec_value;
+			decay_sum += dec_value;
 		}
 
-		if(random_move_swap_node_del<porc_swap_node_del){
-			new_solution = this->swap_node(new_solution,1);
+		// SE calcula el FRR (fitness rate rank)
+		for(int i=0; (unsigned)i<frr.size();i++){
+			float frr_value = decay[i]/decay_sum;
+			frr[i] = frr_value;
 		}
 
-		new_time = this->evaluation_function(new_solution);
-
-		if(new_time < best_time){
-			cout<<"Mejor= "<<best_time<<endl;
-			cout<<"Actual= "<<new_time<<endl;
-			best_solution = new_solution;
-			best_time = new_time;
-			cout<<"-------------- MEJORE LA SOLUCION EN SWAP NODE------------------"<<endl;
-			
-			end_time = clock();
-			total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
-			myfile << total_time <<"-"<< best_time<< "\n";
+		// SE calcula el score final para cada operador
+		int times_used_sum = 0;
+		for(int i=0; (unsigned) i< times_used.size();i++){
+			times_used_sum += times_used[i];
 		}
-		else{
-			new_solution = best_solution;
+		float explore_numerator = 2*log(times_used_sum);
+		for(int i=0; (unsigned)i<frr.size();i++){
+			final_score.push_back(make_tuple(i,frr[i] + explore_factor * sqrt(explore_numerator/times_used[i])));
 		}
 
 	}
 
-	--------------------------------------------------------------------------------------------------------*/
 
 	myfile.close();
 
