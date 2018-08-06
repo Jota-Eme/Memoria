@@ -776,129 +776,16 @@ Solution Grasp::mov_two_opt(Solution solution){
 	return solution;
 }
 
-// FUNCION QUE REALIZA LA CONSOLIDACION ENTRE 2 VEHICULOS Y CALCULA EL TIEMPO DE SALIDA DEL CD. 
-// VERIFICA EN PRIMER LUGAR QUE LA CONSOLIDACION SEA FACTIBLE EN CUANTO A CAPACIDAD
-// SETEA EL CAMPO DEPARTURE_CD_TIME DE CADA VEHICULO, SETEA EL REMAINING_CAPACITY Y MODIFICA LOS DELIVERY_ITEMS SEGUN LA CONSOLIDACION
 
-/*tuple<Vehicle,Vehicle,bool> Grasp::consolidation(tuple<Vehicle,int> tuple1, tuple<Vehicle, int> tuple2, int type){
-
-	Vehicle v1 = get<0>(tuple1);
-	int n1 = get<1>(tuple1);
-	Vehicle v2 = get<0>(tuple2);
-	int n2 = get<1>(tuple2);
-	int unload_items_v1,unload_items_v2;
-
-	if(type == 0){
-		// CANTIDAD DE ITEMS A DESCARGAR DE CADA VEHICULO
-		unload_items_v1 = get<0>(v1.pickup_items[n1]);
-		unload_items_v2 = get<0>(v2.pickup_items[n2]);
-	}
-	else{
-		// CANTIDAD DE ITEMS A DESCARGAR DE CADA VEHICULO
-		unload_items_v1 = get<0>(v1.delivery_items[n1]);
-		unload_items_v2 = get<0>(v2.delivery_items[n2]);
-	}
-
-
-	//verificacion de factibilidad en la capacidad
-	if(v1.remaining_capacity + unload_items_v1 < unload_items_v2){
-		return make_tuple(v1, v2, false);
-	}
-
-	if(v2.remaining_capacity + unload_items_v2 < unload_items_v1){
-		return make_tuple(v1, v2, false);
-	}
-
-
-	// TIEMPOS DE DESCARGA Y CARGA DE CADA VEHICULO
-	int unload_time_v1 = unload_items_v1 * v1.unit_time + v1.fixed_time;
-	int unload_time_v2 = unload_items_v2 * v2.unit_time + v2.fixed_time;
-	int reload_time_v1 = unload_items_v2 * v1.unit_time + v1.fixed_time;
-	int reload_time_v2 = unload_items_v1 * v2.unit_time + v2.fixed_time;
-
-
-	if(type == 0){
-		// CAMBIO DE NODOS 
-		Suplier suplier_temp = v1.pickup_route[n1];
-		v1.pickup_route[n1] = v2.pickup_route[n2];
-		v2.pickup_route[n2] = suplier_temp;
-	}
-	else{
-		// CAMBIO DE NODOS 
-		Customer customer_temp = v1.delivery_route[n1];
-		v1.delivery_route[n1] = v2.delivery_route[n2];
-		v2.delivery_route[n2] = customer_temp;
-	}
-
-	v1.set_times();
-	v2.set_times();
-
-	// SE considera que los vehiculos solo pasan por un crossdock
-	int cdtime1 = get<0>(v1.crossdock_times[0]);
-	int cdtime2 = get<0>(v2.crossdock_times[0]);
-	int arrival_time_v1 = max(cdtime1, v1.crossdock_route[0].ready_time);
-	int arrival_time_v2 = max(cdtime2, v2.crossdock_route[0].ready_time);
-
-	int total_unload_time_v1 = arrival_time_v1 + unload_time_v1;
-	int total_unload_time_v2 = arrival_time_v2 + unload_time_v2;
-
-	int ready_load_time_v1 = max(total_unload_time_v1, total_unload_time_v2);
-	int ready_load_time_v2 = max(total_unload_time_v1, total_unload_time_v2);
-
-	int final_departure_time_v1 = ready_load_time_v1 + reload_time_v1;
-	int final_departure_time_v2 = ready_load_time_v2 + reload_time_v2;
-
-	// SETEO DEL ATRIBUTO DEPARTURE_CD_TIME
-	v1.departure_cd_time = final_departure_time_v1;
-	v2.departure_cd_time = final_departure_time_v2;
-	// SETEO DE REMAINING CAPACITY
-	v1.remaining_capacity = v1.remaining_capacity + unload_items_v1 - unload_items_v2;
-	v2.remaining_capacity = v2.remaining_capacity + unload_items_v2 - unload_items_v1;
-
-	if(type == 0){
-		// CAMBIO DE DELIVERY_ITEMS
-		tuple<int,int> tuple_temp = v1.pickup_items[n1];
-		v1.pickup_items[n1] = v2.pickup_items[n2];
-		v2.pickup_items[n2] = tuple_temp;
-	}
-	else{
-		// CAMBIO DE DELIVERY_ITEMS
-		tuple<int,int> tuple_temp = v1.delivery_items[n1];
-		v1.delivery_items[n1] = v2.delivery_items[n2];
-		v2.delivery_items[n2] = tuple_temp;
-	}
-
-	v1.set_times();
-	v2.set_times();
-
-	return make_tuple(v1, v2, true);
-}*/
 
 // MOVIMIENTO QUE INTERCAMBIA DOS NODOS DEL MISMO TIPO DE RUTA DE DOS VEHICULOS DISTINTOS
 
 Solution Grasp::mov_swap_node(Solution solution, int type){
 
 	int pos_vehicle_1 = rand() % solution.vehicles.size();
-	int pos_vehicle_2 = rand() % solution.vehicles.size();
-
-	if(type == 0){
-		while(pos_vehicle_1 == pos_vehicle_2 || solution.vehicles[pos_vehicle_1].crossdock_route[0].id != solution.vehicles[pos_vehicle_2].crossdock_route[0].id || solution.vehicles[pos_vehicle_1].pickup_route.size() == 0 || solution.vehicles[pos_vehicle_2].pickup_route.size() == 0){
-			//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
-			pos_vehicle_1 = rand() % solution.vehicles.size();
-			pos_vehicle_2 = rand() % solution.vehicles.size();
-		}
-	}
-	else{
-		while(pos_vehicle_1 == pos_vehicle_2 || solution.vehicles[pos_vehicle_1].crossdock_route[0].id != solution.vehicles[pos_vehicle_2].crossdock_route[0].id || solution.vehicles[pos_vehicle_1].delivery_route.size() == 0 || solution.vehicles[pos_vehicle_2].delivery_route.size() == 0){
-			//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
-			pos_vehicle_1 = rand() % solution.vehicles.size();
-			pos_vehicle_2 = rand() % solution.vehicles.size();
-		}
-	}
-
-
-
-
+	int pos_vehicle_2 = -1;
+	int random_node_1 = -1;
+	int random_node_2 = -1;
 	//SE encuentra el vehiculo que posea la ruta mas cara
 	//int type_temp,pos_vehicle_1,pos_vehicle_2;
 	//vector<int> tabu_worst_route;
@@ -922,379 +809,384 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 	//cout<<"Los vehiculos fueron: "<<pos_vehicle_1<<" y "<<pos_vehicle_2<<endl;
 
 	Vehicle vehicle_1 = solution.vehicles[pos_vehicle_1];
-	Vehicle vehicle_2 = solution.vehicles[pos_vehicle_2];
+	Vehicle vehicle_2;
+
+	float best_cost = evaluation_function(solution);
+
+	for(int i=0; (unsigned)i<solution.vehicles.size();i++){
+		vehicle_2 = solution.vehicles[i];
+		pos_vehicle_2 = i;
+		if(vehicle_1.id != vehicle_2.id && vehicle_1.crossdock_route[0].id == vehicle_2.crossdock_route[0].id){
+			if(type == 0){
+				if(vehicle_1.pickup_route.size() !=0 && vehicle_2.pickup_route.size() != 0 ){
+
+					for(int j=0; (unsigned)j<vehicle_1.pickup_route.size();j++){
+
+						for(int k=0; (unsigned)k<vehicle_2.pickup_route.size();k++){
+
+							temp_solution = solution;
+							vehicle_1 = solution.vehicles[pos_vehicle_1];
+							vehicle_2 = solution.vehicles[i];
+
+							random_node_1 = j;
+							random_node_2 = k;
+
+							//cout<<"VEHICULO 1: "<<vehicle_1.id << " nodo: "<<random_node_1<<endl;
+							//cout<<"VEHICULO 2: "<<vehicle_2.id << " nodo: "<<random_node_2<<endl;
+
+							//print_solution(temp_solution);
 
 
-	/*cout<<"ruta vehiculo 1 antes"<<endl;
+							//CAMBIO ESTRUCTURAS INVOLVED
+							// SE buscan los vehiculos que va a entregar cada nodo a cambiar
+							// caso en el que el primer nodo pertenezca al V1
+							if(vehicle_1.id == vehicle_1.involved_pickup[random_node_1]){
 
-	cout<< " [";
+								int id = vehicle_1.pickup_route[random_node_1].id * -1;
+								auto it = find_if(vehicle_1.delivery_route.begin(), vehicle_1.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
 
-	for(int l=0; (unsigned)l < solution.vehicles[random_vehicle_1].delivery_route.size();l++){
-		cout<<" "<<solution.vehicles[random_vehicle_1].delivery_route[l].id;
+								if (it != vehicle_1.delivery_route.end()){
+
+								 	auto index = distance(vehicle_1.delivery_route.begin(), it);
+									vehicle_1.involved_delivery[index] = vehicle_2.id;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP"<<endl;
+									cout<<"vehiculo: "<<vehicle_1.id << "nodo a encontrar en delivery: "<<id<<endl;
+								}
+
+							}
+							// caso en el que el primer nodo pertenezca al V2
+							else if(vehicle_2.id == vehicle_1.involved_pickup[random_node_1]){
+								int id = vehicle_1.pickup_route[random_node_1].id * -1;
+								auto it = find_if(vehicle_2.delivery_route.begin(), vehicle_2.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
+
+								if (it != vehicle_2.delivery_route.end()){
+
+								 	auto index = distance(vehicle_2.delivery_route.begin(), it);
+									vehicle_2.involved_delivery[index] = vehicle_2.id;
+
+								}
+								else{
+									cout<<"ERROR SWAP NOD, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP"<<endl;
+									cout<<"vehiculo: "<<vehicle_2.id << "nodo a encontrar en delivery: "<< id<<endl;
+
+								}
+							}
+
+							// caso en el que el primer nodo pertenezca a otro vehiculo
+							else{
+								// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
+								Vehicle vehicle_3 = temp_solution.vehicles[vehicle_1.involved_pickup[random_node_1]];
+								int id = vehicle_1.pickup_route[random_node_1].id * -1;
+								auto it = find_if(vehicle_3.delivery_route.begin(), vehicle_3.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
+
+								if (it != vehicle_3.delivery_route.end()){
+
+								 	auto index = distance(vehicle_3.delivery_route.begin(), it);
+									vehicle_3.involved_delivery[index] = vehicle_2.id;
+									temp_solution.vehicles[vehicle_1.involved_pickup[random_node_1]] = vehicle_3;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP TERCERO"<<endl;
+									cout<<"vehiculo: "<<vehicle_3.id << "nodo a encontrar en delivery: "<< id<<endl;
+									cout<<"id correcto: "<<vehicle_1.involved_pickup[random_node_1]<<endl;
+
+
+								}
+
+							}
+
+							// -------------------------------------------------------------------------------------------------
+
+							// caso en el que el segundo nodo pertenezca al V1
+							if(vehicle_1.id == vehicle_2.involved_pickup[random_node_2]){
+
+								int id = vehicle_2.pickup_route[random_node_2].id * -1;
+								auto it = find_if(vehicle_1.delivery_route.begin(), vehicle_1.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
+
+								if (it != vehicle_1.delivery_route.end()){
+
+								 	auto index = distance(vehicle_1.delivery_route.begin(), it);
+									vehicle_1.involved_delivery[index] = vehicle_1.id;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP"<<endl;
+									cout<<"vehiculo: "<<vehicle_1.id << "nodo a encontrar en delivery: "<< id<<endl;
+
+								}
+
+							}
+							// caso en el que el segundo nodo pertenezca al V2
+							else if(vehicle_2.id == vehicle_2.involved_pickup[random_node_2]){
+								int id = vehicle_2.pickup_route[random_node_2].id * -1;
+								auto it = find_if(vehicle_2.delivery_route.begin(), vehicle_2.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
+
+								if (it != vehicle_2.delivery_route.end()){
+
+								 	auto index = distance(vehicle_2.delivery_route.begin(), it);
+									vehicle_2.involved_delivery[index] = vehicle_1.id;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP"<<endl;
+									cout<<"vehiculo: "<<vehicle_2.id << "nodo a encontrar en delivery: "<< id<<endl;
+
+								}
+							}
+
+							// caso en el que el primer nodo pertenezca a otro vehiculo
+							else{
+								// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
+								Vehicle vehicle_3 = temp_solution.vehicles[vehicle_2.involved_pickup[random_node_2]];
+								int id = vehicle_2.pickup_route[random_node_2].id * -1;
+								auto it = find_if(vehicle_3.delivery_route.begin(), vehicle_3.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
+
+								if (it != vehicle_3.delivery_route.end()){
+
+								 	auto index = distance(vehicle_3.delivery_route.begin(), it);
+									vehicle_3.involved_delivery[index] = vehicle_1.id;
+									temp_solution.vehicles[vehicle_2.involved_pickup[random_node_2]] = vehicle_3;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP TERCERO"<<endl;
+									cout<<"vehiculo: "<<vehicle_3.id << "nodo a encontrar en delivery: "<< id<<endl;
+									cout<<"id correcto: "<<vehicle_2.involved_pickup[random_node_2]<<endl;
+
+
+								}
+
+							}
+
+
+							//CAMBIO EN ESTRUCTURA DE PICKUP
+							int id_temp = vehicle_1.involved_pickup[random_node_1];
+							vehicle_1.involved_pickup[random_node_1] = vehicle_2.involved_pickup[random_node_2];
+							vehicle_2.involved_pickup[random_node_2] = id_temp;
+
+
+							// CAMBIO DE NODOS 
+							Suplier suplier_temp = vehicle_1.pickup_route[random_node_1];
+							vehicle_1.pickup_route[random_node_1] = vehicle_2.pickup_route[random_node_2];
+							vehicle_2.pickup_route[random_node_2] = suplier_temp;
+
+							// CAMBIO DE DELIVERY_ITEMS
+							tuple<int,int> tuple_temp = vehicle_1.pickup_items[random_node_1];
+							vehicle_1.pickup_items[random_node_1] = vehicle_2.pickup_items[random_node_2];
+							vehicle_2.pickup_items[random_node_2] = tuple_temp;
+
+
+							temp_solution.vehicles[pos_vehicle_1] = vehicle_1;
+							temp_solution.vehicles[pos_vehicle_2] = vehicle_2;
+
+							if(this->feasible_solution(temp_solution)){
+								//cout<<"movimiento SIIIIII FACTIBLE"<<endl;
+								temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
+								temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
+								temp_solution.vehicles[pos_vehicle_1].set_download_time();
+								temp_solution.vehicles[pos_vehicle_2].set_download_time();
+								temp_solution.vehicles[pos_vehicle_1].set_reload_time();
+								temp_solution.vehicles[pos_vehicle_2].set_reload_time();
+
+								int new_cost = evaluation_function(temp_solution);
+								if(new_cost<best_cost){
+									return temp_solution;
+								}
+
+							}
+
+						}
+					}
+				}
+			}
+			else{
+				if(vehicle_1.delivery_route.size() !=0 && vehicle_2.delivery_route.size() != 0 ){
+
+					for(int j=0; (unsigned)j<vehicle_1.delivery_route.size();j++){
+
+						for(int k=0; (unsigned)k<vehicle_2.delivery_route.size();k++){
+
+							temp_solution = solution;
+							vehicle_1 = solution.vehicles[pos_vehicle_1];
+							vehicle_2 = solution.vehicles[i];
+
+							random_node_1 = j;
+							random_node_2 = k;
+
+
+							//CAMBIO ESTRUCTURAS INVOLVED
+							// SE buscan los vehiculos que va a entregar cada nodo a cambiar
+							// caso en el que el primer nodo pertenezca al V1
+							if(vehicle_1.id == vehicle_1.involved_delivery[random_node_1]){
+
+								int id = vehicle_1.delivery_route[random_node_1].id * -1;
+								auto it = find_if(vehicle_1.pickup_route.begin(), vehicle_1.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+
+								if (it != vehicle_1.pickup_route.end()){
+
+								 	auto index = distance(vehicle_1.pickup_route.begin(), it);
+									vehicle_1.involved_pickup[index] = vehicle_2.id;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
+									cout<<"vehiculo: "<<vehicle_1.id << "nodo a encontrar en pickup: "<< id<<endl;
+
+								}
+
+							}
+							// caso en el que el primer nodo pertenezca al V2
+							else if(vehicle_2.id == vehicle_1.involved_delivery[random_node_1]){
+								int id = vehicle_1.delivery_route[random_node_1].id * -1;
+								auto it = find_if(vehicle_2.pickup_route.begin(), vehicle_2.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+
+								if (it != vehicle_2.pickup_route.end()){
+
+								 	auto index = distance(vehicle_2.pickup_route.begin(), it);
+									vehicle_2.involved_pickup[index] = vehicle_2.id;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
+									cout<<"vehiculo: "<<vehicle_2.id << "nodo a encontrar en pickup: "<< id<<endl;
+
+								}
+							}
+
+							// caso en el que el primer nodo pertenezca a otro vehiculo
+							else{
+								// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
+								Vehicle vehicle_3 = temp_solution.vehicles[vehicle_1.involved_delivery[random_node_1]];
+								int id = vehicle_1.delivery_route[random_node_1].id * -1;
+								auto it = find_if(vehicle_3.pickup_route.begin(), vehicle_3.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+
+								if (it != vehicle_3.pickup_route.end()){
+
+								 	auto index = distance(vehicle_3.pickup_route.begin(), it);
+									vehicle_3.involved_pickup[index] = vehicle_2.id;
+									temp_solution.vehicles[vehicle_1.involved_delivery[random_node_1]] = vehicle_3;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY TERCERO"<<endl;
+									cout<<"vehiculo: "<<vehicle_3.id << "nodo a encontrar en pickup: "<< id<<endl;
+									cout<<"id correcto: "<<vehicle_1.involved_delivery[random_node_1]<<endl;
+
+
+								}
+
+							}
+
+							// -------------------------------------------------------------------------------------------------
+
+							// caso en el que el segundo nodo pertenezca al V1
+							if(vehicle_1.id == vehicle_2.involved_delivery[random_node_2]){
+
+								int id = vehicle_2.delivery_route[random_node_2].id * -1;
+								auto it = find_if(vehicle_1.pickup_route.begin(), vehicle_1.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+
+								if (it != vehicle_1.pickup_route.end()){
+
+								 	auto index = distance(vehicle_1.pickup_route.begin(), it);
+									vehicle_1.involved_pickup[index] = vehicle_1.id;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
+									cout<<"vehiculo: "<<vehicle_1.id << "nodo a encontrar en pickup: "<< id<<endl;
+
+								}
+
+							}
+							// caso en el que el segundo nodo pertenezca al V2
+							else if(vehicle_2.id == vehicle_2.involved_delivery[random_node_2]){
+								int id = vehicle_2.delivery_route[random_node_2].id * -1;
+								auto it = find_if(vehicle_2.pickup_route.begin(), vehicle_2.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+
+								if (it != vehicle_2.pickup_route.end()){
+
+								 	auto index = distance(vehicle_2.pickup_route.begin(), it);
+									vehicle_2.involved_pickup[index] = vehicle_1.id;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
+									cout<<"vehiculo: "<<vehicle_2.id << " nodo a encontrar en pickup: "<< id<<endl;
+
+								}
+							}
+
+							// caso en el que el segundo nodo pertenezca a otro vehiculo
+							else{
+								// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
+								Vehicle vehicle_3 = temp_solution.vehicles[vehicle_2.involved_delivery[random_node_2]];
+								int id = vehicle_2.delivery_route[random_node_2].id * -1;
+								auto it = find_if(vehicle_3.pickup_route.begin(), vehicle_3.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+
+								if (it != vehicle_3.pickup_route.end()){
+
+								 	auto index = distance(vehicle_3.pickup_route.begin(), it);
+									vehicle_3.involved_pickup[index] = vehicle_1.id;
+									temp_solution.vehicles[vehicle_2.involved_delivery[random_node_2]] = vehicle_3;
+
+								}
+								else{
+									cout<<"ERROR SWAP NODE, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY TERCERO"<<endl;
+									cout<<"vehiculo: "<<vehicle_3.id << "nodo a encontrar en pickup: "<< id<<endl;
+									cout<<"id correcto: "<<vehicle_2.involved_delivery[random_node_2]<<endl;
+
+
+								}
+
+							}
+
+
+							//CAMBIO EN ESTRUCTURA DE DELIVERY
+							int id_temp = vehicle_1.involved_delivery[random_node_1];
+							vehicle_1.involved_delivery[random_node_1] = vehicle_2.involved_delivery[random_node_2];
+							vehicle_2.involved_delivery[random_node_2] = id_temp;
+
+							// CAMBIO DE NODOS 
+							Customer customer_temp = vehicle_1.delivery_route[random_node_1];
+							vehicle_1.delivery_route[random_node_1] = vehicle_2.delivery_route[random_node_2];
+							vehicle_2.delivery_route[random_node_2] = customer_temp;
+
+							// CAMBIO DE DELIVERY_ITEMS
+							tuple<int,int> tuple_temp = vehicle_1.delivery_items[random_node_1];
+							vehicle_1.delivery_items[random_node_1] = vehicle_2.delivery_items[random_node_2];
+							vehicle_2.delivery_items[random_node_2] = tuple_temp;
+
+
+
+							temp_solution.vehicles[pos_vehicle_1] = vehicle_1;
+							temp_solution.vehicles[pos_vehicle_2] = vehicle_2;
+
+							if(this->feasible_solution(temp_solution)){
+								//cout<<"movimiento SIIIIII FACTIBLE"<<endl;
+								temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
+								temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
+								temp_solution.vehicles[pos_vehicle_1].set_download_time();
+								temp_solution.vehicles[pos_vehicle_2].set_download_time();
+								temp_solution.vehicles[pos_vehicle_1].set_reload_time();
+								temp_solution.vehicles[pos_vehicle_2].set_reload_time();
+
+								int new_cost = evaluation_function(temp_solution);
+								if(new_cost<best_cost){
+									return temp_solution;
+								}
+
+							}
+
+						}
+					}
+				}
+			}
+		}
 	}
-	cout<< " ]" <<endl;
-
-	cout<<"ruta vehiculo 2 antes"<<endl;
-
-	cout<< " [";
-	for(int l=0; (unsigned)l < solution.vehicles[random_vehicle_2].delivery_route.size();l++){
-		cout<<" "<<solution.vehicles[random_vehicle_2].delivery_route[l].id;
-	}
-	cout<< " ]" <<endl;*/
-
-	int random_node_1, random_node_2;
-	temp_solution = solution;
-
-	if(type == 0){
-		random_node_1 = rand() % vehicle_1.pickup_route.size();
-		random_node_2 = rand() % vehicle_2.pickup_route.size();
-
-		//cout<<"VEHICULO 1: "<<vehicle_1.id << " nodo: "<<random_node_1<<endl;
-		//cout<<"VEHICULO 2: "<<vehicle_2.id << " nodo: "<<random_node_2<<endl;
-
-		//print_solution(temp_solution);
-
-
-		//CAMBIO ESTRUCTURAS INVOLVED
-		// SE buscan los vehiculos que va a entregar cada nodo a cambiar
-		// caso en el que el primer nodo pertenezca al V1
-		if(vehicle_1.id == vehicle_1.involved_pickup[random_node_1]){
-
-			int id = vehicle_1.pickup_route[random_node_1].id * -1;
-			auto it = find_if(vehicle_1.delivery_route.begin(), vehicle_1.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
-
-			if (it != vehicle_1.delivery_route.end()){
-
-			 	auto index = distance(vehicle_1.delivery_route.begin(), it);
-				vehicle_1.involved_delivery[index] = vehicle_2.id;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP"<<endl;
-				cout<<"vehiculo: "<<vehicle_1.id << "nodo a encontrar en delivery: "<<id<<endl;
-			}
-
-		}
-		// caso en el que el primer nodo pertenezca al V2
-		else if(vehicle_2.id == vehicle_1.involved_pickup[random_node_1]){
-			int id = vehicle_1.pickup_route[random_node_1].id * -1;
-			auto it = find_if(vehicle_2.delivery_route.begin(), vehicle_2.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
-
-			if (it != vehicle_2.delivery_route.end()){
-
-			 	auto index = distance(vehicle_2.delivery_route.begin(), it);
-				vehicle_2.involved_delivery[index] = vehicle_2.id;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP"<<endl;
-				cout<<"vehiculo: "<<vehicle_2.id << "nodo a encontrar en delivery: "<< id<<endl;
-
-			}
-		}
-
-		// caso en el que el primer nodo pertenezca a otro vehiculo
-		else{
-			// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
-			Vehicle vehicle_3 = temp_solution.vehicles[vehicle_1.involved_pickup[random_node_1]];
-			int id = vehicle_1.pickup_route[random_node_1].id * -1;
-			auto it = find_if(vehicle_3.delivery_route.begin(), vehicle_3.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
-
-			if (it != vehicle_3.delivery_route.end()){
-
-			 	auto index = distance(vehicle_3.delivery_route.begin(), it);
-				vehicle_3.involved_delivery[index] = vehicle_2.id;
-				temp_solution.vehicles[vehicle_1.involved_pickup[random_node_1]] = vehicle_3;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP TERCERO"<<endl;
-				cout<<"vehiculo: "<<vehicle_3.id << "nodo a encontrar en delivery: "<< id<<endl;
-				cout<<"id correcto: "<<vehicle_1.involved_pickup[random_node_1]<<endl;
-
-
-			}
-
-		}
-
-		// -------------------------------------------------------------------------------------------------
-
-		// caso en el que el segundo nodo pertenezca al V1
-		if(vehicle_1.id == vehicle_2.involved_pickup[random_node_2]){
-
-			int id = vehicle_2.pickup_route[random_node_2].id * -1;
-			auto it = find_if(vehicle_1.delivery_route.begin(), vehicle_1.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
-
-			if (it != vehicle_1.delivery_route.end()){
-
-			 	auto index = distance(vehicle_1.delivery_route.begin(), it);
-				vehicle_1.involved_delivery[index] = vehicle_1.id;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP"<<endl;
-				cout<<"vehiculo: "<<vehicle_1.id << "nodo a encontrar en delivery: "<< id<<endl;
-
-			}
-
-		}
-		// caso en el que el segundo nodo pertenezca al V2
-		else if(vehicle_2.id == vehicle_2.involved_pickup[random_node_2]){
-			int id = vehicle_2.pickup_route[random_node_2].id * -1;
-			auto it = find_if(vehicle_2.delivery_route.begin(), vehicle_2.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
-
-			if (it != vehicle_2.delivery_route.end()){
-
-			 	auto index = distance(vehicle_2.delivery_route.begin(), it);
-				vehicle_2.involved_delivery[index] = vehicle_1.id;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP"<<endl;
-				cout<<"vehiculo: "<<vehicle_2.id << "nodo a encontrar en delivery: "<< id<<endl;
-
-			}
-		}
-
-		// caso en el que el primer nodo pertenezca a otro vehiculo
-		else{
-			// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
-			Vehicle vehicle_3 = temp_solution.vehicles[vehicle_2.involved_pickup[random_node_2]];
-			int id = vehicle_2.pickup_route[random_node_2].id * -1;
-			auto it = find_if(vehicle_3.delivery_route.begin(), vehicle_3.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
-
-			if (it != vehicle_3.delivery_route.end()){
-
-			 	auto index = distance(vehicle_3.delivery_route.begin(), it);
-				vehicle_3.involved_delivery[index] = vehicle_1.id;
-				temp_solution.vehicles[vehicle_2.involved_pickup[random_node_2]] = vehicle_3;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP TERCERO"<<endl;
-				cout<<"vehiculo: "<<vehicle_3.id << "nodo a encontrar en delivery: "<< id<<endl;
-				cout<<"id correcto: "<<vehicle_2.involved_pickup[random_node_2]<<endl;
-
-
-			}
-
-		}
-
-
-		//CAMBIO EN ESTRUCTURA DE PICKUP
-		int id_temp = vehicle_1.involved_pickup[random_node_1];
-		vehicle_1.involved_pickup[random_node_1] = vehicle_2.involved_pickup[random_node_2];
-		vehicle_2.involved_pickup[random_node_2] = id_temp;
-
-
-		// CAMBIO DE NODOS 
-		Suplier suplier_temp = vehicle_1.pickup_route[random_node_1];
-		vehicle_1.pickup_route[random_node_1] = vehicle_2.pickup_route[random_node_2];
-		vehicle_2.pickup_route[random_node_2] = suplier_temp;
-
-		// CAMBIO DE DELIVERY_ITEMS
-		tuple<int,int> tuple_temp = vehicle_1.pickup_items[random_node_1];
-		vehicle_1.pickup_items[random_node_1] = vehicle_2.pickup_items[random_node_2];
-		vehicle_2.pickup_items[random_node_2] = tuple_temp;
-
-	}
-	else{
-		random_node_1 = rand() % vehicle_1.delivery_route.size();
-		random_node_2 = rand() % vehicle_2.delivery_route.size();
-
-		//cout<<"VEHICULO 1: "<<vehicle_1.id << " nodo: "<<random_node_1<<endl;
-		//cout<<"VEHICULO 2: "<<vehicle_2.id << " nodo: "<<random_node_2<<endl;
-
-		//print_solution(temp_solution);
-
-		//CAMBIO ESTRUCTURAS INVOLVED
-		// SE buscan los vehiculos que va a entregar cada nodo a cambiar
-		// caso en el que el primer nodo pertenezca al V1
-		if(vehicle_1.id == vehicle_1.involved_delivery[random_node_1]){
-
-			int id = vehicle_1.delivery_route[random_node_1].id * -1;
-			auto it = find_if(vehicle_1.pickup_route.begin(), vehicle_1.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
-
-			if (it != vehicle_1.pickup_route.end()){
-
-			 	auto index = distance(vehicle_1.pickup_route.begin(), it);
-				vehicle_1.involved_pickup[index] = vehicle_2.id;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
-				cout<<"vehiculo: "<<vehicle_1.id << "nodo a encontrar en pickup: "<< id<<endl;
-
-			}
-
-		}
-		// caso en el que el primer nodo pertenezca al V2
-		else if(vehicle_2.id == vehicle_1.involved_delivery[random_node_1]){
-			int id = vehicle_1.delivery_route[random_node_1].id * -1;
-			auto it = find_if(vehicle_2.pickup_route.begin(), vehicle_2.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
-
-			if (it != vehicle_2.pickup_route.end()){
-
-			 	auto index = distance(vehicle_2.pickup_route.begin(), it);
-				vehicle_2.involved_pickup[index] = vehicle_2.id;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
-				cout<<"vehiculo: "<<vehicle_2.id << "nodo a encontrar en pickup: "<< id<<endl;
-
-			}
-		}
-
-		// caso en el que el primer nodo pertenezca a otro vehiculo
-		else{
-			// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
-			Vehicle vehicle_3 = temp_solution.vehicles[vehicle_1.involved_delivery[random_node_1]];
-			int id = vehicle_1.delivery_route[random_node_1].id * -1;
-			auto it = find_if(vehicle_3.pickup_route.begin(), vehicle_3.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
-
-			if (it != vehicle_3.pickup_route.end()){
-
-			 	auto index = distance(vehicle_3.pickup_route.begin(), it);
-				vehicle_3.involved_pickup[index] = vehicle_2.id;
-				temp_solution.vehicles[vehicle_1.involved_delivery[random_node_1]] = vehicle_3;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY TERCERO"<<endl;
-				cout<<"vehiculo: "<<vehicle_3.id << "nodo a encontrar en pickup: "<< id<<endl;
-				cout<<"id correcto: "<<vehicle_1.involved_delivery[random_node_1]<<endl;
-
-
-			}
-
-		}
-
-		// -------------------------------------------------------------------------------------------------
-
-		// caso en el que el segundo nodo pertenezca al V1
-		if(vehicle_1.id == vehicle_2.involved_delivery[random_node_2]){
-
-			int id = vehicle_2.delivery_route[random_node_2].id * -1;
-			auto it = find_if(vehicle_1.pickup_route.begin(), vehicle_1.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
-
-			if (it != vehicle_1.pickup_route.end()){
-
-			 	auto index = distance(vehicle_1.pickup_route.begin(), it);
-				vehicle_1.involved_pickup[index] = vehicle_1.id;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
-				cout<<"vehiculo: "<<vehicle_1.id << "nodo a encontrar en pickup: "<< id<<endl;
-
-			}
-
-		}
-		// caso en el que el segundo nodo pertenezca al V2
-		else if(vehicle_2.id == vehicle_2.involved_delivery[random_node_2]){
-			int id = vehicle_2.delivery_route[random_node_2].id * -1;
-			auto it = find_if(vehicle_2.pickup_route.begin(), vehicle_2.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
-
-			if (it != vehicle_2.pickup_route.end()){
-
-			 	auto index = distance(vehicle_2.pickup_route.begin(), it);
-				vehicle_2.involved_pickup[index] = vehicle_1.id;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY"<<endl;
-				cout<<"vehiculo: "<<vehicle_2.id << " nodo a encontrar en pickup: "<< id<<endl;
-
-			}
-		}
-
-		// caso en el que el segundo nodo pertenezca a otro vehiculo
-		else{
-			// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
-			Vehicle vehicle_3 = temp_solution.vehicles[vehicle_2.involved_delivery[random_node_2]];
-			int id = vehicle_2.delivery_route[random_node_2].id * -1;
-			auto it = find_if(vehicle_3.pickup_route.begin(), vehicle_3.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
-
-			if (it != vehicle_3.pickup_route.end()){
-
-			 	auto index = distance(vehicle_3.pickup_route.begin(), it);
-				vehicle_3.involved_pickup[index] = vehicle_1.id;
-				temp_solution.vehicles[vehicle_2.involved_delivery[random_node_2]] = vehicle_3;
-
-			}
-			else{
-				cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN DELIVERY TERCERO"<<endl;
-				cout<<"vehiculo: "<<vehicle_3.id << "nodo a encontrar en pickup: "<< id<<endl;
-				cout<<"id correcto: "<<vehicle_2.involved_delivery[random_node_2]<<endl;
-
-
-			}
-
-		}
-
-
-		//CAMBIO EN ESTRUCTURA DE DELIVERY
-		int id_temp = vehicle_1.involved_delivery[random_node_1];
-		vehicle_1.involved_delivery[random_node_1] = vehicle_2.involved_delivery[random_node_2];
-		vehicle_2.involved_delivery[random_node_2] = id_temp;
-
-		// CAMBIO DE NODOS 
-		Customer customer_temp = vehicle_1.delivery_route[random_node_1];
-		vehicle_1.delivery_route[random_node_1] = vehicle_2.delivery_route[random_node_2];
-		vehicle_2.delivery_route[random_node_2] = customer_temp;
-
-		// CAMBIO DE DELIVERY_ITEMS
-		tuple<int,int> tuple_temp = vehicle_1.delivery_items[random_node_1];
-		vehicle_1.delivery_items[random_node_1] = vehicle_2.delivery_items[random_node_2];
-		vehicle_2.delivery_items[random_node_2] = tuple_temp;
-
-	}
-
-	//cout<<"Los nodos fueron: "<<random_node_1<<"y"<<random_node_2<<endl;
-
-
-	temp_solution.vehicles[pos_vehicle_1] = vehicle_1;
-	temp_solution.vehicles[pos_vehicle_2] = vehicle_2;
-
-	if(this->feasible_solution(temp_solution)){
-		//cout<<"movimiento SIIIIII FACTIBLE"<<endl;
-		temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
-		temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
-		temp_solution.vehicles[pos_vehicle_1].set_download_time();
-		temp_solution.vehicles[pos_vehicle_2].set_download_time();
-		temp_solution.vehicles[pos_vehicle_1].set_reload_time();
-		temp_solution.vehicles[pos_vehicle_2].set_reload_time();
-
-		return temp_solution;
-		
-
-		/*cout<<"ruta vehiculo 1 despues"<<endl;
-
-		cout<< " [";
-
-		for(int l=0; (unsigned)l < solution.vehicles[pos_vehicle_1].delivery_route.size();l++){
-			cout<<" "<<solution.vehicles[pos_vehicle_1].delivery_route[l].id;
-		}
-		cout<< " ]" <<endl;
-
-		cout<<"ruta vehiculo 2 despues"<<endl;
-
-		cout<< " [";
-
-		for(int l=0; (unsigned)l < solution.vehicles[pos_vehicle_2].delivery_route.size();l++){
-			cout<<" "<<solution.vehicles[pos_vehicle_2].delivery_route[l].id;
-		}
-		cout<< " ]" <<endl;*/
-
-
-	}
-	else{
-		//cout<<"movimiento NOOO factible"<<endl;
-
-	}
-
-
 
 	return solution;
 
@@ -2226,8 +2118,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 			}
 			
-			parent_solution = new_solution;
-			
+			else{
+				parent_solution = best_solution;
+			}
+
 
 		
 		}
@@ -2256,7 +2150,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 			}
 			
-			parent_solution = new_solution;
+			else{
+				parent_solution = best_solution;
+			}
 
 
 
@@ -2286,8 +2182,11 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 			}
 		
-			parent_solution = new_solution;
+			else{
+				parent_solution = best_solution;
+			}
 			
+
 
 
 		}
@@ -2316,7 +2215,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 			}
 			
-			parent_solution = new_solution;
+			else{
+				parent_solution = best_solution;
+			}
+
 
 
 		}
