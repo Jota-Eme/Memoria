@@ -2226,7 +2226,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 			}
 			
-			parent_solution = new_solution;
+			else{
+				parent_solution = best_solution;
+
+			}
 			
 
 		
@@ -2256,7 +2259,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 			}
 			
-			parent_solution = new_solution;
+			else{
+				parent_solution = best_solution;
+
+			}
 
 
 
@@ -2286,7 +2292,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 			}
 		
-			parent_solution = new_solution;
+			else{
+				parent_solution = best_solution;
+
+			}
 			
 
 
@@ -2316,7 +2325,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 			}
 			
-			parent_solution = new_solution;
+			else{
+				parent_solution = best_solution;
+
+			}
 
 
 		}
