@@ -1837,7 +1837,6 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		}
 	}
 
-	cout<<"NO MEJORE NADA"<<endl;
 
     return make_tuple(solution,tabu_more_capacity,tabu_worst_route);
 
