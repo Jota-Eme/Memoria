@@ -783,6 +783,19 @@ Solution Grasp::mov_two_opt(Solution solution){
 Solution Grasp::mov_swap_node(Solution solution, int type){
 
 	int pos_vehicle_1 = rand() % solution.vehicles.size();
+
+
+	if(type == 0){
+		while(solution.vehicles[pos_vehicle_1].pickup_route.size() == 0){
+			pos_vehicle_1 = rand() % solution.vehicles.size();
+		}
+	}
+	else{
+		while(solution.vehicles[pos_vehicle_1].delivery_route.size() == 0){
+			pos_vehicle_1 = rand() % solution.vehicles.size();
+		}
+	}
+
 	int pos_vehicle_2 = -1;
 	int random_node_1 = -1;
 	int random_node_2 = -1;
@@ -817,14 +830,21 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 		vehicle_1 = solution.vehicles[pos_vehicle_1];
 		vehicle_2 = solution.vehicles[i];
 		pos_vehicle_2 = i;
+		//cout<<"vehiculo1: "<<pos_vehicle_1<<endl;
+		//cout<<"vehiculo2: "<<pos_vehicle_2<<endl;
 		if(vehicle_1.id != vehicle_2.id && vehicle_1.crossdock_route[0].id == vehicle_2.crossdock_route[0].id){
 			if(type == 0){
 				if(vehicle_1.pickup_route.size() !=0 && vehicle_2.pickup_route.size() != 0 ){
 					int iter1_pick = vehicle_1.pickup_route.size();
-					for(int j=0; j<iter1_pick;j++){
-						int iter2_pick = vehicle_2.pickup_route.size();
-						for(int k=0; k<iter2_pick;k++){
+					int iter2_pick = vehicle_2.pickup_route.size();
 
+					
+					//cout<<"nodos v1: "<<iter1_pick<<endl;
+					//cout<<"nodos v2: "<<iter2_pick<<endl;
+
+					for(int j=0; j<iter1_pick;j++){
+						for(int k=0; k<iter2_pick;k++){
+							//cout<<"COMBINACION: "<<j<<" - "<<k<<endl;
 							temp_solution = solution;
 							vehicle_1 = solution.vehicles[pos_vehicle_1];
 							vehicle_2 = solution.vehicles[i];
@@ -994,6 +1014,10 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 								temp_solution.vehicles[pos_vehicle_2].set_reload_time();
 
 								float new_cost = evaluation_function(temp_solution);
+								//cout<<"costo actual: "<<new_cost<<endl;
+								//cout<<"costo best: "<<best_cost<<endl;
+								
+
 								if(new_cost<best_cost){
 									return temp_solution;
 								}
@@ -1007,12 +1031,13 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 			else{
 				if(vehicle_1.delivery_route.size() !=0 && vehicle_2.delivery_route.size() != 0 ){
 					int iter1_del = vehicle_1.delivery_route.size();
-
+					int iter2_del = vehicle_2.delivery_route.size();
+					//cout<<"nodos v1: "<<iter1_del<<endl;
+					//cout<<"nodos v2: "<<iter2_del<<endl;
 					for(int j=0; j<iter1_del;j++){
-						int iter2_del = vehicle_2.delivery_route.size();
 
 						for(int k=0; k<iter2_del;k++){
-
+							//cout<<"combinacion: "<<j<<" - "<<k<<endl;
 							temp_solution = solution;
 							vehicle_1 = solution.vehicles[pos_vehicle_1];
 							vehicle_2 = solution.vehicles[i];
@@ -1178,6 +1203,9 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 								temp_solution.vehicles[pos_vehicle_2].set_reload_time();
 
 								float new_cost = evaluation_function(temp_solution);
+								//cout<<"costo actual: "<<new_cost<<endl;
+								//cout<<"costo mejor: "<<best_cost<<endl;
+
 								if(new_cost<best_cost){
 									return temp_solution;
 								}
@@ -1191,6 +1219,7 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 		}
 	}
 
+	//cout<<"NO MEJORE NADA"<<endl;
 	return solution;
 
 }
@@ -2025,10 +2054,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		}
 
 		else if(selected_operator == 2){
-			//cout<<"comence swap pickup"<<endl;
+			//cout<<"----------------comence swap pickup"<<endl;
 			
 			new_solution = this->mov_swap_node(parent_solution,0);
-			//cout<<"termine swap pick"<<endl;
+			//cout<<"----------------termine swap pick"<<endl;
 
 			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
@@ -2060,10 +2089,10 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 		}
 
 		else if(selected_operator == 3){
-			//cout<<"comence swap delivery"<<endl;
+			//cout<<"-----------------comence swap delivery"<<endl;
 
 			new_solution = this->mov_swap_node(parent_solution,1);
-			//cout<<"termine swap delivery"<<endl;
+			//cout<<"-----------------termine swap delivery"<<endl;
 
 			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
