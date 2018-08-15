@@ -5,7 +5,7 @@
   1
 
  VEHICLE CAPACITY           VEHICLE SPEED
-   50                             10
+   50                             0
 
  UNIT_TIME_FOR_PALLET      FIXED_TIME_PREPARATION
     1                          5

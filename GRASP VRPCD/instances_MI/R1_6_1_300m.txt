@@ -4,8 +4,8 @@
  NUMBER OF CROSSDOCKS
   1
   
- VEHICLE CAPACITY
-   50
+ VEHICLE CAPACITY           VEHICLE SPEED
+   50                             0
 
  UNIT_TIME_FOR_PALLET      FIXED_TIME_PREPARATION
     1                          5

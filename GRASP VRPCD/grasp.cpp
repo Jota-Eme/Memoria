@@ -2,11 +2,9 @@
 
 
 // CONSTRUCTOR
-Grasp::Grasp (Instance instance, int list_size, int tabu_capacity_size, int tabu_worst_route_size, int size_window,float decay_factor,float explore_factor ){
+Grasp::Grasp (Instance instance, int list_size, int size_window,float decay_factor,float explore_factor ){
 	this->instance = instance;
 	this->list_size = list_size;
-	this->tabu_capacity_size = tabu_capacity_size;
-	this->tabu_worst_route_size = tabu_worst_route_size;
 	this->criteria = 0;
 	this->size_window = size_window;
 	this->decay_factor = decay_factor;
@@ -508,21 +506,6 @@ Solution Grasp::timewindow_initial_solution(){
 
 float Grasp::evaluation_function(Solution solution){
 
-	/*vector <Vehicle>::iterator vehicle_iterator;
-	Node current_node;
-	float total_cost =0;
-
-	if(solution.vehicles.empty() == false){
-
-		for (vehicle_iterator = solution.vehicles.begin(); vehicle_iterator != solution.vehicles.end(); ++vehicle_iterator){
-			
-			total_cost += vehicle_iterator->get_total_cost();
-		}
-
-	}
-
-	return total_cost;*/
-
 	vector <Suplier>::iterator suplier_iterator;
 	vector <Customer>::iterator customer_iterator;
 	vector <Crossdock>::iterator crossdock_iterator;
@@ -1004,14 +987,16 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 							temp_solution.vehicles[pos_vehicle_1] = vehicle_1;
 							temp_solution.vehicles[pos_vehicle_2] = vehicle_2;
 
+							temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
+							temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
+							temp_solution.vehicles[pos_vehicle_1].set_download_time();
+							temp_solution.vehicles[pos_vehicle_2].set_download_time();
+							temp_solution.vehicles[pos_vehicle_1].set_reload_time();
+							temp_solution.vehicles[pos_vehicle_2].set_reload_time();
+
 							if(this->feasible_solution(temp_solution)){
 								//cout<<"movimiento SIIIIII FACTIBLE"<<endl;
-								temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
-								temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
-								temp_solution.vehicles[pos_vehicle_1].set_download_time();
-								temp_solution.vehicles[pos_vehicle_2].set_download_time();
-								temp_solution.vehicles[pos_vehicle_1].set_reload_time();
-								temp_solution.vehicles[pos_vehicle_2].set_reload_time();
+								
 
 								float new_cost = evaluation_function(temp_solution);
 								//cout<<"costo actual: "<<new_cost<<endl;
@@ -1192,15 +1177,16 @@ Solution Grasp::mov_swap_node(Solution solution, int type){
 
 							temp_solution.vehicles[pos_vehicle_1] = vehicle_1;
 							temp_solution.vehicles[pos_vehicle_2] = vehicle_2;
+							temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
+							temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
+							temp_solution.vehicles[pos_vehicle_1].set_download_time();
+							temp_solution.vehicles[pos_vehicle_2].set_download_time();
+							temp_solution.vehicles[pos_vehicle_1].set_reload_time();
+							temp_solution.vehicles[pos_vehicle_2].set_reload_time();
 
 							if(this->feasible_solution(temp_solution)){
 								//cout<<"movimiento SIIIIII FACTIBLE"<<endl;
-								temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
-								temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
-								temp_solution.vehicles[pos_vehicle_1].set_download_time();
-								temp_solution.vehicles[pos_vehicle_2].set_download_time();
-								temp_solution.vehicles[pos_vehicle_1].set_reload_time();
-								temp_solution.vehicles[pos_vehicle_2].set_reload_time();
+								
 
 								float new_cost = evaluation_function(temp_solution);
 								//cout<<"costo actual: "<<new_cost<<endl;
@@ -1521,7 +1507,9 @@ bool Grasp::feasible_solution(Solution solution){
 	//verifica si es factible en cuanto a capacidad
 	//cout<<"ANTES DE  capacity"<<endl;
 
-	if(!(solution.feasible_capacity())) return false;
+	if(!(solution.feasible_capacity())){
+		return false;
+	} 
 	//cout<<"pase  capacity"<<endl;
 
 
@@ -1541,7 +1529,9 @@ bool Grasp::feasible_solution(Solution solution){
 
 
 	// se revisa la factibilidad en cuanto a TW
-	if(!(solution.feasible_tw())) return false;
+	if(!(solution.feasible_tw())){
+		return false;
+	} 
 	//cout<<"pase  tw"<<endl;
 
 
@@ -1550,8 +1540,7 @@ bool Grasp::feasible_solution(Solution solution){
 }
 
 
-
-tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solution, vector<int> tabu_more_capacity,vector<int> tabu_worst_route){
+Solution Grasp::mov_change_node(Solution solution){
 
 	int pos_vehicle_1 = rand() % solution.vehicles.size();
 	int type_route = rand() % 2;
@@ -1666,7 +1655,36 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 
 							temp_solution.vehicles[pos_vehicle_2] = vehicle2;
 							temp_solution.vehicles[pos_vehicle_1] = vehicle1;
+							if(vehicle2.id != id_involved && vehicle1.id != id_involved){
+								Vehicle vehicle = temp_solution.vehicles[id_involved];
 							
+								// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
+								int id = suplier_node.id * -1;
+								auto it = find_if(vehicle.delivery_route.begin(), vehicle.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
+
+								if (it != vehicle.delivery_route.end()){
+								 	auto index = distance(vehicle.delivery_route.begin(), it);
+									vehicle.involved_delivery[index] = vehicle2.id;
+
+								}
+								else{
+									cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP CHANGE NODE TERCERO"<<endl;
+									cout<<"vehiculo: "<<vehicle.id << "nodo a encontrar en delivery: "<< id<<endl;
+									cout<<"id correcto: "<<id_involved<<endl;
+
+
+								}
+
+								temp_solution.vehicles[id_involved] = vehicle;
+
+							}
+
+							temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
+							temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
+							temp_solution.vehicles[pos_vehicle_1].set_download_time();
+							temp_solution.vehicles[pos_vehicle_2].set_download_time();
+							temp_solution.vehicles[pos_vehicle_1].set_reload_time();
+							temp_solution.vehicles[pos_vehicle_2].set_reload_time();
 
 
 							if(this->feasible_solution(temp_solution)){
@@ -1677,38 +1695,12 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 								//cout<<"costo best: "<<best_cost<<endl;
 
 								if(actual_cost < best_cost){
-									if(vehicle2.id != id_involved && vehicle1.id != id_involved){
-										Vehicle vehicle = temp_solution.vehicles[id_involved];
 									
-										// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
-										int id = suplier_node.id * -1;
-										auto it = find_if(vehicle.delivery_route.begin(), vehicle.delivery_route.end(), [&id](const Customer& customer) {return customer.id == id;});
+									/*if(!(this->feasible_solution(temp_solution))){
+										cout<<"retornare infactible en pickup"<<endl;
 
-										if (it != vehicle.delivery_route.end()){
-										 	auto index = distance(vehicle.delivery_route.begin(), it);
-											vehicle.involved_delivery[index] = vehicle2.id;
-
-										}
-										else{
-											cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP CHANGE NODE TERCERO"<<endl;
-											cout<<"vehiculo: "<<vehicle.id << "nodo a encontrar en delivery: "<< id<<endl;
-											cout<<"id correcto: "<<id_involved<<endl;
-
-
-										}
-
-										temp_solution.vehicles[id_involved] = vehicle;
-
-									}
-
-									temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
-									temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
-									temp_solution.vehicles[pos_vehicle_1].set_download_time();
-									temp_solution.vehicles[pos_vehicle_2].set_download_time();
-									temp_solution.vehicles[pos_vehicle_1].set_reload_time();
-									temp_solution.vehicles[pos_vehicle_2].set_reload_time();
-
-								    return make_tuple(temp_solution,tabu_more_capacity,tabu_worst_route);
+									}*/
+								    return temp_solution;
 								}
 							}
 						}
@@ -1814,6 +1806,37 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 
 							temp_solution.vehicles[pos_vehicle_2] = vehicle2;
 							temp_solution.vehicles[pos_vehicle_1] = vehicle1;
+							if(vehicle2.id != id_involved && vehicle1.id != id_involved){
+								Vehicle vehicle = temp_solution.vehicles[id_involved];
+							
+								// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
+								int id = customer_node.id * -1;
+								auto it = find_if(vehicle.pickup_route.begin(), vehicle.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+
+								if (it != vehicle.pickup_route.end()){
+								 	auto index = distance(vehicle.pickup_route.begin(), it);
+									vehicle.involved_pickup[index] = vehicle2.id;
+
+								}
+								else{
+									cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP CHANGE NODE TERCERO"<<endl;
+									cout<<"vehiculo: "<<vehicle.id << "nodo a encontrar en delivery: "<< id<<endl;
+									cout<<"id correcto: "<<id_involved<<endl;
+
+
+								}
+
+								temp_solution.vehicles[id_involved] = vehicle;
+
+							}
+
+							temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
+							temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
+							temp_solution.vehicles[pos_vehicle_1].set_download_time();
+							temp_solution.vehicles[pos_vehicle_2].set_download_time();
+							temp_solution.vehicles[pos_vehicle_1].set_reload_time();
+							temp_solution.vehicles[pos_vehicle_2].set_reload_time();
+
 
 							if(this->feasible_solution(temp_solution)){
 								//cout<<"encontre factible"<<endl;
@@ -1823,39 +1846,11 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 
 								if(actual_cost < best_cost){
 
-									if(vehicle2.id != id_involved && vehicle1.id != id_involved){
-										Vehicle vehicle = temp_solution.vehicles[id_involved];
-									
-										// LA POSICION DEL VEHICULO DEBERIA SER IGUAL A LA ID
-										int id = customer_node.id * -1;
-										auto it = find_if(vehicle.pickup_route.begin(), vehicle.pickup_route.end(), [&id](const Suplier& suplier) {return suplier.id == id;});
+									/*if(!(this->feasible_solution(temp_solution))){
+										cout<<"retornare infactible en delivery"<<endl;
 
-										if (it != vehicle.pickup_route.end()){
-										 	auto index = distance(vehicle.pickup_route.begin(), it);
-											vehicle.involved_pickup[index] = vehicle2.id;
-
-										}
-										else{
-											cout<<"ERROR, NO ENCONTRE EL ID PARA EL CAMBIO DE ESTRUCTURA EN PICKUP CHANGE NODE TERCERO"<<endl;
-											cout<<"vehiculo: "<<vehicle.id << "nodo a encontrar en delivery: "<< id<<endl;
-											cout<<"id correcto: "<<id_involved<<endl;
-
-
-										}
-
-										temp_solution.vehicles[id_involved] = vehicle;
-
-									}
-
-
-									temp_solution.vehicles[pos_vehicle_2].set_remaining_capacity();
-									temp_solution.vehicles[pos_vehicle_1].set_remaining_capacity();
-									temp_solution.vehicles[pos_vehicle_1].set_download_time();
-									temp_solution.vehicles[pos_vehicle_2].set_download_time();
-									temp_solution.vehicles[pos_vehicle_1].set_reload_time();
-									temp_solution.vehicles[pos_vehicle_2].set_reload_time();
-
-								    return make_tuple(temp_solution,tabu_more_capacity,tabu_worst_route);
+									}*/
+								    return temp_solution;
 
 								}
 							}
@@ -1866,8 +1861,7 @@ tuple<Solution,vector<int>, vector<int>> Grasp::mov_change_node(Solution solutio
 		}
 	}
 
-
-    return make_tuple(solution,tabu_more_capacity,tabu_worst_route);
+    return solution;
 
 }
 
@@ -1903,19 +1897,12 @@ vector<int> get_ranking(vector<tuple<int,float>> rewards){
 
 
 
-Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_phase3, int porc_two_opt, int porc_swap_cd, int porc_swap_node_pick, int porc_swap_node_del, int porc_change_node,int time_limit ,clock_t global_start_time){
+tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t global_start_time){
 
-	cout<<"iteraciones phase 1: "<< iterations_phase1<<endl;
-	cout<<"iteraciones phase 2: "<< iterations_phase2<<endl;
-	cout<<"iteraciones phase 3: "<< iterations_phase3<<endl;
-	cout<<"porcentaje 2opt: "<< porc_two_opt<<endl;
-	cout<<"porcentaje swap_cd: "<< porc_swap_cd<<endl;
-	cout<<"porcentaje swap pickup: "<< porc_swap_node_pick<<endl;
-	cout<<"porcentaje swap delivery: "<< porc_swap_node_del<<endl;
-	cout<<"porcentaje change node: "<< porc_change_node<<endl;
+	/*cout<<"iteraciones phase 1: "<< iterations_phase1<<endl;
 	cout<<"size_window: "<< this->size_window<<endl;
 	cout<<"decay factor: "<< this->decay_factor<<endl;
-	cout<<"explore factor: "<< this->explore_factor<<endl;
+	cout<<"explore factor: "<< this->explore_factor<<endl;*/
 
 	ofstream myfile;
 	myfile.open ("result.txt");
@@ -1931,10 +1918,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 	Solution parent_solution = new_solution;
 	float best_time = this->evaluation_function(best_solution);
 	float new_time,parent_time;
-	vector<int> tabu_more_capacity;
-	vector<int> tabu_worst_route;
 
 	clock_t start_time, end_time,global_end_time;
+	clock_t best_solution_time;
 	double total_time,global_total_time;
 
 	// vector que almacena el fir y el operador a traves del tiempo de la forma <(op_id,fir)>
@@ -1990,7 +1976,12 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 		if(selected_operator == 0){
 			//cout<<"comence change node"<<endl;
-			tie(new_solution,tabu_more_capacity,tabu_worst_route) = this->mov_change_node(parent_solution,tabu_more_capacity,tabu_worst_route);
+			new_solution = this->mov_change_node(parent_solution);
+			/*if(!(this->feasible_solution(new_solution))){
+				cout<<"ERROR: ACEPTE SOLUCION INFACTIBLE"<<endl;
+			}*/
+			//cout<<"termine change node"<<endl;
+
 			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
 
@@ -1998,12 +1989,13 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			fir = (parent_time - new_time)/parent_time;
 				
 			if(new_time < best_time){
-				cout<<"Mejor= "<<best_time<<endl;
-				cout<<"Actual= "<<new_time<<endl;
+				//cout<<"Mejor= "<<best_time<<endl;
+				//cout<<"Actual= "<<new_time<<endl;
 
 				best_solution = new_solution;
 				best_time = new_time;
-				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
+				best_solution_time = clock();
+				//cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
 
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
@@ -2015,15 +2007,15 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			else{
 				parent_solution = best_solution;
 			}
-
-
-		
 		}
 
 
 		else if(selected_operator == 1){
 			//cout<<"comence 2opt"<<endl;
 			new_solution = this->mov_two_opt(parent_solution);
+			/*if(!(this->feasible_solution(new_solution))){
+				cout<<"ERROR: ACEPTE SOLUCION INFACTIBLE"<<endl;
+			}*/
 			//cout<<"termine 2opt"<<endl;
 			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
@@ -2031,12 +2023,14 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			fir = (parent_time - new_time)/parent_time;
 				
 			if(new_time < best_time){
-				cout<<"Mejor= "<<best_time<<endl;
-				cout<<"Actual= "<<new_time<<endl;
+				//cout<<"Mejor= "<<best_time<<endl;
+				//cout<<"Actual= "<<new_time<<endl;
 
 				best_solution = new_solution;
 				best_time = new_time;
-				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
+				best_solution_time = clock();
+
+				//cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
 
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
@@ -2057,6 +2051,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			//cout<<"----------------comence swap pickup"<<endl;
 			
 			new_solution = this->mov_swap_node(parent_solution,0);
+			/*if(!(this->feasible_solution(new_solution))){
+				cout<<"ERROR: ACEPTE SOLUCION INFACTIBLE"<<endl;
+			}*/
 			//cout<<"----------------termine swap pick"<<endl;
 
 			parent_time = this->evaluation_function(parent_solution);
@@ -2065,12 +2062,14 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			fir = (parent_time - new_time)/parent_time;
 				
 			if(new_time < best_time){
-				cout<<"Mejor= "<<best_time<<endl;
-				cout<<"Actual= "<<new_time<<endl;
+				//cout<<"Mejor= "<<best_time<<endl;
+				//cout<<"Actual= "<<new_time<<endl;
 
 				best_solution = new_solution;
 				best_time = new_time;
-				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
+				best_solution_time = clock();
+
+				//cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
 
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
@@ -2092,6 +2091,9 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			//cout<<"-----------------comence swap delivery"<<endl;
 
 			new_solution = this->mov_swap_node(parent_solution,1);
+			/*if(!(this->feasible_solution(new_solution))){
+				cout<<"ERROR: ACEPTE SOLUCION INFACTIBLE"<<endl;
+			}*/
 			//cout<<"-----------------termine swap delivery"<<endl;
 
 			parent_time = this->evaluation_function(parent_solution);
@@ -2100,12 +2102,14 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 			fir = (parent_time - new_time)/parent_time;
 				
 			if(new_time < best_time){
-				cout<<"Mejor= "<<best_time<<endl;
-				cout<<"Actual= "<<new_time<<endl;
+				//cout<<"Mejor= "<<best_time<<endl;
+				//cout<<"Actual= "<<new_time<<endl;
 
 				best_solution = new_solution;
 				best_time = new_time;
-				cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
+				best_solution_time = clock();
+
+				//cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
 
 				end_time = clock();
 				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
@@ -2182,6 +2186,6 @@ Solution Grasp::run(int iterations_phase1, int iterations_phase2,int iterations_
 
 	myfile.close();
 
-	return best_solution;
+	return make_tuple(best_solution,best_solution_time);
 
 }

@@ -33,7 +33,7 @@ class Grasp{
 		float explore_factor;
 
 		// constructores
-		Grasp(Instance,int,int,int,int,float,float);
+		Grasp(Instance,int,int,float,float);
 		Grasp();
 		//funcion que retorna una lista con los request de menos costo que cumplan las restricciones
 		tuple<vector<tuple<Request,int, float>>,bool> get_cheaper_requests(vector<Request>, Vehicle);
@@ -66,7 +66,7 @@ class Grasp{
 		// funcion que retorna el vehiculo que posea la mayor capacidad de acuerdo a la ruta especificada
 		int get_more_capacity(Solution, int, vector<int>);
 		// MOVIMIENTO QUE QUITA UN NODO DE LA RUTA MAS LARGA Y LO COLOCA EN EL QUE TENGA MAS ESPACIO.
-		tuple<Solution,vector<int>,vector<int>> mov_change_node(Solution, vector<int>,vector<int>);
+		Solution mov_change_node(Solution);
 		// funcion que determina si una solucion es factible respecto a todas las restricciones
 		bool feasible_solution(Solution);
 		//funcion que realiza todo el proceso de consolidacion y setea el atributo departure_cd_time
@@ -74,7 +74,7 @@ class Grasp{
 		//funcion que obtiene los vehiculos involucrados en la consolidacion (los vehiculos que tiene q esperar para cargar items)
 		vector<int> get_involved_vehicles(Vehicle);
 		// FUNCION QUE EJECUTA EL ALGORITMO GRASP, HACIENDO TODOS LOS PASOS DE ESTE
-		Solution run(int,int,int,int,int,int,int,int,int,clock_t);
+		tuple<Solution,clock_t> run(int,int,clock_t);
 
 };
 #endif
