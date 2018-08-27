@@ -1,9 +1,9 @@
 
 instance = input("Ingrese el nombre de la instancia\n")
 
-with open('instances_WEN/'+instance+".txt") as f_instance:
+with open('instances_WEN2/'+instance+".txt") as f_instance:
     f_transformed = open('instances_WEN/transformed_'+instance+'.txt', "w")
-    f_tw = open('instances_WEN/' + instance + '_tw.txt',"r")
+    f_tw = open('instances_WEN2/' + instance + '_tw.txt',"r")
 
     read_data = f_instance.readline()
     token = read_data.split(" ")

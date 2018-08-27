@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 	cout<<"decay factor: "<< decay_factor<<endl;
 	cout<<"explore factor: "<< explore_factor<<endl;
 	cout<<"semilla: "<< seed <<endl;*/
-	cout<<list_graps_size<<"-"<<time_limit<<"-"<<iterations_grasp<<"-"<<iterations_phase1<<"-"<<size_window<<"-"<<decay_factor<<"-"<<explore_factor<<"-"<<seed<<"/";
+	cout<<list_graps_size<<"-"<<time_limit<<"-"<<iterations_grasp<<"-"<<iterations_phase1<<"-"<<size_window<<"-"<<decay_factor<<"-"<<explore_factor<<"-"<<seed<<"-";
 
 	Solution new_solution;
 	tie(new_solution,actual_solution_time) = grasp.run(iterations_phase1,time_limit,start_time);	
@@ -124,11 +124,11 @@ int main(int argc, char *argv[]) {
 	cout<<best_time<<"-"<<total_time<<"-"<<best_solution_time_calc<<"-"<<best_grasp<<"-"<<graspit<<endl;
 
 
-	int pickup_nodes, delivery_nodes;
-	tie(pickup_nodes,delivery_nodes) = best_solution.count_nodes();
+	//int pickup_nodes, delivery_nodes;
+	//tie(pickup_nodes,delivery_nodes) = best_solution.count_nodes();
 	//cout<<"CANTIDAD NODOS PICKUP: "<<pickup_nodes<<endl;
 	//cout<<"CANTIDAD NODOS DELIVERY: "<<delivery_nodes<<endl;
-	export_solution(best_solution);
+	//export_solution(best_solution);
 
     return 0;
 

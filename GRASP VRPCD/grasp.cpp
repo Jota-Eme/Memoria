@@ -1904,11 +1904,11 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 	cout<<"decay factor: "<< this->decay_factor<<endl;
 	cout<<"explore factor: "<< this->explore_factor<<endl;*/
 
-	ofstream myfile;
-	myfile.open ("result.txt");
+	//ofstream myfile;
+	//myfile.open ("result.txt");
 
 	//------------------------------------------------------------------------------
-	this->criteria = 0;
+	//this->criteria = 0;
 	Solution new_solution = this->distance_initial_solution();
 	//Solution new_solution = this->demand_initial_solution();
 	//Solution new_solution = this->hybrid_initial_solution();
@@ -1919,9 +1919,10 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 	float best_time = this->evaluation_function(best_solution);
 	float new_time,parent_time;
 
-	clock_t start_time, end_time,global_end_time;
-	clock_t best_solution_time;
-	double total_time,global_total_time;
+	//clock_t start_time, end_time,global_end_time;
+	clock_t best_solution_time,global_end_time;
+	//double total_time,global_total_time;
+	double global_total_time;
 
 	// vector que almacena el fir y el operador a traves del tiempo de la forma <(op_id,fir)>
 	vector<tuple<int,float>> sliding_window;
@@ -1946,7 +1947,7 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 	int selected_operator = -1;
 
 
-	start_time = clock();
+	//start_time = clock();
 
 	// Se comienzan las iteraciones haciendo el 2-opt, solo se acepta el cambio en la solucion si esta mejora
 	for(int i = 1; i <= iterations_phase1; i++){
@@ -1997,9 +1998,9 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 				best_solution_time = clock();
 				//cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
 
-				end_time = clock();
-				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
-				myfile << total_time <<"-"<< best_time << "\n";
+				//end_time = clock();
+				//total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+				//myfile << total_time <<"-"<< best_time << "\n";
 				parent_solution = new_solution;
 
 			}
@@ -2032,9 +2033,9 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 
 				//cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
 
-				end_time = clock();
-				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
-				myfile << total_time <<"-"<< best_time << "\n";
+				//end_time = clock();
+				//total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+				//myfile << total_time <<"-"<< best_time << "\n";
 				parent_solution = new_solution;
 
 			}
@@ -2071,9 +2072,9 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 
 				//cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
 
-				end_time = clock();
-				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
-				myfile << total_time <<"-"<< best_time << "\n";
+				//end_time = clock();
+				//total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+				//myfile << total_time <<"-"<< best_time << "\n";
 				parent_solution = new_solution;
 
 			}
@@ -2111,9 +2112,9 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 
 				//cout<<"-------------- MEJORE LA SOLUCION ------------------"<<endl;
 
-				end_time = clock();
-				total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
-				myfile << total_time <<"-"<< best_time << "\n";
+				//end_time = clock();
+				//total_time = (double)(end_time - start_time)/CLOCKS_PER_SEC;
+				//myfile << total_time <<"-"<< best_time << "\n";
 				parent_solution = new_solution;
 
 			}
@@ -2184,7 +2185,7 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 	}
 
 
-	myfile.close();
+	//myfile.close();
 
 	return make_tuple(best_solution,best_solution_time);
 
