@@ -1,8 +1,12 @@
 import os
-import matplotlib.pyplot as plt
-import matplotlib as mpl
+## numpy is used for creating fake data
+import numpy as np 
+import matplotlib as mpl 
 
-from pylab import plot, show, savefig, xlim, figure, ylim, legend, boxplot, setp, axes
+## agg backend is used to create plot as a .png file
+mpl.use('agg')
+
+import matplotlib.pyplot as plt 
 
 
 def setBoxColors(bp):
@@ -25,15 +29,12 @@ def setBoxColors(bp):
 
 
 
-#folder_static = input("Ingrese el nombre de la carpeta estatica\n")
-#folder_static = "boxplot_results/"+folder_static
-folder_static = 'boxplot_results/wen20'
+instance_group = input("Ingrese el nombre de la carpeta estatica\n")
+folder_static = 'boxplot_results/'+instance_group+'_estandar'
 listdir_static = os.listdir(folder_static)
 listdir_static.sort()
 
-#folder_adaptive = input("Ingrese el nombre de la carpeta adaptiva\n")
-#folder_adaptive = "boxplot_results/"+folder_adaptive
-folder_adaptive = 'boxplot_results/wen20_adaptive'
+folder_adaptive = 'boxplot_results/'+instance_group+'_adaptive'
 listdir_adaptive = os.listdir(folder_adaptive)
 listdir_adaptive.sort()
 
@@ -46,7 +47,7 @@ for filename in listdir_static:
 	fullpath = os.path.join(folder_static, filename)
 	with open(fullpath) as file:
 		content = file.readlines()
-		data = [float(read_data.split("-")[8]) for read_data in content]
+		data = [float(read_data.split("-")[9]) for read_data in content]
 		all_static_data.append(data)
 
 for filename in listdir_adaptive:
@@ -55,44 +56,59 @@ for filename in listdir_adaptive:
 		content = file.readlines()
 		data = [float(read_data.split("-")[8]) for read_data in content]
 		all_adaptive_data.append(data)
-		
-instance1 = [all_static_data[0],all_adaptive_data[0]]
-instance2 = [all_static_data[1],all_adaptive_data[1]]
-instance3 = [all_static_data[2],all_adaptive_data[2]]
-instance4 = [all_static_data[3],all_adaptive_data[3]]
-instance5 = [all_static_data[4],all_adaptive_data[4]]
 
-all_data = [instance1,instance2,instance3,instance4,instance5]
 
-fig = figure()
-ax = axes()
+for i in range(0,len(all_static_data)):
+	instance = [all_static_data[i], all_adaptive_data[i]]
 
-# first boxplot pair
-bp = boxplot(instance1, positions = [1, 2], widths = 0.6)
-setBoxColors(bp)
+	# Create a figure instance
+	fig = plt.figure(figsize=(9, 6))
 
-# second boxplot pair
-bp = boxplot(instance2, positions = [4, 5], widths = 0.6)
-setBoxColors(bp)
+	# Create an axes instance
+	ax = fig.add_subplot(111)
 
-# thrid boxplot pair
-bp = boxplot(instance3, positions = [7, 8], widths = 0.6)
-setBoxColors(bp)
+	# Create the boxplot
+	bp = ax.boxplot(instance, patch_artist=True)
+	ax.set_xticklabels(['Estandar', 'Adaptivo'])
 
-xlim(0,9)
-ylim(2500,4000)
+	for box in bp['boxes']:
+	    # change outline color
+	    box.set( color='#7570b3', linewidth=2)
+	    # change fill color
+	    box.set( facecolor = '#1b9e77' )
 
-ax.set_xticklabels(['20a', '20b', '20c'])
-ax.set_xticks([1.5, 4.5, 7.5])
+	for whisker in bp['whiskers']:
+		whisker.set(color='#7570b3', linewidth=2)
 
-hB, = plot([1,1],'b-')
-hR, = plot([1,1],'r-')
-legend((hB, hR),('Estatico', 'Adaptivo'))
-hB.set_visible(False)
-hR.set_visible(False)
+	for cap in bp['caps']:
+		cap.set(color='#7570b3', linewidth=2)
 
-savefig(os.path.join('boxplot_images', '20.png'))
-show()
+	for median in bp['medians']:
+		median.set(color='#b2df8a', linewidth=2)
+
+	for flier in bp['fliers']:
+		flier.set(marker='o', color='#e7298a', alpha=0.5)
+
+	# Save the figure
+	fig.savefig('boxplot_images/'+instance_group+'/'+instance_group+str(i)+'.png', bbox_inches='tight')
+	# first boxplot pair
+	# bp = boxplot(instance, positions = [0, 1], widths = 0.6)
+	# setBoxColors(bp)
+
+	# xlim(0,9)
+	# ylim(ymin_lim, ymax_lim)
+
+	# # ax.set_xticklabels(['20a', '20b', '20c'])
+	# # ax.set_xticks([1.5, 4.5, 7.5])
+
+	# hB, = plot([1,1],'b-')
+	# hR, = plot([1,1],'r-')
+	# legend((hB, hR),('Estandar', 'Adaptivo'))
+	# hB.set_visible(False)
+	# hR.set_visible(False)
+
+	# savefig(os.path.join('boxplot_images', instance_group+'.png'))
+	# show()
 
 
 # fig = plt.figure()

@@ -1,0 +1,18 @@
+ NUMBER OF REQUESTS
+ 4
+
+ NUMBER OF CROSSDOCKS
+  1
+
+ VEHICLE CAPACITY          VEHICLE SPEED
+       20                        60
+
+ UNIT_TIME_FOR_PALLET      FIXED_TIME_PREPARATION
+   1                             10
+ REQUEST      SUPPLIER                                            CUSTOMER
+ CUST NO.     XCOORD.     YCOORD.     READY TIME     DUE DATE     XCOORD.     YCOORD.     READY TIME     DUE DATE     DEMAND
+    0          677908     6150220         0          10000        677908      6150220         0           10000         0
+    1          720415     6176264        375         495          538181      6086484        742          862           16
+    2          711815     6208837        422         542          588257      6139249        733          853           10
+    3          710831     6168718        360         471          528913      6152557        1032          1152           4
+    4          662179     6199594        424         544          500074      6269745        849          969           4
