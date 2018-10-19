@@ -62,33 +62,42 @@ for i in range(0,len(all_static_data)):
 	instance = [all_static_data[i], all_adaptive_data[i]]
 
 	# Create a figure instance
-	fig = plt.figure(figsize=(9, 6))
+	fig = plt.figure(figsize=(4, 6))
 
 	# Create an axes instance
 	ax = fig.add_subplot(111)
 
+
 	# Create the boxplot
-	bp = ax.boxplot(instance, patch_artist=True)
+	bp = ax.boxplot(instance, positions=[0, 1],patch_artist=True, widths=0.25)
 	ax.set_xticklabels(['Estandar', 'Adaptivo'])
 
-	for box in bp['boxes']:
-	    # change outline color
-	    box.set( color='#7570b3', linewidth=2)
-	    # change fill color
-	    box.set( facecolor = '#1b9e77' )
+
+
+	bp['boxes'][0].set( color='#000000', linewidth=2)
+	bp['boxes'][0].set( facecolor = '#1b9e77' )
+
+	bp['boxes'][1].set( color='#000000', linewidth=2)
+	bp['boxes'][1].set( facecolor = '#99b3ff' )
+	# for box in bp['boxes']:
+	#     # change outline color
+	#     box.set( color='#7570b3', linewidth=2)
+	#     # change fill color
+	#     box.set( facecolor = '#1b9e77' )
 
 	for whisker in bp['whiskers']:
-		whisker.set(color='#7570b3', linewidth=2)
+		whisker.set(color='#000000', linewidth=2)
 
 	for cap in bp['caps']:
-		cap.set(color='#7570b3', linewidth=2)
+		cap.set(color='#000000', linewidth=2)
 
 	for median in bp['medians']:
-		median.set(color='#b2df8a', linewidth=2)
+		median.set(color='#000000', linewidth=2)
 
-	for flier in bp['fliers']:
-		flier.set(marker='o', color='#e7298a', alpha=0.5)
-
+	bp['fliers'][0].set(marker='o', color='#1b9e77')
+	bp['fliers'][1].set(marker='o', color='#4d4dff')
+	# for flier in bp['fliers']:
+	# 	flier.set(marker='o', color='#e7298a', alpha=0.5)
 	# Save the figure
 	fig.savefig('boxplot_images/'+instance_group+'/'+instance_group+str(i)+'.png', bbox_inches='tight')
 	# first boxplot pair
