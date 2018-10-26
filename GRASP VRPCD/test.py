@@ -39,7 +39,8 @@ bp = boxplot(C, positions = [7, 8], widths = 0.6)
 setBoxColors(bp)
 
 # set axes limits and labels
-
+xlim(0,9)
+ylim(0,9)
 ax.set_xticklabels(['A', 'B', 'C'])
 ax.set_xticks([1.5, 4.5, 7.5])
 
