@@ -1875,10 +1875,12 @@ tuple<vector<float>,vector<int>> get_rewards(vector<tuple<int,float>> sliding_wi
 	int operator_id;
 
 	for(tuple<int,int> element : sliding_window){
+		cout<< "element: <"<<get<0>(element)<<","<<get<1>(element)<<">"<<endl;
 		operator_id = get<0>(element);
 		fir = get<1>(element);
 		times_used[operator_id] += 1;
 		rewards[operator_id] += fir;
+		cout<<"fir: "<< fir << endl;
 	}
 
 	return make_tuple(rewards,times_used);
@@ -1986,8 +1988,13 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
 
+			cout << "PARENT TIME: "<<parent_time<<endl;
+			cout << "NEW TIME: "<<parent_time<<endl;
 
 			fir = (parent_time - new_time)/parent_time;
+
+			cout << "FIR TIME: "<<fir<<endl;
+
 				
 			if(new_time < best_time){
 				//cout<<"Mejor= "<<best_time<<endl;
@@ -2021,7 +2028,12 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
 
+			cout << "PARENT TIME: "<<parent_time<<endl;
+			cout << "NEW TIME: "<<parent_time<<endl;
 			fir = (parent_time - new_time)/parent_time;
+
+			cout << "fir time:  "<<fir<<endl;
+
 				
 			if(new_time < best_time){
 				//cout<<"Mejor= "<<best_time<<endl;
@@ -2057,10 +2069,13 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 			}*/
 			//cout<<"----------------termine swap pick"<<endl;
 
+
 			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
-
+			cout << "PARENT TIME: "<<parent_time<<endl;
+			cout << "NEW TIME: "<<parent_time<<endl;
 			fir = (parent_time - new_time)/parent_time;
+			cout << "FIR TIME: "<<fir<<endl;
 				
 			if(new_time < best_time){
 				//cout<<"Mejor= "<<best_time<<endl;
@@ -2100,7 +2115,12 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 			parent_time = this->evaluation_function(parent_solution);
 			new_time = this->evaluation_function(new_solution);
 
+
+
+			cout << "PARENT TIME: "<<parent_time<<endl;
+			cout << "NEW TIME: "<<parent_time<<endl;
 			fir = (parent_time - new_time)/parent_time;
+			cout << "FIR TIME: "<<fir<<endl;
 				
 			if(new_time < best_time){
 				//cout<<"Mejor= "<<best_time<<endl;
@@ -2134,6 +2154,7 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 
 
 		// SE AGREGA EL OPERADOR SELECCIONADO Y SU FIR CORRESPONDIENTE A LA VENTANA
+		cout<<"FIR AHORA: "<< fir <<endl;
 		if(sliding_window.size() == (unsigned)size_window){
 			sliding_window.erase(sliding_window.begin() + 0);
 			sliding_window.push_back(make_tuple(selected_operator,fir));
@@ -2147,6 +2168,7 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 		vector<float> rewards_temp;
 		tie(rewards_temp,times_used) = get_rewards(sliding_window);
 		for(int i=0; (unsigned)i<rewards_temp.size();i++){
+			cout<<"rewards: "<< rewards_temp[i] <<endl;
 			rewards.push_back(make_tuple(i,rewards_temp[i]));
 		}
 		
@@ -2163,12 +2185,20 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 		for(int i=0; (unsigned)i<decay.size();i++){
 			float dec_value = pow(decay_factor,ranking[i]) * rewards_temp[i];
 			decay[i] = dec_value;
+			cout << "dec value: " << dec_value <<endl;
 			decay_sum += dec_value;
+			cout << "dec sum: " << decay_sum <<endl;
+
 		}
 
 		// SE calcula el FRR (fitness rate rank)
 		for(int i=0; (unsigned)i<frr.size();i++){
+			cout << "dec value i: " << decay[i] <<endl;
+			cout << "decay sum: " << decay_sum <<endl;
+
+
 			float frr_value = decay[i]/decay_sum;
+			cout << "frr value: " << frr_value <<endl;
 			frr[i] = frr_value;
 		}
 
