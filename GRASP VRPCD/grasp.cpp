@@ -1906,8 +1906,8 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 	cout<<"decay factor: "<< this->decay_factor<<endl;
 	cout<<"explore factor: "<< this->explore_factor<<endl;*/
 
-	//ofstream myfile;
-	//myfile.open ("result.txt");
+	ofstream myfile;
+	myfile.open ("result.txt",std::fstream::app);
 
 	//------------------------------------------------------------------------------
 	//this->criteria = 0;
@@ -1948,6 +1948,7 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 	float explore_factor = this->explore_factor;
 	int selected_operator = -1;
 
+	bool random = false;
 
 	//start_time = clock();
 
@@ -1961,7 +1962,7 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 		}
 
 		//  ---------- SELECCION DE OPERADOR ......
-		if(i<=4){
+		if(i<=4 ){
 			selected_operator = rand() % 4;
 			while(times_used[selected_operator] != 0){
 				selected_operator = rand() % 4;
@@ -1969,11 +1970,19 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 		}
 
 		else{
-			sort(begin(final_score), end(final_score), [](tuple<int,float> const &t1, tuple<int,float> const &t2) {
-		    	return get<1>(t1) > get<1>(t2); 
-		    	}
-		    );
-			selected_operator = get<0>(final_score[0]);
+
+			if(random){
+				selected_operator = rand() % 4;
+			}
+			else{
+				sort(begin(final_score), end(final_score), [](tuple<int,float> const &t1, tuple<int,float> const &t2) {
+		    		return get<1>(t1) > get<1>(t2); 
+		    		}
+			    );
+				selected_operator = get<0>(final_score[0]);
+			}
+
+			
 		}
 
 
@@ -2164,57 +2173,75 @@ tuple<Solution,clock_t> Grasp::run(int iterations_phase1,int time_limit ,clock_t
 		}
 
 		// SE CALCULA LA RECOMPENZA (SUMA DE FIR EN VENTANA)
+		rewards.clear();
 		vector<float> rewards_temp;
 		tie(rewards_temp,times_used) = get_rewards(sliding_window);
+
+		random = true;
 		for(int i=0; (unsigned)i<rewards_temp.size();i++){
-			//cout<<"rewards: "<< rewards_temp[i] <<endl;
-			rewards.push_back(make_tuple(i,rewards_temp[i]));
-		}
-		
-		// SE REALIZA EL RANKING DE OPERADORES
-		sort(begin(rewards), end(rewards), [](tuple<int,float> const &t1, tuple<int,float> const &t2) {
-	    	return get<1>(t1) > get<1>(t2); 
-	    	}
-	    );
-
-		ranking = get_ranking(rewards);
-
-		float decay_sum = 0;
-		// SE CALCULA EL DECAY Y la suma de los decay
-		for(int i=0; (unsigned)i<decay.size();i++){
-			float dec_value = pow(decay_factor,ranking[i]) * rewards_temp[i];
-			decay[i] = dec_value;
-			//cout << "dec value: " << dec_value <<endl;
-			decay_sum += dec_value;
-			//cout << "dec sum: " << decay_sum <<endl;
-
+			if(rewards_temp[i]>0){
+				random = false;
+			}
 		}
 
-		// SE calcula el FRR (fitness rate rank)
-		for(int i=0; (unsigned)i<frr.size();i++){
-			//cout << "dec value i: " << decay[i] <<endl;
-			//cout << "decay sum: " << decay_sum <<endl;
+		if(!random){
+
+			for(int i=0; (unsigned)i<rewards_temp.size();i++){
+				//cout<<"rewards: "<< rewards_temp[i] <<endl;
+				rewards.push_back(make_tuple(i,rewards_temp[i]));
+			}
+			
+			// SE REALIZA EL RANKING DE OPERADORES
+			sort(begin(rewards), end(rewards), [](tuple<int,float> const &t1, tuple<int,float> const &t2) {
+		    	return get<1>(t1) > get<1>(t2); 
+		    	}
+		    );
+
+			ranking = get_ranking(rewards);
+
+			float decay_sum = 0;
+			// SE CALCULA EL DECAY Y la suma de los decay
+			for(int i=0; (unsigned)i<decay.size();i++){
+				float dec_value = pow(decay_factor,ranking[i]) * rewards_temp[i];
+				//myfile << "ranking: " << ranking[i] <<endl;
+				//myfile << "reward i: " << rewards_temp[i] <<endl;
+	 			decay[i] = dec_value;
+				//myfile << "dec value: " << dec_value <<endl;
+				decay_sum += dec_value;
+				//cout << "dec sum: " << decay_sum <<endl;
+
+			}
+
+			// SE calcula el FRR (fitness rate rank)
+			for(int i=0; (unsigned)i<frr.size();i++){
+				//cout << "dec value i: " << decay[i] <<endl;
+				//cout << "decay sum: " << decay_sum <<endl;
 
 
-			float frr_value = decay[i]/decay_sum;
-			//cout << "frr value: " << frr_value <<endl;
-			frr[i] = frr_value;
-		}
+				float frr_value = decay[i]/decay_sum;
+				//cout << "frr value: " << frr_value <<endl;
+				frr[i] = frr_value;
+				myfile << frr_value << " ";
+			}
 
-		// SE calcula el score final para cada operador
-		int times_used_sum = 0;
-		for(int i=0; (unsigned) i< times_used.size();i++){
-			times_used_sum += times_used[i];
-		}
-		float explore_numerator = 2*log(times_used_sum);
-		for(int i=0; (unsigned)i<frr.size();i++){
-			final_score.push_back(make_tuple(i,frr[i] + explore_factor * sqrt(explore_numerator/times_used[i])));
+			myfile << endl;
+
+			// SE calcula el score final para cada operador
+			int times_used_sum = 0;
+			for(int i=0; (unsigned) i< times_used.size();i++){
+				times_used_sum += times_used[i];
+			}
+			float explore_numerator = 2*log(times_used_sum);
+			final_score.clear();
+			for(int i=0; (unsigned)i<frr.size();i++){
+				final_score.push_back(make_tuple(i,frr[i] + explore_factor * sqrt(explore_numerator/times_used[i])));
+			}
 		}
 
 	}
 
 
-	//myfile.close();
+	myfile.close();
 
 	return make_tuple(best_solution,best_solution_time);
 
