@@ -575,186 +575,99 @@ Solution Grasp::mov_two_opt(Solution solution){
 
 	//se selecciona la ruta mas cara
 	int type_route = rand() % 2;
-	int vehicle_position = rand() % solution.vehicles.size();
 
-	if(type_route == 0){
-		while(solution.vehicles[vehicle_position].pickup_route.size() == 0){
-			//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
-			vehicle_position = rand() % solution.vehicles.size();
-		}
-	}
-	else{
-		while(solution.vehicles[vehicle_position].delivery_route.size() == 0 ){
-			//cout<<"mismos vehiculos, o distintos CD, ahora los cambio"<<endl;
-			vehicle_position = rand() % solution.vehicles.size();
-		}
-	}
-
-// -----------------------------------------------------------------------------
-
-	Vehicle selected_vehicle = solution.vehicles[vehicle_position];
-	//cout<<"VEhiculo escogido: " << vehicle_position << endl;
-	// se selecciona la ruta a modificar del vehiculo al azar
-
-	if(type_route == 0){
-		//SE retorna la misma solucion si se elije una ruta con 1 solo nodo
-		if(selected_vehicle.pickup_route.size() == 1){
-			return solution;
-		}
-
-		for(int l=0; (unsigned)l < selected_vehicle.pickup_route.size(); l++){
-			selected_route.push_back(selected_vehicle.pickup_route[l]);
-			selected_items.push_back(selected_vehicle.pickup_items[l]);
-			selected_involved.push_back(selected_vehicle.involved_pickup[l]);
-		}
-
-		//cout<< "LA RUTA SELECCIONADA ES DE PICKUP" <<endl;
-	}
-
-	else{
-		//SE retorna la misma solucion si se elije una ruta con 1 solo nodo
-		if(selected_vehicle.delivery_route.size() == 1){
-			return solution;
-		}
-
-		for(int l=0; (unsigned)l < selected_vehicle.delivery_route.size(); l++){
-			selected_route.push_back(selected_vehicle.delivery_route[l]);
-			selected_items.push_back(selected_vehicle.delivery_items[l]);
-			selected_involved.push_back(selected_vehicle.involved_delivery[l]);
-		}
-
-		//cout<< "LA RUTA SELECCIONADA ES DE DELIVERY" <<endl;
-	}
-
-	/*cout<< "[";
-	for(int l=0; (unsigned)l < selected_route.size();l++){
-		cout<<" "<<selected_route[l].id;
-	}
-	cout<< " ]" <<endl;*/
-
-	//SE comienza a realizar el 2-opt, primero se seleccionan los 2 putnos de corte
-	// y se verifica que no sean el mismo, luego se ordenan para que el i sea el menor y el k el mayor por conveniencia
-	int i = rand() % selected_route.size();
-	/*int k = rand() % selected_route.size();
-	while(i == k){
-		i = rand() % selected_route.size();
-		k = rand() % selected_route.size();
-	}
-	if(i>k){
-		int temp = i;
-		i=k;
-		k=temp;
-	}*/
-
-	int k=-1;
-
-	if((unsigned)i == selected_route.size() -1){
-		k = i-1;
-	}
-	else{
-		k = i+1;
-	}
+	float best_cost = this->evaluation_function(solution);
 
 
+	for(int vehicle_iter = 0; (unsigned)vehicle_iter<solution.vehicles.size(); vehicle_iter++ ){
 
+		int vehicle_position = vehicle_iter;
 
-
-	//cout<<"Los puntos escogidos son: "<<i<<" y "<<k<<endl;
-
-	// ahora se comienza a crear la nueva ruta, intercambiando los nodos correspondientes
-	//PRIMERA PARTE 2-OPT, ANTES DEL PRIMER PUNTO SE AGREGA TODO NORMAL
-	vector<tuple<int,int>> new_items;
-	vector<int> new_involved;
-
-	for(int j=0; j<i;j++){
-		new_route.push_back(selected_route[j]);
-		new_items.push_back(selected_items[j]);
-		new_involved.push_back(selected_involved[j]);
-	}
-	//SEGUNDA PARTE 2-OPT, DESPUES DEL PRIMER PUNTO SE AGREGA EN ORDEN INVERSO LOS NODOS HASTA EL 2 PUNTO
-	for(int j=k; j>=i;j--){
-		new_route.push_back(selected_route[j]);
-		new_items.push_back(selected_items[j]);
-		new_involved.push_back(selected_involved[j]);
-
-	}
-	//TERCERA PARTE 2-OPT, LUEGO DEL 2 PUNTO SE AGREGA NORMAL
-	for(int j=(k+1); (unsigned)j < selected_route.size();j++){
-		new_route.push_back(selected_route[j]);
-		new_items.push_back(selected_items[j]);
-		new_involved.push_back(selected_involved[j]);
-
-	}
-	// Se reemplaza la ruta antigua por la nueva segun corresponda
-	if(type_route == 0){
-
-		selected_vehicle.pickup_route.clear();
-
-		for(int l=0; (unsigned)l < new_route.size(); l++){
-			Suplier *suplier =  (Suplier *) &new_route[l];
-			selected_vehicle.pickup_route.push_back(*suplier);
-		}
-
-		selected_vehicle.pickup_items = new_items;
-		selected_vehicle.involved_pickup = new_involved;
-
-		/*cout<<"La nueva ruta de pickup es: "<<endl;
-		cout<< "[";
-		for(int l=0; (unsigned)l < selected_vehicle.pickup_route.size(); l++){
-			cout<<" "<<selected_vehicle.pickup_route[l].id;
-		}
-		cout<< " ]" <<endl;*/
-	}
-	else{
-
-		selected_vehicle.delivery_route.clear();
-
-		for(int l=0; (unsigned)l < new_route.size(); l++){
-			Customer *customer =  (Customer *) &new_route[l];
-			selected_vehicle.delivery_route.push_back(*customer);
-		}
-
-		selected_vehicle.delivery_items = new_items;
-		selected_vehicle.involved_delivery = new_involved;
-
-
-		/*cout<<"La nueva ruta de delivery es: "<<endl;
-		cout<< "[";
-		for(int l=0; (unsigned)l < selected_vehicle.delivery_route.size();l++){
-			cout<<" "<<selected_vehicle.delivery_route[l].id;
-		}
-		cout<< " ]" <<endl;*/
-	}
-
-	//selected_vehicle.set_times();
-
-	Solution temp_solution = solution;
-	temp_solution.vehicles[vehicle_position] = selected_vehicle;
-
-	if(this->feasible_solution(temp_solution)){
-		// FINALMENTE SE REEMPLAZA EL VEHICULO CAMBIADO CON LA NUEVA RUTA SI ESTA ES FACTIBLE
-		//cout<<"SII SOY FACTIBLE"<<endl;
-		return temp_solution;
-	}
-	else{
-		//cout<<"NOOOO SOY FACTIBLE"<<endl;
-		return solution;
-	}
-
-	/*cout<<"estoy devolviendo esta ruta "<<endl;
-	cout<< "[";
-	if(random_type_route == 0){
-		for(int l=0; (unsigned)l < selected_vehicle.pickup_route.size();l++){
-			cout<<" "<<solution.vehicles[random_vehicle].pickup_route[l].id;
-		}
-		cout<< " ]" <<endl;
-	}
-	else{
-		for(int l=0; (unsigned)l < selected_vehicle.delivery_route.size();l++){
-				cout<<" "<<solution.vehicles[random_vehicle].delivery_route[l].id;
+		if(type_route == 0){
+			if(solution.vehicles[vehicle_position].pickup_route.size() <=1){
+				continue;
 			}
-		cout<< " ]" <<endl;	
-	}*/
+		}
+		else{
+			if(solution.vehicles[vehicle_position].delivery_route.size() <=1){
+				continue;
+			}
+		}
+
+
+		if(type_route == 0){
+
+			for(int i=0; (unsigned)i < solution.vehicles[vehicle_position].pickup_route.size()-1; i++){
+
+				Vehicle selected_vehicle = solution.vehicles[vehicle_position];
+
+				Suplier node_temp = selected_vehicle.pickup_route[i];
+				selected_vehicle.pickup_route[i] = selected_vehicle.pickup_route[i+1];
+				selected_vehicle.pickup_route[i+1] = node_temp;
+
+				tuple<int,int> item_temp = selected_vehicle.pickup_items[i];
+				selected_vehicle.pickup_items[i] = selected_vehicle.pickup_items[i+1];
+				selected_vehicle.pickup_items[i+1] = item_temp;
+
+				int involved_temp = selected_vehicle.involved_pickup[i];
+				selected_vehicle.involved_pickup[i] = selected_vehicle.involved_pickup[i+1];
+				selected_vehicle.involved_pickup[i+1] = involved_temp;
+
+
+				Solution temp_solution = solution;
+				temp_solution.vehicles[vehicle_position] = selected_vehicle;
+
+				if(this->feasible_solution(temp_solution)){
+					
+					float new_cost = this->evaluation_function(temp_solution);
+
+					if(new_cost <= best_cost){
+						return temp_solution;
+					}
+
+				}
+
+			}
+
+		}
+
+		else{
+
+			for(int i=0; (unsigned)i < solution.vehicles[vehicle_position].delivery_route.size()-1; i++){
+
+				Vehicle selected_vehicle = solution.vehicles[vehicle_position];
+
+				Customer node_temp = selected_vehicle.delivery_route[i];
+				selected_vehicle.delivery_route[i] = selected_vehicle.delivery_route[i+1];
+				selected_vehicle.delivery_route[i+1] = node_temp;
+
+				tuple<int,int> item_temp = selected_vehicle.delivery_items[i];
+				selected_vehicle.delivery_items[i] = selected_vehicle.delivery_items[i+1];
+				selected_vehicle.delivery_items[i+1] = item_temp;
+
+				int involved_temp = selected_vehicle.involved_delivery[i];
+				selected_vehicle.involved_delivery[i] = selected_vehicle.involved_delivery[i+1];
+				selected_vehicle.involved_delivery[i+1] = involved_temp;
+
+
+				Solution temp_solution = solution;
+				temp_solution.vehicles[vehicle_position] = selected_vehicle;
+
+				if(this->feasible_solution(temp_solution)){
+					
+					float new_cost = this->evaluation_function(temp_solution);
+
+					if(new_cost <= best_cost){
+						return temp_solution;
+					}
+
+				}
+
+			}
+
+		}
+
+	}
 
 	return solution;
 }
